@@ -4,6 +4,8 @@ import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import log from 'electron-log'
 import * as schema from './schema'
+import { rotateBackups } from './backupRotation'
+import { applyMigrations } from './migrate'
 
 let _db: ReturnType<typeof drizzle> | null = null
 
@@ -13,25 +15,30 @@ export async function initDatabase() {
 
   log.info('[db] Opening database at:', dbPath)
 
+  // 1. Backup rotation BEFORE opening the DB (D-16)
+  //    Pitfall #8: DB MUST NOT open if single-instance lock was not acquired.
+  //    The lock check in index.ts gates app.whenReady, so by the time we reach
+  //    here the lock is confirmed.
+  await rotateBackups(dbPath, userData)
+
+  // 2. Open the database
   const sqlite = new Database(dbPath)
 
-  // Apply WAL pragmas for safety and performance
+  // 3. Apply WAL pragmas for safety and performance (D-16)
   sqlite.pragma('journal_mode = WAL')
   sqlite.pragma('synchronous = NORMAL')
   sqlite.pragma('foreign_keys = ON')
 
-  // Create campaigns table directly (Drizzle migrate() is added in 01-02)
-  sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS campaigns (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
-    )
-  `)
+  // 4. Wrap in Drizzle
+  const db = drizzle(sqlite, { schema })
+
+  // 5. Apply Drizzle migrations (replaces raw CREATE TABLE from 01-01)
+  //    applyMigrations also runs PRAGMA integrity_check (D-16, Pitfall #9)
+  await applyMigrations(db, sqlite)
 
   log.info('[db] Database initialized')
 
-  _db = drizzle(sqlite, { schema })
+  _db = db
 }
 
 export function getDb() {

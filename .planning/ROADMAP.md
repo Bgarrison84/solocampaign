@@ -5,13 +5,13 @@
 **Granularity:** fine
 **Phases:** 9
 **Coverage:** 53/53 v1 requirements mapped
-**Last updated:** 2026-05-19
+**Last updated:** 2026-05-22
 
 ---
 
 ## Phases
 
-- [ ] **Phase 1: Foundation & Secure Shell** — Bootable Electron app with secure baseline, SQLite persistence, typed IPC, split-panel shell, and campaign list/create flow
+- [~] **Phase 1: Foundation & Secure Shell** — Bootable Electron app with secure baseline, SQLite persistence, typed IPC, split-panel shell, and campaign list/create flow (1/3 plans complete)
 - [ ] **Phase 2: Character Domain & Live Sheet** — Step-by-step SRD character builder with persistent character sheet, live resource tracking, and portrait/cover image import
 - [ ] **Phase 3: AI Engine & Provider Abstraction** — Per-campaign AI provider configuration (OpenAI-compatible + Gemini) with encrypted keys, streaming chat, fallback handling, and DM personality/strictness controls
 - [ ] **Phase 4: Long-Campaign Memory & Session Flow** — Three-layer memory architecture, structured session start prompts, end-of-session recap, and AI-generated summaries that keep months-long campaigns coherent
@@ -35,11 +35,14 @@
   2. User can create a new campaign, close the app, reopen it, and see the campaign with all data intact
   3. User sees a split-panel layout (narrative chat on left, tabbed right panel) immediately on entering a campaign
   4. Electron renderer runs with contextIsolation enabled, nodeIntegration disabled, and all IPC handlers validated via Zod
-**Plans:** TBD
+**Plans:** 01-01 ✓ | 01-02 (pending) | 01-03 (pending)
+**Phase 1 Progress:** 1/3 plans complete
 **Notes:**
   - FOUND-04 covers encrypted secret storage via safeStorage; the actual provider/key UI ships in Phase 3 but the safeStorage wrapper lands here
-  - Long lead-time setup: kick off Apple Developer ID + Azure Trusted Signing certificate procurement now (non-blocking; certs used in Phase 9)
-  - Lock in better-sqlite3 + electron-rebuild + asarUnpack and verify packaged smoke builds on all three platforms before exiting the phase
+  - No code signing per D-03 (user decision: unsigned installers with bypass documentation)
+  - Electron 41.7.0 selected (ABI 145) — better-sqlite3 v12 prebuilt available; Electron 42 MSVC build fails
+  - 01-01 completed: walking skeleton proven (Electron + SQLite + tRPC + React Router + campaign CRUD)
+  - Next: 01-02 Drizzle migrate() + integrity_check + backup rotation + single-instance lock
 **UI hint:** yes
 
 ### Phase 2: Character Domain & Live Sheet

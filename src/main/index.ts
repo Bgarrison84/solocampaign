@@ -4,6 +4,7 @@ import { createIPCHandler } from 'electron-trpc/main'
 import log from 'electron-log'
 import { router } from './trpc/router'
 import { initDatabase } from './db/index'
+import { secretStorage } from './secrets'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -25,6 +26,15 @@ if (!gotLock) {
       await initDatabase()
     } catch (err) {
       log.error('[main] Failed to initialize database:', err)
+    }
+
+    // Initialize secret storage (creates {userData}/secrets/ directory)
+    // Must run after DB init, before BrowserWindow creation so the directory
+    // exists before any IPC handler could be called.
+    try {
+      await secretStorage.init()
+    } catch (err) {
+      log.error('[main] Failed to initialize secret storage:', err)
     }
 
     // Set CSP on every response

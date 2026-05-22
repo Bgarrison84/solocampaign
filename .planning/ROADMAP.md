@@ -11,7 +11,7 @@
 
 ## Phases
 
-- [~] **Phase 1: Foundation & Secure Shell** — Bootable Electron app with secure baseline, SQLite persistence, typed IPC, split-panel shell, and campaign list/create flow (2/3 plans complete)
+- [~] **Phase 1: Foundation & Secure Shell** — Bootable Electron app with secure baseline, SQLite persistence, typed IPC, split-panel shell, and campaign list/create flow (3/3 core plans complete; wave 2 01-04/01-05 remaining)
 - [ ] **Phase 2: Character Domain & Live Sheet** — Step-by-step SRD character builder with persistent character sheet, live resource tracking, and portrait/cover image import
 - [ ] **Phase 3: AI Engine & Provider Abstraction** — Per-campaign AI provider configuration (OpenAI-compatible + Gemini) with encrypted keys, streaming chat, fallback handling, and DM personality/strictness controls
 - [ ] **Phase 4: Long-Campaign Memory & Session Flow** — Three-layer memory architecture, structured session start prompts, end-of-session recap, and AI-generated summaries that keep months-long campaigns coherent
@@ -35,15 +35,16 @@
   2. User can create a new campaign, close the app, reopen it, and see the campaign with all data intact
   3. User sees a split-panel layout (narrative chat on left, tabbed right panel) immediately on entering a campaign
   4. Electron renderer runs with contextIsolation enabled, nodeIntegration disabled, and all IPC handlers validated via Zod
-**Plans:** 01-01 ✓ | 01-02 ✓ | 01-03 (pending)
-**Phase 1 Progress:** 2/3 plans complete
+**Plans:** 01-01 ✓ | 01-02 ✓ | 01-03 ✓ | 01-04 (pending) | 01-05 (pending)
+**Phase 1 Progress:** 3/3 core plans complete (01-04 split panel, 01-05 title bar are wave 2)
 **Notes:**
   - FOUND-04 covers encrypted secret storage via safeStorage; the actual provider/key UI ships in Phase 3 but the safeStorage wrapper lands here
   - No code signing per D-03 (user decision: unsigned installers with bypass documentation)
   - Electron 41.7.0 selected (ABI 145) — better-sqlite3 v12 prebuilt available; Electron 42 MSVC build fails
   - 01-01 completed: walking skeleton proven (Electron + SQLite + tRPC + React Router + campaign CRUD)
   - 01-02 completed: Drizzle migrate() auto-runs at startup; backup rotation + integrity_check + single-instance lock in place
-  - Next: 01-03 SecretStorageService (safeStorage encrypt/decrypt + Vitest unit tests)
+  - 01-03 completed: SecretStorageService (safeStorage + B64 fallback + key normalization) + secrets tRPC router (exists/set/delete, no get) + 34 unit tests. FOUND-04 architecture complete.
+  - Next: 01-04 split-panel shell (react-resizable-panels v3 + 5-tab structure)
 **UI hint:** yes
 
 ### Phase 2: Character Domain & Live Sheet

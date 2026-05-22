@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-22T23:00:00.000Z"
+last_updated: "2026-05-22T21:39:00.000Z"
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 3
-  completed_plans: 2
-  percent: 22
+  completed_plans: 3
+  percent: 33
 ---
 
 # SoloCampaign — State
@@ -26,16 +26,16 @@ progress:
 ## Current Position
 
 Phase: 1 (Foundation & Secure Shell) — EXECUTING
-Plan: 3 of 3
+Plan: 3 of 3 — PHASE COMPLETE
 **Milestone:** v1
 **Phase:** Phase 1 — Foundation & Secure Shell
-**Plan:** 01-02 Complete → 01-03 (SecretStorageService) is next
-**Status:** Executing Phase 1
+**Plan:** 01-03 Complete → Phase 1 done (01-04, 01-05 are separate parallel wave 2 plans)
+**Status:** Phase 1 plans 01-01, 01-02, 01-03 complete. Wave 2: 01-04 (split panel), 01-05 (title bar) remaining.
 
-**Progress:** [████░░░░░░░░░░░░░░░░] 22% (1/9 phases started, 2/3 Phase 1 plans complete)
+**Progress:** [██████░░░░░░░░░░░░░░] 33% (1/9 phases started, 3/3 Phase 1 core plans complete)
 
 ```
-Phase 1: Foundation & Secure Shell              [In Progress — 2/3 plans done]
+Phase 1: Foundation & Secure Shell              [In Progress — 3/3 core plans done]
 Phase 2: Character Domain & Live Sheet          [Not started]
 Phase 3: AI Engine & Provider Abstraction       [Not started]
 Phase 4: Long-Campaign Memory & Session Flow    [Not started]
@@ -55,7 +55,7 @@ Phase 9: Distribution & Update Notifications    [Not started]
 | Total v1 requirements | 53 |
 | Requirements mapped | 53 / 53 (100%) |
 | Phases | 9 |
-| Plans complete | 2 (01-01, 01-02) |
+| Plans complete | 3 (01-01, 01-02, 01-03) |
 | Phases complete | 0 |
 | Granularity | fine |
 | Model profile | quality |
@@ -65,6 +65,7 @@ Phase 9: Distribution & Update Notifications    [Not started]
 |------|----------|-------|-------|
 | 01-01 | 85min | 3 | 30+ |
 | 01-02 | 35min | 2 | 8 |
+| 01-03 | 65min | 2 | 7 |
 
 ---
 
@@ -87,6 +88,9 @@ Phase 9: Distribution & Update Notifications    [Not started]
 | react-resizable-panels@^3 pin | shadcn Resizable wrapper broken on v4 | research/SUMMARY.md |
 | applyMigrations accepts BetterSQLite3Database<any> | Schema-typed Drizzle instance incompatible with Record<string,never>; migrator only uses SQLite connection | 01-02 execution |
 | integrity_check AFTER migrate() | Validates post-migration state; on fresh DB confirms migration ran cleanly | 01-02 execution |
+| isSecure() checks BOTH isEncryptionAvailable AND getSelectedStorageBackend !== 'basic_text' | Pitfall #10: Linux returns true for isEncryptionAvailable even with basic_text (hard-coded plaintext password) backend | 01-03 execution |
+| tRPC v10 test caller: router.createCaller({}) not createCallerFactory | createCallerFactory is the v11 API; v10 uses router.createCaller on the router object directly | 01-03 execution |
+| No get procedure on secrets tRPC router (FOUND-04) | Returning plaintext over IPC defeats safeStorage; Phase 3 uses per-request scoped decryption pattern | 01-03 design |
 
 ### Active Todos (cross-phase)
 
@@ -107,7 +111,7 @@ None.
 2. AI context window collapse — three-layer memory must be designed into Phase 4, not retrofitted
 3. Game state inconsistency from AI prose mutations — tool-call-only contract from Phase 5
 4. ~~better-sqlite3 native module rebuild failures~~ — **RESOLVED in 01-01** (Electron 41 ABI 145 prebuilt works on Windows)
-5. API key leakage — safeStorage from Phase 3 (SecretStorageService in 01-03)
+5. ~~API key leakage~~ — **RESOLVED in 01-03** (SecretStorageService + zero-get-over-IPC tRPC surface; UI wiring deferred to Phase 3 per D-15)
 6. ~~SQLite WAL corruption~~ — **RESOLVED in 01-02** (single-instance lock + integrity_check + backup rotation)
 
 ---
@@ -117,22 +121,24 @@ None.
 ### Last Session
 
 **Date:** 2026-05-22
-**Activity:** Plan 01-02 execution — Drizzle migrations, SQLite safety stack, single-instance lock
-**Outcome:** Drizzle migrate() replaces raw CREATE TABLE. Backup rotation + integrity_check + single-instance lock all in place. TypeScript typecheck clean.
+**Activity:** Plan 01-03 execution — SecretStorageService + secrets tRPC IPC surface
+**Outcome:** SecretStorageService with safeStorage + B64 fallback implemented. secrets tRPC router (exists/set/delete, NO get) wired. 34 unit tests passing. TypeScript typecheck clean. FOUND-04 architecture complete.
 
 ### Stopped At
 
-Plan 01-03: SecretStorageService (safeStorage wrapper)
+Plan 01-04 (Split-Panel Shell) — next wave 2 plan
 
 ### Next Session
 
-**Suggested action:** Execute Plan 01-03 (SecretStorageService — safeStorage encrypt/decrypt wrapper with headless Linux fallback, Vitest unit tests)
+**Suggested action:** Execute Plan 01-04 (split-panel shell: react-resizable-panels v3 + 5-tab structure)
 
-**Key context for 01-03:**
-- Empty `secretsRouter` in src/main/trpc/routers/secrets.ts ready to fill
-- SecretStorageService pattern documented in RESEARCH.md §6
-- Headless Linux fallback: when safeStorage.getSelectedStorageBackend() returns 'basic_text', use base64 with warning
-- D-19: Vitest unit tests for encrypt/decrypt round-trip, fallback path, key normalization
+**Key context for 01-04:**
+- CampaignViewScreen is currently a stub ("Campaign loaded: {name}")
+- react-resizable-panels@^3 is already installed (pinned per RESEARCH)
+- shadcn Resizable wrapper in src/renderer/src/components/ui/ needs to be verified/created
+- D-08: 5 tabs as empty shells (Character Sheet, Combat Tracker, NPC Tracker, Session Journal, Inventory)
+- D-09: Default active tab = Character Sheet
+- D-11: Default split ratio 60/40 (chat left, panel right)
 
 ---
 

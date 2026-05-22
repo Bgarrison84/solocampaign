@@ -1,0 +1,40 @@
+appId: com.briston.solocampaign
+productName: SoloCampaign
+
+directories:
+  app: .
+  output: dist
+
+files:
+  - out/**
+  - package.json
+  - "!node_modules/**/*"
+  - "node_modules/better-sqlite3/**/*"
+
+asar: true
+asarUnpack:
+  - "**/node_modules/better-sqlite3/**"
+  - "resources/migrations/**"
+
+extraResources:
+  - from: resources/migrations
+    to: migrations
+    filter:
+      - "**/*"
+
+mac:
+  icon: src/resources/build/icons/icon.icns
+  category: public.app-category.games
+  target:
+    - dir
+
+linux:
+  icon: src/resources/build/icons
+  category: Game
+  target:
+    - AppImage
+
+win:
+  icon: src/resources/build/icons/icon.ico
+  target:
+    - nsis

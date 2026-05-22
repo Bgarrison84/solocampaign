@@ -27,7 +27,9 @@
     "lint": "biome check --no-errors-on-unmatched",
     "lint:fix": "biome check --write --no-errors-on-unmatched --assist-enabled=true",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

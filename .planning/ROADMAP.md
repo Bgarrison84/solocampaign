@@ -11,7 +11,7 @@
 
 ## Phases
 
-- [~] **Phase 1: Foundation & Secure Shell** — Bootable Electron app with secure baseline, SQLite persistence, typed IPC, split-panel shell, and campaign list/create flow (3/3 core plans complete; 4 gap-closure plans created: 01-04/01-05/01-06/01-07)
+- [x] **Phase 1: Foundation & Secure Shell** — Bootable Electron app with secure baseline, SQLite persistence, typed IPC, split-panel shell, and campaign list/create flow ✓ 7/7 plans complete (2026-05-24)
 - [ ] **Phase 2: Character Domain & Live Sheet** — Step-by-step SRD character builder with persistent character sheet, live resource tracking, and portrait/cover image import
 - [ ] **Phase 3: AI Engine & Provider Abstraction** — Per-campaign AI provider configuration (OpenAI-compatible + Gemini) with encrypted keys, streaming chat, fallback handling, and DM personality/strictness controls
 - [ ] **Phase 4: Long-Campaign Memory & Session Flow** — Three-layer memory architecture, structured session start prompts, end-of-session recap, and AI-generated summaries that keep months-long campaigns coherent

@@ -5,7 +5,7 @@ import reactPlugin from '@vitejs/plugin-react'
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [externalizeDepsPlugin({ exclude: ['electron-store'] })],
     build: {
       rollupOptions: {
         input: {

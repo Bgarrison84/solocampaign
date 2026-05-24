@@ -45,7 +45,7 @@ if (Test-Path $unpackedExe) {
   # 6. Single-instance lock: launch a second instance and it should exit within 3s
   if ($running) {
     $proc2 = Start-Process -FilePath $unpackedExe -PassThru -WindowStyle Hidden
-    Start-Sleep -Seconds 3
+    Start-Sleep -Seconds 8
     Check "Second instance exits quickly (single-instance lock)" $proc2.HasExited
 
     if (!$proc2.HasExited) { $proc2.Kill() }

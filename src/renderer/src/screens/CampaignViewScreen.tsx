@@ -5,17 +5,29 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import { trpc } from '../lib/trpc'
 import { usePanelSizeStore } from '../stores/panelSizeStore'
+import { useWindowStore } from '../stores/windowStore'
 
 export function CampaignViewScreen() {
   const { id } = useParams<{ id: string }>()
   const store = usePanelSizeStore()
   const saveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const setCampaignName = useWindowStore((s) => s.setCampaignName)
 
   const campaignQuery = useQuery({
     queryKey: ['campaigns', 'get', id],
     queryFn: () => trpc.campaigns.get.query({ id: id! }),
     enabled: !!id,
   })
+
+  // Set campaign name in title bar when data loads; clear on unmount (D-13)
+  useEffect(() => {
+    if (campaignQuery.data?.name) {
+      setCampaignName(campaignQuery.data.name)
+    }
+    return () => {
+      setCampaignName(null)
+    }
+  }, [campaignQuery.data?.name, setCampaignName])
 
   // Load persisted panel sizes on mount or campaign change
   useEffect(() => {
@@ -44,7 +56,7 @@ export function CampaignViewScreen() {
 
   if (!id) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
+      <div className="flex items-center justify-center h-full bg-background">
         <p className="text-muted-foreground">No campaign selected.</p>
       </div>
     )
@@ -52,7 +64,7 @@ export function CampaignViewScreen() {
 
   if (campaignQuery.isLoading || !store.isLoaded) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
+      <div className="flex items-center justify-center h-full bg-background">
         <p className="text-muted-foreground">Loading campaign...</p>
       </div>
     )
@@ -60,14 +72,14 @@ export function CampaignViewScreen() {
 
   if (!campaignQuery.data) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
+      <div className="flex items-center justify-center h-full bg-background">
         <p className="text-muted-foreground">Campaign not found.</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col" style={{ height: '100vh' }}>
+    <div className="flex flex-col h-full">
       <PanelGroup
         direction="horizontal"
         className="flex-1"

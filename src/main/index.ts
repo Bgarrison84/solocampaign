@@ -2,11 +2,15 @@ import { app, BrowserWindow, session } from 'electron'
 import path from 'node:path'
 import { createIPCHandler } from 'electron-trpc/main'
 import log from 'electron-log'
+import Store from 'electron-store'
 import { router } from './trpc/router'
 import { initDatabase } from './db/index'
 import { secretStorage } from './secrets'
 
 let mainWindow: BrowserWindow | null = null
+
+// Window bounds persistence — saved on resize/move, restored on next launch (D-14)
+const boundsStore = new Store<{ windowBounds: { width: number; height: number; x?: number; y?: number } }>({ name: 'windowBounds' })
 
 // Single-instance lock MUST run before app.whenReady()
 const gotLock = app.requestSingleInstanceLock()
@@ -55,13 +59,20 @@ if (!gotLock) {
       })
     })
 
+    // Restore saved bounds from previous session (D-14: 1280×800 default, persist bounds)
+    const savedBounds = boundsStore.get('windowBounds', { width: 1280, height: 800 })
+
     mainWindow = new BrowserWindow({
-      width: 1280,
-      height: 800,
+      ...savedBounds,
       minWidth: 1024,
       minHeight: 700,
       backgroundColor: '#1f2126',
       show: false,
+      // D-12: Frameless window — titleBarStyle: 'hidden' on macOS (native traffic lights),
+      // frame: false on Windows/Linux (custom title bar buttons rendered by TitleBar.tsx)
+      ...(process.platform === 'darwin'
+        ? { titleBarStyle: 'hidden' as const }
+        : { frame: false }),
       webPreferences: {
         contextIsolation: true,
         sandbox: true,
@@ -78,6 +89,19 @@ if (!gotLock) {
     mainWindow.once('ready-to-show', () => {
       mainWindow?.show()
     })
+
+    // Persist window bounds on resize and move with 1s debounce (D-14)
+    let boundsDebounce: ReturnType<typeof setTimeout> | null = null
+    const saveBounds = () => {
+      if (boundsDebounce) clearTimeout(boundsDebounce)
+      boundsDebounce = setTimeout(() => {
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          boundsStore.set('windowBounds', mainWindow.getBounds())
+        }
+      }, 1000)
+    }
+    mainWindow.on('resize', saveBounds)
+    mainWindow.on('move', saveBounds)
 
     // Wire tRPC IPC handler with senderFrame validation
     createIPCHandler({

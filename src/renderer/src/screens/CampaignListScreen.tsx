@@ -20,7 +20,7 @@ export function CampaignListScreen() {
 
   if (campaignsQuery.isError) {
     return (
-      <div className="flex flex-col min-h-screen bg-background p-8">
+      <div className="flex flex-col min-h-full bg-background p-8">
         <h1 className="text-2xl font-semibold text-foreground mb-8">Your Campaigns</h1>
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
           Couldn't load your campaigns. Restart SoloCampaign and try again.
@@ -33,7 +33,7 @@ export function CampaignListScreen() {
   const isLoading = campaignsQuery.isLoading
 
   return (
-    <div className="flex flex-col min-h-screen bg-background p-8">
+    <div className="flex flex-col min-h-full bg-background p-8">
       <h1 className="text-2xl font-semibold text-foreground mb-8">Your Campaigns</h1>
 
       {isLoading ? (

@@ -1,0 +1,74 @@
+name: Packaged Build Smoke Tests
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+# Cancel in-progress runs on new push to the same branch
+concurrency:
+  group: smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Smoke — ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: pwsh -File scripts/smoke/smoke.win.ps1
+            node: 20
+          - os: macos-latest
+            script: bash scripts/smoke/smoke.mac.sh
+            node: 20
+          - os: ubuntu-latest
+            script: bash scripts/smoke/smoke.linux.sh
+            node: 20
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Rebuild native modules (better-sqlite3)
+        run: npx @electron/rebuild -f -w better-sqlite3
+        env:
+          npm_config_arch: x64
+
+      - name: Build packaged app
+        run: npm run build
+        env:
+          # No code signing per D-03
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          SKIP_NOTARIZE: true
+
+      - name: Linux — install FUSE + start virtual display
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y fuse libfuse2 xvfb
+          Xvfb :99 -screen 0 1024x768x24 &
+          echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name: Run smoke tests
+        run: ${{ matrix.script }}
+
+      - name: Upload dist artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: dist/
+          retention-days: 3

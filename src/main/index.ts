@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session } from 'electron'
+import { app, BrowserWindow, session, dialog } from 'electron'
 import path from 'node:path'
 import { createIPCHandler } from 'electron-trpc/main'
 import log from 'electron-log'
@@ -30,6 +30,13 @@ if (!gotLock) {
       await initDatabase()
     } catch (err) {
       log.error('[main] Failed to initialize database:', err)
+      const message = err instanceof Error ? err.message : String(err)
+      dialog.showErrorBox(
+        'Database Error',
+        `SoloCampaign could not initialize the database.\n\n${message}\n\nThe application will now quit.`
+      )
+      app.quit()
+      return
     }
 
     // Initialize secret storage (creates {userData}/secrets/ directory)
@@ -109,10 +116,11 @@ if (!gotLock) {
       windows: [mainWindow],
       createContext: async ({ event }: { event: Electron.IpcMainInvokeEvent }) => {
         const senderUrl = (event as any).senderFrame?.url ?? ''
+        const isDev = process.env.NODE_ENV === 'development'
         if (
           !senderUrl.startsWith('file://') &&
           !senderUrl.startsWith('app://') &&
-          !senderUrl.startsWith('http://localhost:')
+          !(isDev && senderUrl.startsWith('http://localhost:'))
         ) {
           throw new Error('IPC sender frame URL not allowed')
         }

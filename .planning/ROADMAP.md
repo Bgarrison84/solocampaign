@@ -35,7 +35,7 @@
   2. User can create a new campaign, close the app, reopen it, and see the campaign with all data intact
   3. User sees a split-panel layout (narrative chat on left, tabbed right panel) immediately on entering a campaign
   4. Electron renderer runs with contextIsolation enabled, nodeIntegration disabled, and all IPC handlers validated via Zod
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans complete
 Plans:
 - [x] 01-01-PLAN.md — Walking skeleton: Electron + SQLite + tRPC + campaign CRUD
 - [x] 01-02-PLAN.md — Drizzle migrations + backup rotation + integrity check + single-instance lock
@@ -43,7 +43,7 @@ Plans:
 - [x] 01-04-PLAN.md — Split-panel campaign view shell (react-resizable-panels + 5-tab right panel)
 - [x] 01-05-PLAN.md — Custom frameless title bar + window size persistence
 - [x] 01-06-PLAN.md — Code review bug fixes (CR-01, CR-03, CR-04, CR-05)
-- [ ] 01-07-PLAN.md — Packaged build smoke tests + CI matrix
+- [x] 01-07-PLAN.md — Packaged build smoke tests + CI matrix
 **Phase 1 Progress:** 3/7 plans complete (wave 3: 01-04+01-05 parallel; wave 4: 01-06 after 01-05; wave 5: 01-07 after all)
 **Notes:**
   - FOUND-04 covers encrypted secret storage via safeStorage; the actual provider/key UI ships in Phase 3 but the safeStorage wrapper lands here
@@ -194,7 +194,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Secure Shell | 6/7 | In Progress|  |
+| 1. Foundation & Secure Shell | 7/7 | Complete   | 2026-05-24 |
 | 2. Character Domain & Live Sheet | 0/0 | Not started | - |
 | 3. AI Engine & Provider Abstraction | 0/0 | Not started | - |
 | 4. Long-Campaign Memory & Session Flow | 0/0 | Not started | - |

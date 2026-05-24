@@ -11,7 +11,7 @@
 
 ## Phases
 
-- [~] **Phase 1: Foundation & Secure Shell** — Bootable Electron app with secure baseline, SQLite persistence, typed IPC, split-panel shell, and campaign list/create flow (3/3 core plans complete; wave 2 01-04/01-05 remaining)
+- [~] **Phase 1: Foundation & Secure Shell** — Bootable Electron app with secure baseline, SQLite persistence, typed IPC, split-panel shell, and campaign list/create flow (3/3 core plans complete; 4 gap-closure plans created: 01-04/01-05/01-06/01-07)
 - [ ] **Phase 2: Character Domain & Live Sheet** — Step-by-step SRD character builder with persistent character sheet, live resource tracking, and portrait/cover image import
 - [ ] **Phase 3: AI Engine & Provider Abstraction** — Per-campaign AI provider configuration (OpenAI-compatible + Gemini) with encrypted keys, streaming chat, fallback handling, and DM personality/strictness controls
 - [ ] **Phase 4: Long-Campaign Memory & Session Flow** — Three-layer memory architecture, structured session start prompts, end-of-session recap, and AI-generated summaries that keep months-long campaigns coherent
@@ -35,8 +35,16 @@
   2. User can create a new campaign, close the app, reopen it, and see the campaign with all data intact
   3. User sees a split-panel layout (narrative chat on left, tabbed right panel) immediately on entering a campaign
   4. Electron renderer runs with contextIsolation enabled, nodeIntegration disabled, and all IPC handlers validated via Zod
-**Plans:** 01-01 ✓ | 01-02 ✓ | 01-03 ✓ | 01-04 (pending) | 01-05 (pending)
-**Phase 1 Progress:** 3/3 core plans complete (01-04 split panel, 01-05 title bar are wave 2)
+**Plans:** 7 plans
+Plans:
+- [x] 01-01-PLAN.md — Walking skeleton: Electron + SQLite + tRPC + campaign CRUD
+- [x] 01-02-PLAN.md — Drizzle migrations + backup rotation + integrity check + single-instance lock
+- [x] 01-03-PLAN.md — SecretStorageService + secrets tRPC router
+- [ ] 01-04-PLAN.md — Split-panel campaign view shell (react-resizable-panels + 5-tab right panel)
+- [ ] 01-05-PLAN.md — Custom frameless title bar + window size persistence
+- [ ] 01-06-PLAN.md — Code review bug fixes (CR-01, CR-03, CR-04, CR-05)
+- [ ] 01-07-PLAN.md — Packaged build smoke tests + CI matrix
+**Phase 1 Progress:** 3/7 plans complete (wave 3: 01-04+01-05 parallel; wave 4: 01-06 after 01-05; wave 5: 01-07 after all)
 **Notes:**
   - FOUND-04 covers encrypted secret storage via safeStorage; the actual provider/key UI ships in Phase 3 but the safeStorage wrapper lands here
   - No code signing per D-03 (user decision: unsigned installers with bypass documentation)
@@ -44,7 +52,7 @@
   - 01-01 completed: walking skeleton proven (Electron + SQLite + tRPC + React Router + campaign CRUD)
   - 01-02 completed: Drizzle migrate() auto-runs at startup; backup rotation + integrity_check + single-instance lock in place
   - 01-03 completed: SecretStorageService (safeStorage + B64 fallback + key normalization) + secrets tRPC router (exists/set/delete, no get) + 34 unit tests. FOUND-04 architecture complete.
-  - Next: 01-04 split-panel shell (react-resizable-panels v3 + 5-tab structure)
+  - Next: 01-04 (split-panel shell), 01-05 (title bar), 01-06 (CR bug fixes) run in parallel (wave 3); then 01-07 (smoke tests) in wave 4
 **UI hint:** yes
 
 ### Phase 2: Character Domain & Live Sheet

@@ -35,7 +35,7 @@ A user can install SoloCampaign on Windows/macOS/Linux, launch it, create a new 
 - **D-08:** All 5 right-panel tabs render as empty shells from day one: Character Sheet, Combat Tracker, NPC Tracker, Session Journal, Inventory. Each shows a minimal "Content coming in Phase X" placeholder. No tab is hidden or added later — the structure is permanent.
 - **D-09:** Default active tab on entering a campaign: **Character Sheet**.
 - **D-10:** Left panel (narrative chat area) shows a simple centered placeholder: "AI narration appears here." No skeleton bubbles.
-- **D-11:** Default split ratio: **60/40** (chat/right panel). User-resizable via react-resizable-panels v4.
+- **D-11:** Default split ratio: **60/40** (chat/right panel). User-resizable via react-resizable-panels v3 (v3 installed in 01-01; v4 breaks shadcn Resizable wrapper per 01-RESEARCH.md Pitfall #1).
 
 ### Window Chrome
 

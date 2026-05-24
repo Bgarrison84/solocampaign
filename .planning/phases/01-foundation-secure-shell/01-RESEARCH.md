@@ -966,7 +966,7 @@ Failure on any platform fails the workflow.
 
 **How to avoid:** Expose `process.platform` via contextBridge in preload (see section 8). Or expose it via a tRPC `system.platform` query. ContextBridge is simpler.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Pinned Electron version: 41 or 42?**
    - What we know: STACK.md and STATE.md say "Electron 41" (one major behind 42). npm registry shows 42.2.0 is latest.

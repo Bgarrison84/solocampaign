@@ -8,7 +8,9 @@ import log from 'electron-log'
 let _fallbackWarningLogged = false
 
 export class SecretStorageService {
-  private dir = path.join(app.getPath('userData'), 'secrets')
+  private get dir(): string {
+    return path.join(app.getPath('userData'), 'secrets')
+  }
 
   /**
    * Creates the secrets directory if it does not exist.
@@ -76,7 +78,7 @@ export class SecretStorageService {
     const buf = await readFile(fp)
     if (buf.subarray(0, 4).toString() === 'B64:') {
       // Fallback path: strip the B64: prefix and base64-decode
-      return Buffer.from(buf.subarray(4).toString(), 'base64').toString()
+      return Buffer.from(buf.subarray(4).toString('ascii'), 'base64').toString()
     }
     // Secure path: delegate to safeStorage
     return safeStorage.decryptString(buf)

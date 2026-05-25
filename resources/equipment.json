@@ -1,0 +1,370 @@
+{
+  "barbarian": [
+    {
+      "id": "barbarian-a",
+      "label": "Option A: Greataxe and four handaxes",
+      "items": [
+        { "name": "Greataxe", "quantity": 1, "weight": 7 },
+        { "name": "Handaxe", "quantity": 4, "weight": 2 },
+        { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "barbarian-b",
+      "label": "Option B: Any martial melee weapon and two handaxes",
+      "items": [
+        { "name": "Martial melee weapon (player's choice)", "quantity": 1, "weight": 4 },
+        { "name": "Handaxe", "quantity": 2, "weight": 2 },
+        { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "barbarian-c",
+      "label": "Option C: 75 GP",
+      "items": [],
+      "startingGold": 75
+    }
+  ],
+  "bard": [
+    {
+      "id": "bard-a",
+      "label": "Option A: Leather armor, two daggers, and musical instrument",
+      "items": [
+        { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+        { "name": "Dagger", "quantity": 2, "weight": 1 },
+        { "name": "Musical Instrument (player's choice)", "quantity": 1, "weight": 3 },
+        { "name": "Entertainer's Pack", "quantity": 1, "weight": 38 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "bard-b",
+      "label": "Option B: Studded leather armor, a scimitar, and musical instrument",
+      "items": [
+        { "name": "Studded Leather Armor", "quantity": 1, "weight": 13 },
+        { "name": "Scimitar", "quantity": 1, "weight": 3 },
+        { "name": "Musical Instrument (player's choice)", "quantity": 1, "weight": 3 },
+        { "name": "Entertainer's Pack", "quantity": 1, "weight": 38 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "bard-c",
+      "label": "Option C: 100 GP",
+      "items": [],
+      "startingGold": 100
+    }
+  ],
+  "cleric": [
+    {
+      "id": "cleric-a",
+      "label": "Option A: Chain mail, shield, and a mace",
+      "items": [
+        { "name": "Chain Mail", "quantity": 1, "weight": 55 },
+        { "name": "Shield", "quantity": 1, "weight": 6 },
+        { "name": "Mace", "quantity": 1, "weight": 4 },
+        { "name": "Holy Symbol", "quantity": 1, "weight": 1 },
+        { "name": "Priest's Pack", "quantity": 1, "weight": 33 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "cleric-b",
+      "label": "Option B: Scale mail, a mace, and light crossbow with 20 bolts",
+      "items": [
+        { "name": "Scale Mail", "quantity": 1, "weight": 45 },
+        { "name": "Mace", "quantity": 1, "weight": 4 },
+        { "name": "Light Crossbow", "quantity": 1, "weight": 5 },
+        { "name": "Crossbow Bolt", "quantity": 20, "weight": 0.075 },
+        { "name": "Holy Symbol", "quantity": 1, "weight": 1 },
+        { "name": "Priest's Pack", "quantity": 1, "weight": 33 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "cleric-c",
+      "label": "Option C: 110 GP",
+      "items": [],
+      "startingGold": 110
+    }
+  ],
+  "druid": [
+    {
+      "id": "druid-a",
+      "label": "Option A: Leather armor, shield, and a wooden staff",
+      "items": [
+        { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+        { "name": "Shield", "quantity": 1, "weight": 6 },
+        { "name": "Quarterstaff", "quantity": 1, "weight": 4 },
+        { "name": "Druidic Focus (wooden staff)", "quantity": 1, "weight": 4 },
+        { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "druid-b",
+      "label": "Option B: Leather armor and a scimitar",
+      "items": [
+        { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+        { "name": "Scimitar", "quantity": 1, "weight": 3 },
+        { "name": "Druidic Focus (yew wand)", "quantity": 1, "weight": 1 },
+        { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "druid-c",
+      "label": "Option C: 50 GP",
+      "items": [],
+      "startingGold": 50
+    }
+  ],
+  "fighter": [
+    {
+      "id": "fighter-a",
+      "label": "Option A: Chain mail, shield, and a martial weapon",
+      "items": [
+        { "name": "Chain Mail", "quantity": 1, "weight": 55 },
+        { "name": "Shield", "quantity": 1, "weight": 6 },
+        { "name": "Longsword", "quantity": 1, "weight": 3 },
+        { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "fighter-b",
+      "label": "Option B: Leather armor, longbow, 20 arrows, and a martial weapon",
+      "items": [
+        { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+        { "name": "Longbow", "quantity": 1, "weight": 2 },
+        { "name": "Arrow", "quantity": 20, "weight": 0.05 },
+        { "name": "Shortsword", "quantity": 1, "weight": 2 },
+        { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "fighter-c",
+      "label": "Option C: 175 GP",
+      "items": [],
+      "startingGold": 175
+    }
+  ],
+  "monk": [
+    {
+      "id": "monk-a",
+      "label": "Option A: A spear and five javelins",
+      "items": [
+        { "name": "Spear", "quantity": 1, "weight": 3 },
+        { "name": "Javelin", "quantity": 5, "weight": 2 },
+        { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "monk-b",
+      "label": "Option B: A short sword and a dagger",
+      "items": [
+        { "name": "Shortsword", "quantity": 1, "weight": 2 },
+        { "name": "Dagger", "quantity": 1, "weight": 1 },
+        { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "monk-c",
+      "label": "Option C: 50 GP",
+      "items": [],
+      "startingGold": 50
+    }
+  ],
+  "paladin": [
+    {
+      "id": "paladin-a",
+      "label": "Option A: Chain mail, shield, and a martial weapon",
+      "items": [
+        { "name": "Chain Mail", "quantity": 1, "weight": 55 },
+        { "name": "Shield", "quantity": 1, "weight": 6 },
+        { "name": "Longsword", "quantity": 1, "weight": 3 },
+        { "name": "Holy Symbol", "quantity": 1, "weight": 1 },
+        { "name": "Priest's Pack", "quantity": 1, "weight": 33 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "paladin-b",
+      "label": "Option B: Scale mail, two handaxes, and a javelin",
+      "items": [
+        { "name": "Scale Mail", "quantity": 1, "weight": 45 },
+        { "name": "Handaxe", "quantity": 2, "weight": 2 },
+        { "name": "Javelin", "quantity": 1, "weight": 2 },
+        { "name": "Holy Symbol", "quantity": 1, "weight": 1 },
+        { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "paladin-c",
+      "label": "Option C: 150 GP",
+      "items": [],
+      "startingGold": 150
+    }
+  ],
+  "ranger": [
+    {
+      "id": "ranger-a",
+      "label": "Option A: Scale mail, two shortswords, and a longbow with 20 arrows",
+      "items": [
+        { "name": "Scale Mail", "quantity": 1, "weight": 45 },
+        { "name": "Shortsword", "quantity": 2, "weight": 2 },
+        { "name": "Longbow", "quantity": 1, "weight": 2 },
+        { "name": "Arrow", "quantity": 20, "weight": 0.05 },
+        { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "ranger-b",
+      "label": "Option B: Leather armor, a longsword, and a shortbow with 20 arrows",
+      "items": [
+        { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+        { "name": "Longsword", "quantity": 1, "weight": 3 },
+        { "name": "Shortbow", "quantity": 1, "weight": 2 },
+        { "name": "Arrow", "quantity": 20, "weight": 0.05 },
+        { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "ranger-c",
+      "label": "Option C: 150 GP",
+      "items": [],
+      "startingGold": 150
+    }
+  ],
+  "rogue": [
+    {
+      "id": "rogue-a",
+      "label": "Option A: Leather armor, two daggers, a shortbow, and 20 arrows",
+      "items": [
+        { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+        { "name": "Dagger", "quantity": 2, "weight": 1 },
+        { "name": "Shortbow", "quantity": 1, "weight": 2 },
+        { "name": "Arrow", "quantity": 20, "weight": 0.05 },
+        { "name": "Burglar's Pack", "quantity": 1, "weight": 47 },
+        { "name": "Thieves' Tools", "quantity": 1, "weight": 1 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "rogue-b",
+      "label": "Option B: Leather armor, a rapier, and a shortsword",
+      "items": [
+        { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+        { "name": "Rapier", "quantity": 1, "weight": 2 },
+        { "name": "Shortsword", "quantity": 1, "weight": 2 },
+        { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 },
+        { "name": "Thieves' Tools", "quantity": 1, "weight": 1 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "rogue-c",
+      "label": "Option C: 100 GP",
+      "items": [],
+      "startingGold": 100
+    }
+  ],
+  "sorcerer": [
+    {
+      "id": "sorcerer-a",
+      "label": "Option A: A light crossbow and 20 bolts, and an arcane focus",
+      "items": [
+        { "name": "Light Crossbow", "quantity": 1, "weight": 5 },
+        { "name": "Crossbow Bolt", "quantity": 20, "weight": 0.075 },
+        { "name": "Arcane Focus (crystal)", "quantity": 1, "weight": 1 },
+        { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "sorcerer-b",
+      "label": "Option B: Two daggers and an arcane focus",
+      "items": [
+        { "name": "Dagger", "quantity": 2, "weight": 1 },
+        { "name": "Arcane Focus (orb)", "quantity": 1, "weight": 3 },
+        { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "sorcerer-c",
+      "label": "Option C: 50 GP",
+      "items": [],
+      "startingGold": 50
+    }
+  ],
+  "warlock": [
+    {
+      "id": "warlock-a",
+      "label": "Option A: Leather armor, a light crossbow, 20 bolts, and an arcane focus",
+      "items": [
+        { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+        { "name": "Light Crossbow", "quantity": 1, "weight": 5 },
+        { "name": "Crossbow Bolt", "quantity": 20, "weight": 0.075 },
+        { "name": "Arcane Focus (crystal)", "quantity": 1, "weight": 1 },
+        { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "warlock-b",
+      "label": "Option B: Leather armor, a dagger, and an arcane focus",
+      "items": [
+        { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+        { "name": "Dagger", "quantity": 2, "weight": 1 },
+        { "name": "Arcane Focus (rod)", "quantity": 1, "weight": 2 },
+        { "name": "Entertainer's Pack", "quantity": 1, "weight": 38 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "warlock-c",
+      "label": "Option C: 100 GP",
+      "items": [],
+      "startingGold": 100
+    }
+  ],
+  "wizard": [
+    {
+      "id": "wizard-a",
+      "label": "Option A: A quarterstaff and a spellbook",
+      "items": [
+        { "name": "Quarterstaff", "quantity": 1, "weight": 4 },
+        { "name": "Arcane Focus (wand)", "quantity": 1, "weight": 1 },
+        { "name": "Spellbook", "quantity": 1, "weight": 3 },
+        { "name": "Scholar's Pack", "quantity": 1, "weight": 22 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "wizard-b",
+      "label": "Option B: A dagger and a spellbook",
+      "items": [
+        { "name": "Dagger", "quantity": 1, "weight": 1 },
+        { "name": "Arcane Focus (orb)", "quantity": 1, "weight": 3 },
+        { "name": "Spellbook", "quantity": 1, "weight": 3 },
+        { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+      ],
+      "startingGold": 0
+    },
+    {
+      "id": "wizard-c",
+      "label": "Option C: 55 GP",
+      "items": [],
+      "startingGold": 55
+    }
+  ]
+}

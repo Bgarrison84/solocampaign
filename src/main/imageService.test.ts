@@ -32,19 +32,12 @@ vi.mock('electron-log', () => ({
 
 // Mock jimp to avoid WASM / heavy image decoding in unit tests.
 // The mock returns a fake image object that supports the API surface used in imageService.
+// NOTE: vi.fn() here creates a persistent mock — mockResolvedValue is set in beforeEach
+// after vi.resetModules() to ensure the mock state is fresh per test.
 vi.mock('jimp', () => {
-  const fakeImage = {
-    bitmap: { width: 800, height: 600 },
-    resize: vi.fn().mockReturnThis(),
-    write: vi.fn().mockImplementation(async (destPath: string) => {
-      // Simulate writing a small PNG-like file at the destination
-      const { writeFile: wf } = await import('fs/promises')
-      await wf(destPath, Buffer.from(TINY_PNG_BASE64, 'base64'))
-    }),
-  }
   return {
     Jimp: {
-      read: vi.fn().mockResolvedValue(fakeImage),
+      read: vi.fn(),
     },
   }
 })
@@ -55,13 +48,26 @@ describe('imageService', () => {
   beforeEach(async () => {
     testDir = await mkdtemp(join(tmpdir(), 'solocampaign-image-test-'))
     vi.resetModules()
+
     electronMock = await vi.importMock('electron') as typeof electronMock
     electronMock.app.getPath.mockReturnValue(testDir)
+
+    // Reset and configure the jimp mock for each test
+    const jimpMock = await vi.importMock('jimp') as { Jimp: { read: ReturnType<typeof vi.fn> } }
+    const fakeImage = {
+      bitmap: { width: 800, height: 600 },
+      resize: vi.fn().mockReturnThis(),
+      write: vi.fn().mockImplementation(async (destPath: string) => {
+        const { writeFile: wf } = await import('fs/promises')
+        await wf(destPath, Buffer.from(TINY_PNG_BASE64, 'base64'))
+      }),
+    }
+    jimpMock.Jimp.read.mockResolvedValue(fakeImage)
   })
 
   afterEach(async () => {
     await rm(testDir, { recursive: true, force: true })
-    vi.restoreAllMocks()
+    vi.clearAllMocks()
   })
 
   // ─── importImage ─────────────────────────────────────────────────────────────

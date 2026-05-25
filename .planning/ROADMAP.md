@@ -5,7 +5,7 @@
 **Granularity:** fine
 **Phases:** 9
 **Coverage:** 53/53 v1 requirements mapped
-**Last updated:** 2026-05-22
+**Last updated:** 2026-05-24
 
 ---
 
@@ -65,7 +65,22 @@ Plans:
   2. User can update HP, spell slots, death saves, XP, currency, and conditions live from the character sheet and see changes persist after restart
   3. User can import a local image file as a character portrait and as a campaign cover image
   4. User can mark items as attuned and see the attunement limit displayed (not enforced)
-**Plans:** TBD
+**Plans:** 7 plans
+Plans:
+- [ ] 02-01-PLAN.md — Schema + migration 0001 + pure calculations + content loader + repo + Wave 0 test stubs
+- [ ] 02-02-PLAN.md — tRPC routers (characters + content) + router registration + jimp install + electron-builder.yml content JSON config
+- [ ] 02-03-PLAN.md — Author 5 content JSON files from 2024 PHB / Tasha's / Xanathar's PDFs
+- [ ] 02-04-PLAN.md — Image service (jimp + WEBP dynamic import) + tRPC wiring for portrait + cover image
+- [ ] 02-05-PLAN.md — Character creation wizard: shadcn Select + CharacterSheetTab orchestrator + 6 wizard steps with full UI-SPEC compliance
+- [ ] 02-06-PLAN.md — Character sheet UI: 10 sections + 5 reusable sheet primitives + zero-debounce optimistic live-play mutations
+- [ ] 02-07-PLAN.md — Cover image wiring: CampaignCard display + import; campaign view [Change Cover Image] button
+**Wave structure:**
+  - Wave 1: 02-01 (foundation — schema, repo, calculations, content loader, test scaffolds)
+  - Wave 2: 02-02 (tRPC + jimp install + electron-builder config; depends on 02-01)
+  - Wave 3: 02-03 + 02-04 in parallel (content JSON authoring; image service — both depend only on 02-02)
+  - Wave 4: 02-05 (wizard + CharacterSheetTab orchestrator; depends on 02-03 content + 02-04 image service)
+  - Wave 5: 02-06 (sheet UI with live-play mutations; depends on 02-05 — wizard creates the character the sheet displays)
+  - Wave 6: 02-07 (cover image UI; depends on 02-06 sheet UI for shared patterns and to avoid CampaignViewScreen merge conflicts)
 **Notes:**
   - Spell list interaction (CHAR-08) moves to Phase 5 with the rules engine; this phase ships the structural sheet
   - Advanced ability score methods (CHAR-02/03), multiclass (CHAR-04), and feats (CHAR-05) defer to Phase 7
@@ -195,7 +210,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Secure Shell | 7/7 | Complete   | 2026-05-24 |
-| 2. Character Domain & Live Sheet | 0/0 | Not started | - |
+| 2. Character Domain & Live Sheet | 0/7 | Planned | - |
 | 3. AI Engine & Provider Abstraction | 0/0 | Not started | - |
 | 4. Long-Campaign Memory & Session Flow | 0/0 | Not started | - |
 | 5. Rules Engine, Dice & Combat | 0/0 | Not started | - |

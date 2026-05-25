@@ -48,7 +48,7 @@ A user can build a level-1 character using a multi-step wizard (pulling content 
   - Species-granted level-1 feats auto-applied from content data (no picker UI)
   - Background skill proficiencies auto-applied
   - Background tool proficiencies auto-applied
-- **D-16:** Player manually makes skill proficiency choices (class-granted picks) and saving throw proficiency choices in the Ability Scores step. These are not auto-assigned.
+- **D-16:** Player manually makes skill proficiency choices (class-granted picks) in the Ability Scores step. Saving throw proficiencies are fixed per class (auto-applied, displayed read-only — no picker UI). The 2024 PHB gives each class exactly two fixed saves; the player's "choice" is the class selection itself. *(Updated from discuss-phase: original wording said "and saving throw proficiency choices" but the rules have no save choice — corrected 2026-05-25.)*
 - **D-17:** After the wizard closes, the Character Sheet tab renders immediately with the completed character. No intermediate portrait-prompt step.
 
 ### Character Sheet Layout

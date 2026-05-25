@@ -48,4 +48,9 @@ export const campaignsRepo = {
       .where(eq(campaigns.id, campaignId))
       .run()
   },
+
+  delete(id: string): void {
+    const db = getDb()
+    db.delete(campaigns).where(eq(campaigns.id, id)).run()
+  },
 }

@@ -21,6 +21,12 @@ export const campaignsRouter = t.router({
       return campaignsRepo.get(input.id)
     }),
 
+  delete: t.procedure
+    .input(z.object({ id: campaignIdSchema }))
+    .mutation(({ input }) => {
+      campaignsRepo.delete(input.id)
+    }),
+
   /**
    * Import a cover image for a campaign.
    * Opens a native OS file dialog, resizes to max 1024px, stores relative path in DB.

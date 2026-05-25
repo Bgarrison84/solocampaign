@@ -1,10 +1,17 @@
-import React, { useCallback, useEffect, useRef } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Camera } from 'lucide-react'
+import { Camera, ChevronLeft, Trash2 } from 'lucide-react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import { Button } from '../components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../components/ui/dialog'
 import { trpc } from '../lib/trpc'
 import { usePanelSizeStore } from '../stores/panelSizeStore'
 import { useWindowStore } from '../stores/windowStore'
@@ -12,10 +19,12 @@ import { CharacterSheetTab } from '../components/CharacterSheetTab'
 
 export function CampaignViewScreen() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const store = usePanelSizeStore()
   const saveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const setCampaignName = useWindowStore((s) => s.setCampaignName)
   const queryClient = useQueryClient()
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const campaignQuery = useQuery({
     queryKey: ['campaigns', 'get', id],
@@ -28,6 +37,14 @@ export function CampaignViewScreen() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['campaigns', 'getCoverDataUrl', id] })
       queryClient.invalidateQueries({ queryKey: ['campaigns', 'list'] })
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: () => trpc.campaigns.delete.mutate({ id: id! }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', 'list'] })
+      navigate('/')
     },
   })
 
@@ -91,7 +108,31 @@ export function CampaignViewScreen() {
   }
 
   return (
+    <>
     <div className="flex flex-col h-full">
+      {/* Action bar — back navigation + delete */}
+      <div className="flex items-center gap-2 px-2 py-1 border-b border-border bg-card shrink-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/')}
+          className="gap-1"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Campaigns
+        </Button>
+        <span className="flex-1" />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowDeleteConfirm(true)}
+          className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1"
+        >
+          <Trash2 className="h-4 w-4" />
+          Delete Campaign
+        </Button>
+      </div>
+
       <PanelGroup
         direction="horizontal"
         className="flex-1"
@@ -202,5 +243,38 @@ export function CampaignViewScreen() {
         </Panel>
       </PanelGroup>
     </div>
+
+    {/* Delete confirmation dialog */}
+    <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <DialogContent className="sm:max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle>Delete this campaign?</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          This will permanently delete{' '}
+          <span className="font-semibold text-foreground">{campaignQuery.data?.name}</span>{' '}
+          and all its characters. This cannot be undone.
+        </p>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowDeleteConfirm(false)}
+            disabled={deleteMutation.isPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={() => deleteMutation.mutate()}
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? 'Deleting…' : 'Yes, delete'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }

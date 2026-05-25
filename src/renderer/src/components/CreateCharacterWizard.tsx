@@ -292,7 +292,7 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
     <>
       {/* Non-dismissible dialog per D-04 */}
       <Dialog open={true} onOpenChange={() => { /* no-op — wizard cannot be dismissed */ }}>
-        <DialogContent className="sm:max-w-[720px] w-full h-auto max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="sm:max-w-[720px] w-full h-[85vh] max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Create Your Character</DialogTitle>
             <WizardProgress
@@ -305,7 +305,7 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
           </DialogHeader>
 
           {/* Step body */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden min-h-0">
             {step === 0 && (
               <StepRace
                 wizardState={wizardState}

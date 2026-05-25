@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import { trpc } from '../lib/trpc'
 import { usePanelSizeStore } from '../stores/panelSizeStore'
 import { useWindowStore } from '../stores/windowStore'
+import { CharacterSheetTab } from '../components/CharacterSheetTab'
 
 export function CampaignViewScreen() {
   const { id } = useParams<{ id: string }>()
@@ -134,13 +135,8 @@ export function CampaignViewScreen() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="character-sheet" className="flex-1 overflow-auto p-6">
-                <div className="flex flex-col items-center max-w-[400px] mx-auto" style={{ paddingTop: '30%' }}>
-                  <h2 className="text-xl font-semibold text-foreground mb-2">Character Sheet</h2>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Your character sheet will appear here after character creation (Phase 2).
-                  </p>
-                </div>
+              <TabsContent value="character-sheet" className="flex-1 overflow-hidden p-0">
+                <CharacterSheetTab campaignId={id} />
               </TabsContent>
 
               <TabsContent value="combat-tracker" className="flex-1 overflow-auto p-6">

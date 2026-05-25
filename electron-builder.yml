@@ -15,12 +15,17 @@ asar: true
 asarUnpack:
   - "**/node_modules/better-sqlite3/**"
   - "resources/migrations/**"
+  - "resources/*.json"
 
 extraResources:
   - from: resources/migrations
     to: migrations
     filter:
       - "**/*"
+  - from: resources
+    to: .
+    filter:
+      - "*.json"
 
 mac:
   icon: src/resources/build/icons/icon.icns

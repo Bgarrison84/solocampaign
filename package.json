@@ -32,6 +32,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@jimp/wasm-webp": "^1.6.1",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
@@ -48,6 +49,7 @@
     "electron-log": "^5.4.4",
     "electron-store": "^10.0.0",
     "electron-trpc": "0.7.1",
+    "jimp": "^1.6.1",
     "lucide-react": "^0.556.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",

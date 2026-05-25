@@ -2,6 +2,16 @@ import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { trpc } from '../lib/trpc'
 import { CreateCharacterWizard } from './CreateCharacterWizard'
+import { SheetHeader } from './sheet/SheetHeader'
+import { AbilityScoresSection } from './sheet/AbilityScoresSection'
+import { SavingThrowsSection } from './sheet/SavingThrowsSection'
+import { SkillsSection } from './sheet/SkillsSection'
+import { CombatStatsSection } from './sheet/CombatStatsSection'
+import { ResourcesSection } from './sheet/ResourcesSection'
+import { CurrencySection } from './sheet/CurrencySection'
+import { EquipmentSection } from './sheet/EquipmentSection'
+import { ProficienciesSection } from './sheet/ProficienciesSection'
+import { TraitsSection } from './sheet/TraitsSection'
 
 interface CharacterSheetTabProps {
   campaignId: string
@@ -13,7 +23,7 @@ interface CharacterSheetTabProps {
  * Queries characters.getByCampaignId and branches on the result:
  * - Loading: shows "Building your character…" per UI-SPEC §6.5
  * - null (no character): auto-launches CreateCharacterWizard (D-04, non-dismissible)
- * - data: shows character sheet (Plan 06 fills this in)
+ * - data: renders full 10-section character sheet
  */
 export function CharacterSheetTab({ campaignId }: CharacterSheetTabProps) {
   const characterQuery = useQuery({
@@ -36,19 +46,20 @@ export function CharacterSheetTab({ campaignId }: CharacterSheetTabProps) {
     return <CreateCharacterWizard campaignId={campaignId} />
   }
 
-  // Character exists — Plan 06 replaces this with the full 10-section sheet
+  // Character exists — render all 10 sections per UI-SPEC §4.1
   const character = characterQuery.data
   return (
     <div className="flex flex-col gap-4 p-4 overflow-y-auto h-full">
-      <div className="text-center text-muted-foreground">
-        <p className="text-xl font-semibold text-foreground">{character.name}</p>
-        <p className="text-sm">
-          {character.race} {character.class} · Level {character.level}
-        </p>
-        <p className="text-sm mt-2">
-          Character sheet UI coming in Plan 06.
-        </p>
-      </div>
+      <SheetHeader character={character} />
+      <AbilityScoresSection character={character} />
+      <SavingThrowsSection character={character} />
+      <SkillsSection character={character} />
+      <CombatStatsSection character={character} />
+      <ResourcesSection character={character} />
+      <CurrencySection character={character} />
+      <EquipmentSection character={character} />
+      <ProficienciesSection character={character} />
+      <TraitsSection character={character} />
     </div>
   )
 }

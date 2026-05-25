@@ -67,7 +67,7 @@ Plans:
   4. User can mark items as attuned and see the attunement limit displayed (not enforced)
 **Plans:** 7 plans
 Plans:
-- [ ] 02-01-PLAN.md — Schema + migration 0001 + pure calculations + content loader + repo + Wave 0 test stubs
+- [x] 02-01-PLAN.md — Schema + migration 0001 + pure calculations + content loader + repo + Wave 0 test stubs
 - [ ] 02-02-PLAN.md — tRPC routers (characters + content) + router registration + jimp install + electron-builder.yml content JSON config
 - [ ] 02-03-PLAN.md — Author 5 content JSON files from 2024 PHB / Tasha's / Xanathar's PDFs
 - [ ] 02-04-PLAN.md — Image service (jimp + WEBP dynamic import) + tRPC wiring for portrait + cover image

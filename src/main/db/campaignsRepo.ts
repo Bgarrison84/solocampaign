@@ -36,4 +36,16 @@ export const campaignsRepo = {
     const db = getDb()
     return db.select().from(campaigns).where(eq(campaigns.id, id)).get()
   },
+
+  /**
+   * Persist a cover image relative path for a campaign.
+   * Ownership of cover-image persistence lives here (campaign domain) — D-24, W4 fix.
+   */
+  updateCoverImagePath(campaignId: string, relativePath: string): void {
+    const db = getDb()
+    db.update(campaigns)
+      .set({ coverImagePath: relativePath })
+      .where(eq(campaigns.id, campaignId))
+      .run()
+  },
 }

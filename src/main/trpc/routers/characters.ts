@@ -28,9 +28,7 @@ import {
   xpDeltaSchema,
   conditionNameSchema,
 } from '../schemas'
-import { app } from 'electron'
-import path from 'node:path'
-import { promises as fsPromises } from 'fs'
+import { importImage, getImageDataUrl } from '../../imageService'
 
 // ─── Input schemas ─────────────────────────────────────────────────────────────
 
@@ -228,38 +226,29 @@ export const charactersRouter = t.router({
    * Get character portrait as a base64 data URL (T-02-07).
    * Path derived from DB column only — renderer never sends a raw path.
    * Takes characterId (not campaignId) and uses getWithResources directly.
+   * Uses imageService.getImageDataUrl as the single source of truth.
    */
   getPortraitDataUrl: t.procedure
     .input(z.object({ characterId: characterIdSchema }))
     .query(async ({ input }) => {
       const withResources = charactersRepo.getWithResources(input.characterId)
-
       if (!withResources?.portraitPath) return null
-
-      const absolutePath = path.join(app.getPath('userData'), withResources.portraitPath)
-      try {
-        const buffer = await fsPromises.readFile(absolutePath)
-        const ext = path.extname(withResources.portraitPath).slice(1).toLowerCase()
-        const mimeType = ext === 'jpg' ? 'jpeg' : ext
-        return `data:image/${mimeType};base64,${buffer.toString('base64')}`
-      } catch (err: unknown) {
-        const nodeErr = err as { code?: string }
-        if (nodeErr?.code === 'ENOENT') return null
-        throw err
-      }
+      return await getImageDataUrl(withResources.portraitPath)
     }),
 
   /**
-   * Import a portrait image for a character (stubbed until Plan 04).
-   * imageService.ts (dialog + jimp resize + fs copy) is implemented in Plan 04.
+   * Import a portrait image for a character.
+   * Opens a native OS file dialog, resizes to max 1024px, stores relative path in DB.
+   * Returns null if the user cancels the dialog (no image selected).
+   * Both characterId and campaignId are required — campaignId scopes the image folder.
    */
   importPortrait: t.procedure
-    .input(z.object({ characterId: characterIdSchema }))
-    .mutation(() => {
-      throw new TRPCError({
-        code: 'NOT_IMPLEMENTED',
-        message: 'Portrait import will be available in Plan 04.',
-      })
+    .input(z.object({ characterId: characterIdSchema, campaignId: campaignIdSchema }))
+    .mutation(async ({ input }) => {
+      const relativePath = await importImage(input.campaignId, 'portrait')
+      if (relativePath === null) return null
+      charactersRepo.updatePortraitPath(input.characterId, relativePath)
+      return relativePath
     }),
 
   /**

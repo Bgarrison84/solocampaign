@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-25T08:00:00.000Z"
+last_updated: "2026-05-25T16:30:00.000Z"
 progress:
   total_phases: 9
-  completed_phases: 1
-  total_plans: 14
-  completed_plans: 7
-  percent: 11
+  completed_phases: 2
+  total_plans: 21
+  completed_plans: 14
+  percent: 22
 ---
 
 # SoloCampaign — State
@@ -19,22 +19,22 @@ progress:
 **Project:** SoloCampaign
 **Mode:** mvp
 **Core Value:** A player with no group and no DM can sit down, load SoloCampaign, and play a full D&D 5e campaign — from character creation to level 20+ — with a competent AI DM that remembers everything, follows the rules (or bends them on command), and keeps the world alive.
-**Current Focus:** Phase 2 — Character Domain & Live Sheet
+**Current Focus:** Phase 3 — AI Engine & Provider Abstraction
 
 ---
 
 ## Current Position
 
-Phase: 2 (Character Domain & Live Sheet) — NOT STARTED
+Phase: 3 (AI Engine & Provider Abstraction) — NOT STARTED
 **Milestone:** v1
-**Phase:** Phase 2 — Character Domain & Live Sheet
-**Status:** Phase 1 complete (7/7 plans). Ready to plan Phase 2.
+**Phase:** Phase 3 — AI Engine & Provider Abstraction
+**Status:** Phase 2 complete (7/7 plans). Human UAT pending (9 items). 5 code review criticals logged in 02-REVIEW.md.
 
-**Progress:** [██░░░░░░░░░░░░░░░░░░] 11% (1/9 phases complete)
+**Progress:** [████░░░░░░░░░░░░░░░░] 22% (2/9 phases complete)
 
 ```
 Phase 1: Foundation & Secure Shell              [COMPLETE — 7/7 plans, 2026-05-24]
-Phase 2: Character Domain & Live Sheet          [Executing — 4/7 plans — paused at Wave 4]
+Phase 2: Character Domain & Live Sheet          [COMPLETE — 7/7 plans, 2026-05-25]
 Phase 3: AI Engine & Provider Abstraction       [Not started]
 Phase 4: Long-Campaign Memory & Session Flow    [Not started]
 Phase 5: Rules Engine, Dice & Combat            [Not started]
@@ -118,20 +118,22 @@ None.
 
 ### Last Session
 
-**Date:** 2026-05-24
-**Activity:** Phase 1 completion — all 7 plans verified (8/8 automated checks pass, 5 human UAT items pending runtime verification)
-**Outcome:** Phase 1 marked complete. Walking skeleton, SQLite persistence, secrets storage, split-panel shell, frameless title bar, code review bug fixes, and smoke test CI matrix all shipped.
+**Date:** 2026-05-25
+**Activity:** Phase 2 execution — waves 4–6 (plans 02-05 through 02-07): 6-step character creation wizard, full 10-section interactive character sheet, and campaign cover image UI. Code review produced 5 criticals in 02-REVIEW.md.
+**Outcome:** Phase 2 marked complete. 10/10 automated verification checks pass. 9 human UAT items persisted in 02-HUMAN-UAT.md pending runtime verification.
 
 ### Stopped At
 
-Phase 2 UI-SPEC verified and approved (02-UI-SPEC.md). All 6 checker dimensions passed (after typography/spacing fixes applied in revision 1). Ready to plan Phase 2.
+Phase 2 complete. Human UAT pending. Code review criticals (CR-01 through CR-05) logged in 02-REVIEW.md — recommend fixing before Phase 3.
 
 ### Next Session
 
-**Suggested action:** Run `/gsd-plan-phase 2` — UI-SPEC.md is ready as design context for the planner.
+**Suggested action (option A):** `/gsd-code-review 2 --fix` — fix the 5 critical code review findings before moving to Phase 3.
 
-**Phase 2 goal:** Step-by-step SRD character builder with persistent character sheet, live resource tracking, and portrait/cover image import.
+**Suggested action (option B):** `/gsd-discuss-phase 3` — start Phase 3 (AI Engine & Provider Abstraction) discussion.
+
+**Phase 3 goal:** Per-campaign AI provider configuration (OpenAI-compatible + Gemini) with encrypted keys, streaming chat, fallback handling, and DM personality/strictness controls.
 
 ---
 
-*Last updated: 2026-05-25 — Phase 2 UI-SPEC re-verified, all 6 dimensions pass, ready for /gsd-plan-phase 2*
+*Last updated: 2026-05-25 — Phase 2 complete (7/7 plans). Human UAT + code review criticals outstanding.*

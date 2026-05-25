@@ -12,7 +12,7 @@
 ## Phases
 
 - [x] **Phase 1: Foundation & Secure Shell** — Bootable Electron app with secure baseline, SQLite persistence, typed IPC, split-panel shell, and campaign list/create flow ✓ 7/7 plans complete (2026-05-24)
-- [ ] **Phase 2: Character Domain & Live Sheet** — Step-by-step SRD character builder with persistent character sheet, live resource tracking, and portrait/cover image import
+- [x] **Phase 2: Character Domain & Live Sheet** — Step-by-step SRD character builder with persistent character sheet, live resource tracking, and portrait/cover image import ✓ 7/7 plans complete (2026-05-25)
 - [ ] **Phase 3: AI Engine & Provider Abstraction** — Per-campaign AI provider configuration (OpenAI-compatible + Gemini) with encrypted keys, streaming chat, fallback handling, and DM personality/strictness controls
 - [ ] **Phase 4: Long-Campaign Memory & Session Flow** — Three-layer memory architecture, structured session start prompts, end-of-session recap, and AI-generated summaries that keep months-long campaigns coherent
 - [ ] **Phase 5: Rules Engine, Dice & Combat** — Deterministic rules engine, player-rolls-dice paradigm, combat tracker with initiative/HP/conditions, XP-driven level-up, rests, spell slot management, and currency
@@ -65,15 +65,15 @@ Plans:
   2. User can update HP, spell slots, death saves, XP, currency, and conditions live from the character sheet and see changes persist after restart
   3. User can import a local image file as a character portrait and as a campaign cover image
   4. User can mark items as attuned and see the attunement limit displayed (not enforced)
-**Plans:** 7 plans
+**Plans:** 7/7 plans complete
 Plans:
 - [x] 02-01-PLAN.md — Schema + migration 0001 + pure calculations + content loader + repo + Wave 0 test stubs
 - [x] 02-02-PLAN.md — tRPC routers (characters + content) + router registration + jimp install + electron-builder.yml content JSON config
 - [x] 02-03-PLAN.md — Author 5 content JSON files from 2024 PHB / Tasha's / Xanathar's PDFs
 - [x] 02-04-PLAN.md — Image service (jimp + WEBP dynamic import) + tRPC wiring for portrait + cover image
-- [ ] 02-05-PLAN.md — Character creation wizard: shadcn Select + CharacterSheetTab orchestrator + 6 wizard steps with full UI-SPEC compliance
-- [ ] 02-06-PLAN.md — Character sheet UI: 10 sections + 5 reusable sheet primitives + zero-debounce optimistic live-play mutations
-- [ ] 02-07-PLAN.md — Cover image wiring: CampaignCard display + import; campaign view [Change Cover Image] button
+- [x] 02-05-PLAN.md — Character creation wizard: shadcn Select + CharacterSheetTab orchestrator + 6 wizard steps with full UI-SPEC compliance
+- [x] 02-06-PLAN.md — Character sheet UI: 10 sections + 5 reusable sheet primitives + zero-debounce optimistic live-play mutations
+- [x] 02-07-PLAN.md — Cover image wiring: CampaignCard display + import; campaign view [Change Cover Image] button
 **Wave structure:**
   - Wave 1: 02-01 (foundation — schema, repo, calculations, content loader, test scaffolds)
   - Wave 2: 02-02 (tRPC + jimp install + electron-builder config; depends on 02-01)
@@ -210,7 +210,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Secure Shell | 7/7 | Complete   | 2026-05-24 |
-| 2. Character Domain & Live Sheet | 0/7 | Planned | - |
+| 2. Character Domain & Live Sheet | 7/7 | Complete   | 2026-05-25 |
 | 3. AI Engine & Provider Abstraction | 0/0 | Not started | - |
 | 4. Long-Campaign Memory & Session Flow | 0/0 | Not started | - |
 | 5. Rules Engine, Dice & Combat | 0/0 | Not started | - |

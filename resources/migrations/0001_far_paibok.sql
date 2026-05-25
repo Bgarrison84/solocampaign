@@ -1,0 +1,75 @@
+CREATE TABLE `character_items` (
+	`id` text PRIMARY KEY NOT NULL,
+	`character_id` text NOT NULL,
+	`name` text NOT NULL,
+	`quantity` integer DEFAULT 1 NOT NULL,
+	`weight` real DEFAULT 0 NOT NULL,
+	`is_attuned` integer DEFAULT false NOT NULL,
+	`is_magic` integer DEFAULT false NOT NULL,
+	`description` text,
+	`sort_order` integer DEFAULT 0 NOT NULL,
+	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`character_id`) REFERENCES `characters`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `character_resources` (
+	`id` text PRIMARY KEY NOT NULL,
+	`character_id` text NOT NULL,
+	`hp_current` integer NOT NULL,
+	`hp_max` integer NOT NULL,
+	`hp_temp` integer DEFAULT 0 NOT NULL,
+	`spell_slots` text DEFAULT '{}' NOT NULL,
+	`cp` integer DEFAULT 0 NOT NULL,
+	`sp` integer DEFAULT 0 NOT NULL,
+	`ep` integer DEFAULT 0 NOT NULL,
+	`gp` integer DEFAULT 0 NOT NULL,
+	`pp` integer DEFAULT 0 NOT NULL,
+	`conditions` text DEFAULT '[]' NOT NULL,
+	`death_save_successes` integer DEFAULT 0 NOT NULL,
+	`death_save_failures` integer DEFAULT 0 NOT NULL,
+	`has_inspiration` integer DEFAULT false NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`character_id`) REFERENCES `characters`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `characters` (
+	`id` text PRIMARY KEY NOT NULL,
+	`campaign_id` text NOT NULL,
+	`name` text NOT NULL,
+	`race` text NOT NULL,
+	`subrace` text,
+	`class` text NOT NULL,
+	`subclass` text,
+	`background` text NOT NULL,
+	`level` integer DEFAULT 1 NOT NULL,
+	`xp` integer DEFAULT 0 NOT NULL,
+	`backstory` text,
+	`strength` integer NOT NULL,
+	`dexterity` integer NOT NULL,
+	`constitution` integer NOT NULL,
+	`intelligence` integer NOT NULL,
+	`wisdom` integer NOT NULL,
+	`charisma` integer NOT NULL,
+	`saving_throw_proficiencies` text DEFAULT '[]' NOT NULL,
+	`skill_proficiencies` text DEFAULT '[]' NOT NULL,
+	`skill_expertise` text DEFAULT '[]' NOT NULL,
+	`ac` integer NOT NULL,
+	`initiative_bonus` integer NOT NULL,
+	`speed` integer NOT NULL,
+	`proficiency_bonus` integer DEFAULT 2 NOT NULL,
+	`languages` text DEFAULT '[]' NOT NULL,
+	`tool_proficiencies` text DEFAULT '[]' NOT NULL,
+	`armor_proficiencies` text DEFAULT '[]' NOT NULL,
+	`weapon_proficiencies` text DEFAULT '[]' NOT NULL,
+	`racial_traits_text` text,
+	`class_feature_text` text,
+	`background_feature_text` text,
+	`equipment_package` text,
+	`portrait_path` text,
+	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`campaign_id`) REFERENCES `campaigns`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `characters_campaign_id_unique` ON `characters` (`campaign_id`);--> statement-breakpoint
+ALTER TABLE `campaigns` ADD `cover_image_path` text;

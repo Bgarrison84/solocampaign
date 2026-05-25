@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Camera } from 'lucide-react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
+import { Button } from '../components/ui/button'
 import { trpc } from '../lib/trpc'
 import { usePanelSizeStore } from '../stores/panelSizeStore'
 import { useWindowStore } from '../stores/windowStore'
@@ -13,11 +15,20 @@ export function CampaignViewScreen() {
   const store = usePanelSizeStore()
   const saveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const setCampaignName = useWindowStore((s) => s.setCampaignName)
+  const queryClient = useQueryClient()
 
   const campaignQuery = useQuery({
     queryKey: ['campaigns', 'get', id],
     queryFn: () => trpc.campaigns.get.query({ id: id! }),
     enabled: !!id,
+  })
+
+  const coverMutation = useMutation({
+    mutationFn: () => trpc.campaigns.importCoverImage.mutate({ campaignId: id! }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['campaigns', 'getCoverDataUrl', id] })
+      queryClient.invalidateQueries({ queryKey: ['campaigns', 'list'] })
+    },
   })
 
   // Set campaign name in title bar when data loads; clear on unmount (D-13)
@@ -133,6 +144,18 @@ export function CampaignViewScreen() {
                 >
                   Inventory
                 </TabsTrigger>
+                {/* Trailing action — Change Cover Image */}
+                <div className="ml-auto pr-2 flex items-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => coverMutation.mutate()}
+                    disabled={coverMutation.isPending}
+                  >
+                    <Camera className="mr-1 h-4 w-4" />
+                    {coverMutation.isPending ? 'Importing...' : 'Change Cover Image'}
+                  </Button>
+                </div>
               </TabsList>
 
               <TabsContent value="character-sheet" className="flex-1 overflow-hidden p-0">

@@ -68,7 +68,7 @@ Plans:
 **Plans:** 7 plans
 Plans:
 - [x] 02-01-PLAN.md — Schema + migration 0001 + pure calculations + content loader + repo + Wave 0 test stubs
-- [ ] 02-02-PLAN.md — tRPC routers (characters + content) + router registration + jimp install + electron-builder.yml content JSON config
+- [x] 02-02-PLAN.md — tRPC routers (characters + content) + router registration + jimp install + electron-builder.yml content JSON config
 - [ ] 02-03-PLAN.md — Author 5 content JSON files from 2024 PHB / Tasha's / Xanathar's PDFs
 - [ ] 02-04-PLAN.md — Image service (jimp + WEBP dynamic import) + tRPC wiring for portrait + cover image
 - [ ] 02-05-PLAN.md — Character creation wizard: shadcn Select + CharacterSheetTab orchestrator + 6 wizard steps with full UI-SPEC compliance

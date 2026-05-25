@@ -1,0 +1,840 @@
+[
+  {
+    "id": "barbarian",
+    "name": "Barbarian",
+    "hitDie": 12,
+    "primaryAbility": ["strength"],
+    "savingThrowProficiencies": ["strength", "constitution"],
+    "armorProficiencies": ["light armor", "medium armor", "shields"],
+    "weaponProficiencies": ["simple weapons", "martial weapons"],
+    "toolProficiencies": [],
+    "skillChoiceCount": 2,
+    "skillChoices": ["animal handling", "athletics", "intimidation", "nature", "perception", "survival"],
+    "startingEquipmentPackages": [
+      {
+        "id": "barbarian-a",
+        "label": "Option A: Greataxe and four handaxes",
+        "items": [
+          { "name": "Greataxe", "quantity": 1, "weight": 7 },
+          { "name": "Handaxe", "quantity": 4, "weight": 2 },
+          { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "barbarian-b",
+        "label": "Option B: Any martial melee weapon and two handaxes",
+        "items": [
+          { "name": "Martial melee weapon (player's choice)", "quantity": 1, "weight": 4 },
+          { "name": "Handaxe", "quantity": 2, "weight": 2 },
+          { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "barbarian-c",
+        "label": "Option C: 75 GP",
+        "items": [],
+        "startingGold": 75
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Rage",
+        "description": "As a bonus action, enter a rage lasting 1 minute. While raging you have advantage on Strength checks and saves, +2 damage on melee attacks using Strength, and resistance to bludgeoning, piercing, and slashing damage. You can rage 2 times per long rest at level 1."
+      },
+      {
+        "name": "Unarmored Defense",
+        "description": "While not wearing armor your AC equals 10 + your Dexterity modifier + your Constitution modifier. You can use a shield and still gain this benefit."
+      }
+    ],
+    "spellcaster": false,
+    "choosesSubclassAtLevel1": false,
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "bard",
+    "name": "Bard",
+    "hitDie": 8,
+    "primaryAbility": ["charisma"],
+    "savingThrowProficiencies": ["dexterity", "charisma"],
+    "armorProficiencies": ["light armor"],
+    "weaponProficiencies": ["simple weapons", "hand crossbows", "longswords", "rapiers", "shortswords"],
+    "toolProficiencies": ["three musical instruments of your choice"],
+    "skillChoiceCount": 3,
+    "skillChoices": ["acrobatics", "animal handling", "arcana", "athletics", "deception", "history", "insight", "intimidation", "investigation", "medicine", "nature", "perception", "performance", "persuasion", "religion", "sleight of hand", "stealth", "survival"],
+    "startingEquipmentPackages": [
+      {
+        "id": "bard-a",
+        "label": "Option A: Leather armor, two daggers, and musical instrument",
+        "items": [
+          { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+          { "name": "Dagger", "quantity": 2, "weight": 1 },
+          { "name": "Musical Instrument (player's choice)", "quantity": 1, "weight": 3 },
+          { "name": "Entertainer's Pack", "quantity": 1, "weight": 38 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "bard-b",
+        "label": "Option B: Studded leather armor, a scimitar, and musical instrument",
+        "items": [
+          { "name": "Studded Leather Armor", "quantity": 1, "weight": 13 },
+          { "name": "Scimitar", "quantity": 1, "weight": 3 },
+          { "name": "Musical Instrument (player's choice)", "quantity": 1, "weight": 3 },
+          { "name": "Entertainer's Pack", "quantity": 1, "weight": 38 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "bard-c",
+        "label": "Option C: 100 GP",
+        "items": [],
+        "startingGold": 100
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Bardic Inspiration",
+        "description": "As a bonus action, choose a creature other than yourself within 60 feet that can hear you. That creature gains one Bardic Inspiration die (d6 at level 1–4). Once within the next 10 minutes it can roll that die and add the result to an ability check, attack roll, or saving throw. You can use this a number of times equal to your Charisma modifier per long rest."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "You can cast bard spells using Charisma as your spellcasting ability. You know 2 cantrips and 4 spells at level 1, and prepare new spells when you gain levels."
+      }
+    ],
+    "spellcaster": true,
+    "spellcastingAbility": "charisma",
+    "choosesSubclassAtLevel1": false,
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "cleric",
+    "name": "Cleric",
+    "hitDie": 8,
+    "primaryAbility": ["wisdom"],
+    "savingThrowProficiencies": ["wisdom", "charisma"],
+    "armorProficiencies": ["light armor", "medium armor", "shields"],
+    "weaponProficiencies": ["simple weapons"],
+    "toolProficiencies": [],
+    "skillChoiceCount": 2,
+    "skillChoices": ["history", "insight", "medicine", "persuasion", "religion"],
+    "startingEquipmentPackages": [
+      {
+        "id": "cleric-a",
+        "label": "Option A: Chain mail, shield, and a mace",
+        "items": [
+          { "name": "Chain Mail", "quantity": 1, "weight": 55 },
+          { "name": "Shield", "quantity": 1, "weight": 6 },
+          { "name": "Mace", "quantity": 1, "weight": 4 },
+          { "name": "Holy Symbol", "quantity": 1, "weight": 1 },
+          { "name": "Priest's Pack", "quantity": 1, "weight": 33 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "cleric-b",
+        "label": "Option B: Scale mail, a mace, and light crossbow with 20 bolts",
+        "items": [
+          { "name": "Scale Mail", "quantity": 1, "weight": 45 },
+          { "name": "Mace", "quantity": 1, "weight": 4 },
+          { "name": "Light Crossbow", "quantity": 1, "weight": 5 },
+          { "name": "Crossbow Bolt", "quantity": 20, "weight": 0.075 },
+          { "name": "Holy Symbol", "quantity": 1, "weight": 1 },
+          { "name": "Priest's Pack", "quantity": 1, "weight": 33 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "cleric-c",
+        "label": "Option C: 110 GP",
+        "items": [],
+        "startingGold": 110
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Spellcasting",
+        "description": "You can cast cleric spells using Wisdom as your spellcasting ability. You prepare a number of spells equal to your Wisdom modifier + your cleric level. You know all cleric spells and choose which to prepare after each long rest."
+      },
+      {
+        "name": "Divine Domain",
+        "description": "Choose a divine domain related to your deity. Your domain grants you domain spells and other features at 1st level and again at higher levels."
+      }
+    ],
+    "spellcaster": true,
+    "spellcastingAbility": "wisdom",
+    "choosesSubclassAtLevel1": true,
+    "subclasses": [
+      {
+        "id": "life",
+        "name": "Life Domain",
+        "features": [
+          {
+            "name": "Bonus Proficiency",
+            "description": "You gain proficiency with heavy armor."
+          },
+          {
+            "name": "Disciple of Life",
+            "description": "Your healing spells are more effective. Whenever you use a spell of 1st level or higher to restore hit points, the creature regains additional hit points equal to 2 + the spell's level."
+          }
+        ]
+      },
+      {
+        "id": "light",
+        "name": "Light Domain",
+        "features": [
+          {
+            "name": "Bonus Cantrip",
+            "description": "You gain the Light cantrip if you don't already know it."
+          },
+          {
+            "name": "Warding Flare",
+            "description": "When attacked, you can impose disadvantage on the attacker's roll as a reaction, interposing divine light. Usable a number of times equal to your Wisdom modifier per long rest."
+          }
+        ]
+      },
+      {
+        "id": "trickery",
+        "name": "Trickery Domain",
+        "features": [
+          {
+            "name": "Blessing of the Trickster",
+            "description": "You can use your action to give one willing creature (not yourself) advantage on Dexterity (Stealth) checks. This blessing lasts for 1 hour or until you use this feature again."
+          }
+        ]
+      },
+      {
+        "id": "knowledge",
+        "name": "Knowledge Domain",
+        "features": [
+          {
+            "name": "Blessings of Knowledge",
+            "description": "You learn two languages of your choice and gain proficiency in two skills from Arcana, History, Nature, or Religion. Your proficiency bonus is doubled for those two skills."
+          }
+        ]
+      },
+      {
+        "id": "nature",
+        "name": "Nature Domain",
+        "features": [
+          {
+            "name": "Acolyte of Nature",
+            "description": "You learn one druid cantrip of your choice. You also gain proficiency in one of the following skills: Animal Handling, Nature, or Survival."
+          },
+          {
+            "name": "Bonus Proficiency",
+            "description": "You gain proficiency with heavy armor."
+          }
+        ]
+      },
+      {
+        "id": "tempest",
+        "name": "Tempest Domain",
+        "features": [
+          {
+            "name": "Bonus Proficiencies",
+            "description": "You gain proficiency with martial weapons and heavy armor."
+          },
+          {
+            "name": "Wrath of the Storm",
+            "description": "When a creature within 5 feet hits you with an attack, you can use your reaction to deal lightning or thunder damage equal to 2d8 to the attacker. Usable a number of times equal to your Wisdom modifier per long rest."
+          }
+        ]
+      },
+      {
+        "id": "war",
+        "name": "War Domain",
+        "features": [
+          {
+            "name": "Bonus Proficiencies",
+            "description": "You gain proficiency with martial weapons and heavy armor."
+          },
+          {
+            "name": "War Priest",
+            "description": "When you use the Attack action, you can make one weapon attack as a bonus action. You can use this feature a number of times equal to your Wisdom modifier per long rest."
+          }
+        ]
+      }
+    ],
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "druid",
+    "name": "Druid",
+    "hitDie": 8,
+    "primaryAbility": ["wisdom"],
+    "savingThrowProficiencies": ["intelligence", "wisdom"],
+    "armorProficiencies": ["light armor (non-metal)", "medium armor (non-metal)", "shields (non-metal)"],
+    "weaponProficiencies": ["clubs", "daggers", "darts", "javelins", "maces", "quarterstaffs", "scimitars", "sickles", "slings", "spears"],
+    "toolProficiencies": ["herbalism kit"],
+    "skillChoiceCount": 2,
+    "skillChoices": ["arcana", "animal handling", "insight", "medicine", "nature", "perception", "religion", "survival"],
+    "startingEquipmentPackages": [
+      {
+        "id": "druid-a",
+        "label": "Option A: Leather armor, shield, and a wooden staff",
+        "items": [
+          { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+          { "name": "Shield", "quantity": 1, "weight": 6 },
+          { "name": "Quarterstaff", "quantity": 1, "weight": 4 },
+          { "name": "Druidic Focus (wooden staff)", "quantity": 1, "weight": 4 },
+          { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "druid-b",
+        "label": "Option B: Leather armor and a scimitar",
+        "items": [
+          { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+          { "name": "Scimitar", "quantity": 1, "weight": 3 },
+          { "name": "Druidic Focus (yew wand)", "quantity": 1, "weight": 1 },
+          { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "druid-c",
+        "label": "Option C: 50 GP",
+        "items": [],
+        "startingGold": 50
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Druidic",
+        "description": "You know Druidic, the secret language of druids. You can speak it and use it to leave hidden messages. Creatures who know Druidic automatically spot such a message."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "You can cast druid spells using Wisdom as your spellcasting ability. You prepare spells after each long rest; the number you prepare equals your Wisdom modifier + your druid level."
+      }
+    ],
+    "spellcaster": true,
+    "spellcastingAbility": "wisdom",
+    "choosesSubclassAtLevel1": false,
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "fighter",
+    "name": "Fighter",
+    "hitDie": 10,
+    "primaryAbility": ["strength", "dexterity"],
+    "savingThrowProficiencies": ["strength", "constitution"],
+    "armorProficiencies": ["all armor", "shields"],
+    "weaponProficiencies": ["simple weapons", "martial weapons"],
+    "toolProficiencies": [],
+    "skillChoiceCount": 2,
+    "skillChoices": ["acrobatics", "animal handling", "athletics", "history", "insight", "intimidation", "perception", "survival"],
+    "startingEquipmentPackages": [
+      {
+        "id": "fighter-a",
+        "label": "Option A: Chain mail, shield, and a martial weapon",
+        "items": [
+          { "name": "Chain Mail", "quantity": 1, "weight": 55 },
+          { "name": "Shield", "quantity": 1, "weight": 6 },
+          { "name": "Longsword", "quantity": 1, "weight": 3 },
+          { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "fighter-b",
+        "label": "Option B: Leather armor, longbow, 20 arrows, and a martial weapon",
+        "items": [
+          { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+          { "name": "Longbow", "quantity": 1, "weight": 2 },
+          { "name": "Arrow", "quantity": 20, "weight": 0.05 },
+          { "name": "Shortsword", "quantity": 1, "weight": 2 },
+          { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "fighter-c",
+        "label": "Option C: 175 GP",
+        "items": [],
+        "startingGold": 175
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Fighting Style",
+        "description": "You adopt a particular style of fighting. Choose Archery (+2 bonus to ranged attack rolls), Defense (+1 to AC when wearing armor), Dueling (+2 damage when wielding a melee weapon in one hand and no other weapons), Great Weapon Fighting (reroll 1s and 2s on damage dice for two-handed weapons), Protection (use reaction to impose disadvantage on attacks against an adjacent ally), or Two-Weapon Fighting (add ability modifier to the off-hand attack)."
+      },
+      {
+        "name": "Second Wind",
+        "description": "As a bonus action, regain 1d10 + your fighter level hit points. Usable once per short or long rest."
+      }
+    ],
+    "spellcaster": false,
+    "choosesSubclassAtLevel1": false,
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "monk",
+    "name": "Monk",
+    "hitDie": 8,
+    "primaryAbility": ["dexterity", "wisdom"],
+    "savingThrowProficiencies": ["strength", "dexterity"],
+    "armorProficiencies": [],
+    "weaponProficiencies": ["simple weapons", "shortswords"],
+    "toolProficiencies": ["one type of artisan's tools or one musical instrument"],
+    "skillChoiceCount": 2,
+    "skillChoices": ["acrobatics", "athletics", "history", "insight", "religion", "stealth"],
+    "startingEquipmentPackages": [
+      {
+        "id": "monk-a",
+        "label": "Option A: A spear and five javelins",
+        "items": [
+          { "name": "Spear", "quantity": 1, "weight": 3 },
+          { "name": "Javelin", "quantity": 5, "weight": 2 },
+          { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "monk-b",
+        "label": "Option B: A short sword and a dagger",
+        "items": [
+          { "name": "Shortsword", "quantity": 1, "weight": 2 },
+          { "name": "Dagger", "quantity": 1, "weight": 1 },
+          { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "monk-c",
+        "label": "Option C: 50 GP",
+        "items": [],
+        "startingGold": 50
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Unarmored Defense",
+        "description": "While you are wearing no armor and not wielding a shield, your AC equals 10 + your Dexterity modifier + your Wisdom modifier."
+      },
+      {
+        "name": "Martial Arts",
+        "description": "You can use Dexterity instead of Strength for attack and damage rolls with unarmed strikes and monk weapons. Your unarmed strikes deal 1d4 bludgeoning damage. When you use the Attack action with a monk weapon or unarmed strike, you can make one unarmed strike as a bonus action."
+      }
+    ],
+    "spellcaster": false,
+    "choosesSubclassAtLevel1": false,
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "paladin",
+    "name": "Paladin",
+    "hitDie": 10,
+    "primaryAbility": ["strength", "charisma"],
+    "savingThrowProficiencies": ["wisdom", "charisma"],
+    "armorProficiencies": ["all armor", "shields"],
+    "weaponProficiencies": ["simple weapons", "martial weapons"],
+    "toolProficiencies": [],
+    "skillChoiceCount": 2,
+    "skillChoices": ["athletics", "insight", "intimidation", "medicine", "persuasion", "religion"],
+    "startingEquipmentPackages": [
+      {
+        "id": "paladin-a",
+        "label": "Option A: Chain mail, shield, and a martial weapon",
+        "items": [
+          { "name": "Chain Mail", "quantity": 1, "weight": 55 },
+          { "name": "Shield", "quantity": 1, "weight": 6 },
+          { "name": "Longsword", "quantity": 1, "weight": 3 },
+          { "name": "Holy Symbol", "quantity": 1, "weight": 1 },
+          { "name": "Priest's Pack", "quantity": 1, "weight": 33 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "paladin-b",
+        "label": "Option B: Scale mail, two handaxes, and a javelin",
+        "items": [
+          { "name": "Scale Mail", "quantity": 1, "weight": 45 },
+          { "name": "Handaxe", "quantity": 2, "weight": 2 },
+          { "name": "Javelin", "quantity": 1, "weight": 2 },
+          { "name": "Holy Symbol", "quantity": 1, "weight": 1 },
+          { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "paladin-c",
+        "label": "Option C: 150 GP",
+        "items": [],
+        "startingGold": 150
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Divine Sense",
+        "description": "As an action, open your awareness to detect celestials, fiends, and undead within 60 feet that are not behind total cover. You also detect consecrated or desecrated objects. Usable a number of times equal to 1 + your Charisma modifier per long rest."
+      },
+      {
+        "name": "Lay on Hands",
+        "description": "A pool of healing power with a total of 5 × your paladin level hit points. As an action, touch a creature to restore any number of hit points from the pool. Alternatively, expend 5 points to cure one disease or neutralize one poison affecting the creature. Replenishes on long rest."
+      }
+    ],
+    "spellcaster": true,
+    "spellcastingAbility": "charisma",
+    "choosesSubclassAtLevel1": false,
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "ranger",
+    "name": "Ranger",
+    "hitDie": 10,
+    "primaryAbility": ["dexterity", "wisdom"],
+    "savingThrowProficiencies": ["strength", "dexterity"],
+    "armorProficiencies": ["light armor", "medium armor", "shields"],
+    "weaponProficiencies": ["simple weapons", "martial weapons"],
+    "toolProficiencies": [],
+    "skillChoiceCount": 3,
+    "skillChoices": ["animal handling", "athletics", "insight", "investigation", "nature", "perception", "stealth", "survival"],
+    "startingEquipmentPackages": [
+      {
+        "id": "ranger-a",
+        "label": "Option A: Scale mail, two shortswords, and a longbow with 20 arrows",
+        "items": [
+          { "name": "Scale Mail", "quantity": 1, "weight": 45 },
+          { "name": "Shortsword", "quantity": 2, "weight": 2 },
+          { "name": "Longbow", "quantity": 1, "weight": 2 },
+          { "name": "Arrow", "quantity": 20, "weight": 0.05 },
+          { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "ranger-b",
+        "label": "Option B: Leather armor, a longsword, and a shortbow with 20 arrows",
+        "items": [
+          { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+          { "name": "Longsword", "quantity": 1, "weight": 3 },
+          { "name": "Shortbow", "quantity": 1, "weight": 2 },
+          { "name": "Arrow", "quantity": 20, "weight": 0.05 },
+          { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "ranger-c",
+        "label": "Option C: 150 GP",
+        "items": [],
+        "startingGold": 150
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Favored Enemy",
+        "description": "Choose a type of favored enemy: aberrations, beasts, celestials, constructs, dragons, elementals, fey, fiends, giants, monstrosities, oozes, plants, or undead. You have advantage on Survival checks to track and on Intelligence checks to recall information about your favored enemy type."
+      },
+      {
+        "name": "Natural Explorer",
+        "description": "Choose a type of favored terrain. When you make an Intelligence or Wisdom check related to that terrain, your proficiency bonus is doubled. While traveling through your favored terrain your group cannot become lost, difficult terrain doesn't slow the group, and you can move stealthily at a normal pace."
+      }
+    ],
+    "spellcaster": true,
+    "spellcastingAbility": "wisdom",
+    "choosesSubclassAtLevel1": false,
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "rogue",
+    "name": "Rogue",
+    "hitDie": 8,
+    "primaryAbility": ["dexterity"],
+    "savingThrowProficiencies": ["dexterity", "intelligence"],
+    "armorProficiencies": ["light armor"],
+    "weaponProficiencies": ["simple weapons", "hand crossbows", "longswords", "rapiers", "shortswords"],
+    "toolProficiencies": ["thieves' tools"],
+    "skillChoiceCount": 4,
+    "skillChoices": ["acrobatics", "athletics", "deception", "insight", "intimidation", "investigation", "perception", "performance", "persuasion", "sleight of hand", "stealth"],
+    "startingEquipmentPackages": [
+      {
+        "id": "rogue-a",
+        "label": "Option A: Leather armor, two daggers, a shortbow, and 20 arrows",
+        "items": [
+          { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+          { "name": "Dagger", "quantity": 2, "weight": 1 },
+          { "name": "Shortbow", "quantity": 1, "weight": 2 },
+          { "name": "Arrow", "quantity": 20, "weight": 0.05 },
+          { "name": "Burglar's Pack", "quantity": 1, "weight": 47 },
+          { "name": "Thieves' Tools", "quantity": 1, "weight": 1 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "rogue-b",
+        "label": "Option B: Leather armor, a rapier, and a shortsword",
+        "items": [
+          { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+          { "name": "Rapier", "quantity": 1, "weight": 2 },
+          { "name": "Shortsword", "quantity": 1, "weight": 2 },
+          { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 },
+          { "name": "Thieves' Tools", "quantity": 1, "weight": 1 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "rogue-c",
+        "label": "Option C: 100 GP",
+        "items": [],
+        "startingGold": 100
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Expertise",
+        "description": "Choose two of your skill proficiencies or one skill proficiency and your thieves' tools proficiency. Your proficiency bonus is doubled for any ability check using those skills."
+      },
+      {
+        "name": "Sneak Attack",
+        "description": "Once per turn, deal an extra 1d6 damage when you hit a creature with a finesse or ranged weapon while you have advantage on the attack, or while an ally is adjacent to the target and you don't have disadvantage."
+      },
+      {
+        "name": "Thieves' Cant",
+        "description": "You have learned the secret mix of dialect, jargon, and code used by thieves. It takes four times as long to convey a message compared to Common. You also understand a set of secret signs and symbols used to convey short messages."
+      }
+    ],
+    "spellcaster": false,
+    "choosesSubclassAtLevel1": false,
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "sorcerer",
+    "name": "Sorcerer",
+    "hitDie": 6,
+    "primaryAbility": ["charisma"],
+    "savingThrowProficiencies": ["constitution", "charisma"],
+    "armorProficiencies": [],
+    "weaponProficiencies": ["daggers", "darts", "slings", "quarterstaffs", "light crossbows"],
+    "toolProficiencies": [],
+    "skillChoiceCount": 2,
+    "skillChoices": ["arcana", "deception", "insight", "intimidation", "persuasion", "religion"],
+    "startingEquipmentPackages": [
+      {
+        "id": "sorcerer-a",
+        "label": "Option A: A light crossbow and 20 bolts, and an arcane focus",
+        "items": [
+          { "name": "Light Crossbow", "quantity": 1, "weight": 5 },
+          { "name": "Crossbow Bolt", "quantity": 20, "weight": 0.075 },
+          { "name": "Arcane Focus (crystal)", "quantity": 1, "weight": 1 },
+          { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "sorcerer-b",
+        "label": "Option B: Two daggers and an arcane focus",
+        "items": [
+          { "name": "Dagger", "quantity": 2, "weight": 1 },
+          { "name": "Arcane Focus (orb)", "quantity": 1, "weight": 3 },
+          { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "sorcerer-c",
+        "label": "Option C: 50 GP",
+        "items": [],
+        "startingGold": 50
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Sorcerous Origin",
+        "description": "Choose a sorcerous origin, which describes the source of your innate magical power. Your origin grants you features at 1st level and again at 6th, 14th, and 18th level."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "You can cast sorcerer spells using Charisma as your spellcasting ability. You know 4 spells and 4 cantrips at level 1. Unlike other spellcasters you know a fixed list of spells and do not prepare them daily."
+      },
+      {
+        "name": "Sorcery Points",
+        "description": "You have 2 sorcery points at level 1, which you regain on a long rest. You can use sorcery points to create additional spell slots or empower your spells using Metamagic (unlocked at level 3)."
+      }
+    ],
+    "spellcaster": true,
+    "spellcastingAbility": "charisma",
+    "choosesSubclassAtLevel1": true,
+    "subclasses": [
+      {
+        "id": "draconic",
+        "name": "Draconic Bloodline",
+        "features": [
+          {
+            "name": "Dragon Ancestor",
+            "description": "Choose a dragon type (black, blue, brass, bronze, copper, gold, green, red, silver, or white). You speak Draconic and gain advantage on Charisma checks when interacting with dragons of that type."
+          },
+          {
+            "name": "Draconic Resilience",
+            "description": "Your hit point maximum increases by 1 per sorcerer level. When not wearing armor, your AC equals 13 + your Dexterity modifier."
+          }
+        ]
+      },
+      {
+        "id": "wild-magic",
+        "name": "Wild Magic Surge",
+        "features": [
+          {
+            "name": "Wild Magic Surge",
+            "description": "After you cast a sorcerer spell of 1st level or higher, the DM can have you roll a d20. On a 1, roll on the Wild Magic Surge table to determine a random magical effect."
+          },
+          {
+            "name": "Tides of Chaos",
+            "description": "Once per long rest, gain advantage on one attack roll, ability check, or saving throw. The DM can force you to make a Wild Magic Surge before you regain this feature."
+          }
+        ]
+      }
+    ],
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "warlock",
+    "name": "Warlock",
+    "hitDie": 8,
+    "primaryAbility": ["charisma"],
+    "savingThrowProficiencies": ["wisdom", "charisma"],
+    "armorProficiencies": ["light armor"],
+    "weaponProficiencies": ["simple weapons"],
+    "toolProficiencies": [],
+    "skillChoiceCount": 2,
+    "skillChoices": ["arcana", "deception", "history", "intimidation", "investigation", "nature", "religion"],
+    "startingEquipmentPackages": [
+      {
+        "id": "warlock-a",
+        "label": "Option A: Leather armor, a light crossbow, 20 bolts, and an arcane focus",
+        "items": [
+          { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+          { "name": "Light Crossbow", "quantity": 1, "weight": 5 },
+          { "name": "Crossbow Bolt", "quantity": 20, "weight": 0.075 },
+          { "name": "Arcane Focus (crystal)", "quantity": 1, "weight": 1 },
+          { "name": "Dungeoneer's Pack", "quantity": 1, "weight": 62 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "warlock-b",
+        "label": "Option B: Leather armor, a dagger, and an arcane focus",
+        "items": [
+          { "name": "Leather Armor", "quantity": 1, "weight": 10 },
+          { "name": "Dagger", "quantity": 2, "weight": 1 },
+          { "name": "Arcane Focus (rod)", "quantity": 1, "weight": 2 },
+          { "name": "Entertainer's Pack", "quantity": 1, "weight": 38 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "warlock-c",
+        "label": "Option C: 100 GP",
+        "items": [],
+        "startingGold": 100
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Otherworldly Patron",
+        "description": "You have struck a bargain with an otherworldly being of power. Your choice of patron grants you features at 1st level and again at 6th, 10th, and 14th level."
+      },
+      {
+        "name": "Pact Magic",
+        "description": "You cast warlock spells using Charisma as your spellcasting ability. You know 2 spells and 2 cantrips at level 1. Warlock spell slots are limited (1 slot at levels 1–2) but recover on a short or long rest. All your spell slots are the same level."
+      }
+    ],
+    "spellcaster": true,
+    "spellcastingAbility": "charisma",
+    "choosesSubclassAtLevel1": true,
+    "subclasses": [
+      {
+        "id": "archfey",
+        "name": "The Archfey",
+        "features": [
+          {
+            "name": "Fey Presence",
+            "description": "As an action, fill a 10-foot cube centered on yourself with fey magic. Each creature in that area must make a Wisdom saving throw (DC = your spell save DC) or be charmed or frightened by you (your choice) until the end of your next turn. Usable once per short or long rest."
+          }
+        ]
+      },
+      {
+        "id": "fiend",
+        "name": "The Fiend",
+        "features": [
+          {
+            "name": "Dark One's Blessing",
+            "description": "When you reduce a hostile creature to 0 HP, you gain temporary hit points equal to your Charisma modifier + your warlock level (minimum 1). These replace any existing temporary hit points."
+          }
+        ]
+      },
+      {
+        "id": "great-old-one",
+        "name": "The Great Old One",
+        "features": [
+          {
+            "name": "Awakened Mind",
+            "description": "You can telepathically speak to any creature you can see within 30 feet. You don't need to share a language, but the creature must understand at least one language. This telepathy is one-way."
+          }
+        ]
+      }
+    ],
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "wizard",
+    "name": "Wizard",
+    "hitDie": 6,
+    "primaryAbility": ["intelligence"],
+    "savingThrowProficiencies": ["intelligence", "wisdom"],
+    "armorProficiencies": [],
+    "weaponProficiencies": ["daggers", "darts", "slings", "quarterstaffs", "light crossbows"],
+    "toolProficiencies": [],
+    "skillChoiceCount": 2,
+    "skillChoices": ["arcana", "history", "insight", "investigation", "medicine", "religion"],
+    "startingEquipmentPackages": [
+      {
+        "id": "wizard-a",
+        "label": "Option A: A quarterstaff and a spellbook",
+        "items": [
+          { "name": "Quarterstaff", "quantity": 1, "weight": 4 },
+          { "name": "Arcane Focus (wand)", "quantity": 1, "weight": 1 },
+          { "name": "Spellbook", "quantity": 1, "weight": 3 },
+          { "name": "Scholar's Pack", "quantity": 1, "weight": 22 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "wizard-b",
+        "label": "Option B: A dagger and a spellbook",
+        "items": [
+          { "name": "Dagger", "quantity": 1, "weight": 1 },
+          { "name": "Arcane Focus (orb)", "quantity": 1, "weight": 3 },
+          { "name": "Spellbook", "quantity": 1, "weight": 3 },
+          { "name": "Explorer's Pack", "quantity": 1, "weight": 59 }
+        ],
+        "startingGold": 0
+      },
+      {
+        "id": "wizard-c",
+        "label": "Option C: 55 GP",
+        "items": [],
+        "startingGold": 55
+      }
+    ],
+    "level1Features": [
+      {
+        "name": "Arcane Recovery",
+        "description": "Once per day when you finish a short rest, choose expended spell slots to recover. The slots can have a combined level no greater than half your wizard level (rounded up). Slots of 6th level and higher cannot be recovered this way."
+      },
+      {
+        "name": "Spellcasting",
+        "description": "You cast wizard spells using Intelligence as your spellcasting ability. Your spellbook contains 6 1st-level spells at character creation. You prepare a number of spells equal to your Intelligence modifier + your wizard level after each long rest."
+      }
+    ],
+    "spellcaster": true,
+    "spellcastingAbility": "intelligence",
+    "choosesSubclassAtLevel1": false,
+    "source": "SRD 5.1"
+  }
+]

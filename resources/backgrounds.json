@@ -1,0 +1,545 @@
+[
+  {
+    "id": "acolyte",
+    "name": "Acolyte",
+    "skillProficiencies": ["insight", "religion"],
+    "toolProficiencies": [],
+    "languages": [],
+    "freeLanguageChoices": 2,
+    "feature": {
+      "name": "Shelter of the Faithful",
+      "description": "As an acolyte, you command the respect of those who share your faith. You and your companions can receive free healing and care at a temple of your faith, though you must provide material components for spells. Those who share your religion will support you at a modest lifestyle."
+    },
+    "suggestedPersonalityTraits": [
+      "I idolize a particular hero of my faith and constantly refer to that person's deeds.",
+      "I can find common ground between the fiercest enemies, empathizing with them.",
+      "I see omens in every event and action. The gods try to speak to us; we just need to listen.",
+      "Nothing can shake my optimistic attitude."
+    ],
+    "suggestedIdeals": [
+      "Tradition. The ancient traditions of worship and sacrifice must be preserved and upheld.",
+      "Charity. I always try to help those in need, no matter what the personal cost.",
+      "Change. We must help bring about the changes the gods are constantly working in the world.",
+      "Power. I hope to one day rise to the top of my faith's religious hierarchy."
+    ],
+    "suggestedBonds": [
+      "I would die to recover an ancient relic of my faith that was lost long ago.",
+      "I will someday get revenge on the corrupt temple hierarchy who branded me a heretic.",
+      "I owe my life to the priest who took me in when my parents died."
+    ],
+    "suggestedFlaws": [
+      "I judge others harshly, and myself even more severely.",
+      "I put too much trust in those who wield power within my temple's hierarchy.",
+      "My piety sometimes leads me to blindly trust those who profess faith in my god."
+    ],
+    "startingEquipment": [
+      { "name": "Holy symbol", "quantity": 1, "weight": 1 },
+      { "name": "Prayer book or prayer wheel", "quantity": 1, "weight": 1 },
+      { "name": "Incense (5 sticks)", "quantity": 5, "weight": 0 },
+      { "name": "Vestments", "quantity": 1, "weight": 4 },
+      { "name": "Common clothes", "quantity": 1, "weight": 3 }
+    ],
+    "startingGold": 15,
+    "source": "SRD 5.1"
+  },
+  {
+    "id": "criminal",
+    "name": "Criminal",
+    "skillProficiencies": ["deception", "stealth"],
+    "toolProficiencies": ["one type of gaming set", "thieves' tools"],
+    "languages": [],
+    "freeLanguageChoices": 0,
+    "feature": {
+      "name": "Criminal Contact",
+      "description": "You have a reliable and trustworthy contact who acts as your liaison to a network of criminals. You know how to get messages to and from this contact, even over great distances, and you can reach them within a few days."
+    },
+    "suggestedPersonalityTraits": [
+      "I always have a plan for when things go wrong.",
+      "I am always calm, no matter what the situation. I never raise my voice or let my emotions control me.",
+      "The first thing I do in a new place is note the locations of everything valuable—or where such things could be hidden.",
+      "I would rather make a new friend than a new enemy."
+    ],
+    "suggestedIdeals": [
+      "Honor. I don't steal from others in the trade.",
+      "Freedom. Chains are meant to be broken, as are those who would forge them.",
+      "Charity. I steal from the wealthy so that I can help people in need.",
+      "Redemption. There's a spark of good in everyone."
+    ],
+    "suggestedBonds": [
+      "I'm trying to pay off an old debt I owe to a generous benefactor.",
+      "My ill-gotten gains go to support my family.",
+      "Something important was taken from me, and I aim to steal it back."
+    ],
+    "suggestedFlaws": [
+      "When I see something valuable, I can't think about anything but how to steal it.",
+      "When faced with a choice between money and my friends, I usually choose the money.",
+      "I turn tail and run when things look bad."
+    ],
+    "startingEquipment": [
+      { "name": "Crowbar", "quantity": 1, "weight": 5 },
+      { "name": "Dark common clothes with hood", "quantity": 1, "weight": 3 }
+    ],
+    "startingGold": 15,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "folk-hero",
+    "name": "Folk Hero",
+    "skillProficiencies": ["animal handling", "survival"],
+    "toolProficiencies": ["one type of artisan's tools", "vehicles (land)"],
+    "languages": [],
+    "freeLanguageChoices": 0,
+    "feature": {
+      "name": "Rustic Hospitality",
+      "description": "Since you come from the ranks of common folk, you fit in among them with ease. You can find a place to hide, rest, or recuperate among other commoners, unless you have shown yourself to be a danger to them. They will shield you from the law or anyone else searching for you, though they won't risk their lives for you."
+    },
+    "suggestedPersonalityTraits": [
+      "I judge people by their actions, not their words.",
+      "If someone is in trouble, I'm always ready to lend help.",
+      "When I set my mind to something, I follow through no matter what gets in my way.",
+      "I have a strong sense of fair play and always try to find the most equitable solution."
+    ],
+    "suggestedIdeals": [
+      "Respect. People deserve to be treated with dignity and respect.",
+      "Fairness. No one should get preferential treatment before the law, and no one is above the law.",
+      "Freedom. Tyrants must not be allowed to oppress the people.",
+      "Sincerity. There's no good in pretending to be something I'm not."
+    ],
+    "suggestedBonds": [
+      "I have a family, but I have no idea where they are. I hope to see them again.",
+      "I worked the land, I love the land, and I will protect the land.",
+      "A proud noble once gave me a horrible beating, and I will take my revenge on any bully I encounter."
+    ],
+    "suggestedFlaws": [
+      "The tyrant who rules my land will stop at nothing to see me killed.",
+      "I'm convinced of the significance of my destiny, and blind to my shortcomings.",
+      "I have a weakness for the vices of the city, especially hard drink."
+    ],
+    "startingEquipment": [
+      { "name": "Artisan's tools (one type)", "quantity": 1, "weight": 5 },
+      { "name": "Shovel", "quantity": 1, "weight": 5 },
+      { "name": "Iron pot", "quantity": 1, "weight": 10 },
+      { "name": "Common clothes", "quantity": 1, "weight": 3 }
+    ],
+    "startingGold": 10,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "noble",
+    "name": "Noble",
+    "skillProficiencies": ["history", "persuasion"],
+    "toolProficiencies": ["one type of gaming set"],
+    "languages": [],
+    "freeLanguageChoices": 1,
+    "feature": {
+      "name": "Position of Privilege",
+      "description": "Thanks to your noble birth, people are inclined to think the best of you. You are welcome in high society, and people assume you have the right to be wherever you are. The common folk make every effort to accommodate you and avoid your displeasure, and other people of high birth treat you as a member of the same social sphere."
+    },
+    "suggestedPersonalityTraits": [
+      "My eloquent flattery makes everyone I talk to feel like the most wonderful and important person in the world.",
+      "The common folk love me for my kindness and generosity.",
+      "No one could doubt by looking at my regal bearing that I am a cut above the unwashed masses.",
+      "I take great pains to always look my best and follow the latest fashions."
+    ],
+    "suggestedIdeals": [
+      "Respect. Respect is due to me because of my position, but all people regardless of station deserve to be treated with dignity.",
+      "Responsibility. It is my duty to respect the authority of those above me, just as those below me must respect mine.",
+      "Independence. I must prove that I can handle myself without the coddling of my family.",
+      "Power. If I can attain more power, no one will tell me what to do."
+    ],
+    "suggestedBonds": [
+      "I will face any challenge to prove myself superior to my hated rival.",
+      "My house's alliance with another noble family must be sustained at all costs.",
+      "Nothing is more important than the other members of my family."
+    ],
+    "suggestedFlaws": [
+      "I secretly believe that everyone is beneath me.",
+      "I hide a truly scandalous secret that could ruin my family forever.",
+      "I too often hear veiled insults and threats in every word addressed to me."
+    ],
+    "startingEquipment": [
+      { "name": "Fine clothes", "quantity": 1, "weight": 6 },
+      { "name": "Signet ring", "quantity": 1, "weight": 0 },
+      { "name": "Scroll of pedigree", "quantity": 1, "weight": 0 }
+    ],
+    "startingGold": 25,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "sage",
+    "name": "Sage",
+    "skillProficiencies": ["arcana", "history"],
+    "toolProficiencies": [],
+    "languages": [],
+    "freeLanguageChoices": 2,
+    "feature": {
+      "name": "Researcher",
+      "description": "When you attempt to learn or recall a piece of lore, if you do not know that information, you often know where and from whom you can obtain it. Usually, this information comes from a library, scriptorium, university, or a sage or other learned person or creature. Your DM might rule that the knowledge you seek is secreted away or requires a quest to obtain."
+    },
+    "suggestedPersonalityTraits": [
+      "I use polysyllabic words that convey the impression of great erudition.",
+      "I've read every book in the world's greatest libraries—or I like to boast that I have.",
+      "I'm used to helping out those who aren't as smart as I am, and I patiently explain anything.",
+      "There's nothing I like more than a good mystery."
+    ],
+    "suggestedIdeals": [
+      "Knowledge. The path to power and self-improvement is through knowledge.",
+      "Beauty. What is beautiful points us beyond itself toward what is true.",
+      "Logic. Emotions must not cloud our logical thinking.",
+      "Self-Improvement. The goal of a life of study is the betterment of oneself."
+    ],
+    "suggestedBonds": [
+      "It is my duty to protect my students.",
+      "I have an ancient text that holds terrible secrets that must not fall into the wrong hands.",
+      "I work to preserve a library, university, scriptorium, or monastery."
+    ],
+    "suggestedFlaws": [
+      "I am easily distracted by the promise of information.",
+      "Most people scream and run when they see a demon. I stop and take notes on its anatomy.",
+      "Unlocking an ancient mystery is worth the price of a civilization."
+    ],
+    "startingEquipment": [
+      { "name": "Bottle of black ink", "quantity": 1, "weight": 0 },
+      { "name": "Quill", "quantity": 1, "weight": 0 },
+      { "name": "Small knife", "quantity": 1, "weight": 0.5 },
+      { "name": "Letter from a dead colleague", "quantity": 1, "weight": 0 },
+      { "name": "Common clothes", "quantity": 1, "weight": 3 }
+    ],
+    "startingGold": 10,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "soldier",
+    "name": "Soldier",
+    "skillProficiencies": ["athletics", "intimidation"],
+    "toolProficiencies": ["one type of gaming set", "vehicles (land)"],
+    "languages": [],
+    "freeLanguageChoices": 0,
+    "feature": {
+      "name": "Military Rank",
+      "description": "You have a military rank from your career as a soldier. Soldiers loyal to your former military organization still recognize your authority and influence, and they defer to you if they are of a lower rank. You can invoke your rank to exert influence over other soldiers and requisition simple equipment or horses for temporary use."
+    },
+    "suggestedPersonalityTraits": [
+      "I'm always polite and respectful.",
+      "I'm haunted by memories of war. I fight to forget.",
+      "I've lost too many friends, and I'm slow to make new ones.",
+      "I'm full of inspiring and cautionary tales from my military experience relevant to almost every situation."
+    ],
+    "suggestedIdeals": [
+      "Greater Good. Our lot is to lay down our lives in defense of others.",
+      "Responsibility. I do what I must and obey just authority.",
+      "Independence. When people follow orders blindly, they embrace a kind of tyranny.",
+      "Live and Let Live. Ideals aren't worth killing over or going to war for."
+    ],
+    "suggestedBonds": [
+      "I would still lay down my life for the people I served with.",
+      "Someone saved my life on the battlefield. To this day, I will never leave a friend behind.",
+      "My honor is my life."
+    ],
+    "suggestedFlaws": [
+      "The monstrous enemy we faced in battle still leaves me quivering with fear.",
+      "I have little respect for anyone who is not a proven warrior.",
+      "I made a terrible mistake in battle that cost many lives—and I would do anything to keep that mistake secret."
+    ],
+    "startingEquipment": [
+      { "name": "Insignia of rank", "quantity": 1, "weight": 0 },
+      { "name": "Trophy from a fallen enemy", "quantity": 1, "weight": 0 },
+      { "name": "Gaming set (bone dice)", "quantity": 1, "weight": 0 },
+      { "name": "Common clothes", "quantity": 1, "weight": 3 }
+    ],
+    "startingGold": 10,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "entertainer",
+    "name": "Entertainer",
+    "skillProficiencies": ["acrobatics", "performance"],
+    "toolProficiencies": ["one type of musical instrument", "disguise kit"],
+    "languages": [],
+    "freeLanguageChoices": 0,
+    "feature": {
+      "name": "By Popular Demand",
+      "description": "You can always find a place to perform in any establishment that offers entertainment—taverns, inns, circuses, and so on. At such a place, you receive free lodging and food of a modest or comfortable standard, as long as you perform each night. In addition, your performance makes you something of a local figure. When strangers recognize you in a town where you've performed, they're usually well disposed toward you."
+    },
+    "suggestedPersonalityTraits": [
+      "I know a story relevant to almost every situation.",
+      "Whenever I come to a new place, I collect local rumors and spread gossip.",
+      "I'm a hopeless romantic, always searching for that 'special someone.'",
+      "Nobody stays angry at me or around me for long, since I can defuse any amount of tension."
+    ],
+    "suggestedIdeals": [
+      "Beauty. When I perform, I make the world better than it was.",
+      "Tradition. The stories, legends, and songs of the past must never be forgotten.",
+      "Creativity. The world is in need of new ideas and bold action.",
+      "People. I like seeing the smiles on people's faces when I perform."
+    ],
+    "suggestedBonds": [
+      "My instrument is my most treasured possession, and it reminds me of someone I love.",
+      "Someone stole my precious instrument, and someday I'll get it back.",
+      "I want to be famous, whatever it takes."
+    ],
+    "suggestedFlaws": [
+      "I'll do anything to win fame and renown.",
+      "I'm a sucker for a pretty face.",
+      "A scandal prevents me from ever going home again. That kind of trouble seems to follow me around."
+    ],
+    "startingEquipment": [
+      { "name": "Musical instrument (one of your choice)", "quantity": 1, "weight": 3 },
+      { "name": "Costume", "quantity": 1, "weight": 4 },
+      { "name": "Belt pouch", "quantity": 1, "weight": 1 }
+    ],
+    "startingGold": 15,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "guild-artisan",
+    "name": "Guild Artisan",
+    "skillProficiencies": ["insight", "persuasion"],
+    "toolProficiencies": ["one type of artisan's tools"],
+    "languages": [],
+    "freeLanguageChoices": 1,
+    "feature": {
+      "name": "Guild Membership",
+      "description": "As an established member of your guild, you can rely on certain benefits that membership provides. Fellow guild members will provide lodging and food if necessary, and pay for your funeral if needed. In some cities and towns, a guildhall offers a central place to meet other members of your profession. Guilds often wield tremendous political power."
+    },
+    "suggestedPersonalityTraits": [
+      "I believe that anything worth doing is worth doing right. I can't help it—I'm a perfectionist.",
+      "I'm a snob who looks down on those who can't appreciate fine craftsmanship.",
+      "I like to talk at length about my profession.",
+      "I don't part with my money easily and will haggle tirelessly to get the best deal possible."
+    ],
+    "suggestedIdeals": [
+      "Community. It is the duty of all civilized people to strengthen the bonds of community.",
+      "Generosity. My talents were given to me so that I could use them to benefit the world.",
+      "Freedom. Everyone should be free to pursue his or her own livelihood.",
+      "Greed. I'm only in it for the money."
+    ],
+    "suggestedBonds": [
+      "The workshop where I learned my trade is the most important place in the world to me.",
+      "I owe my guild a great debt for forging me into the person I am today.",
+      "I pursue wealth to secure someone's love."
+    ],
+    "suggestedFlaws": [
+      "I'll do anything to get my hands on something rare or priceless.",
+      "I'm quick to assume that someone is trying to cheat me.",
+      "No one must ever learn that I once stole money from guild coffers."
+    ],
+    "startingEquipment": [
+      { "name": "Artisan's tools (one type)", "quantity": 1, "weight": 5 },
+      { "name": "Letter of introduction from your guild", "quantity": 1, "weight": 0 },
+      { "name": "Traveler's clothes", "quantity": 1, "weight": 4 }
+    ],
+    "startingGold": 15,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "hermit",
+    "name": "Hermit",
+    "skillProficiencies": ["medicine", "religion"],
+    "toolProficiencies": ["herbalism kit"],
+    "languages": [],
+    "freeLanguageChoices": 1,
+    "feature": {
+      "name": "Discovery",
+      "description": "The quiet seclusion of your extended hermitage gave you access to a unique and powerful discovery. The exact nature of this revelation depends on the nature of your seclusion. It might be a great truth about the cosmos, the deities, the powerful beings of the outer planes, or the forces of nature."
+    },
+    "suggestedPersonalityTraits": [
+      "I've been isolated for so long that I rarely speak, preferring gestures and the occasional grunt.",
+      "I am utterly serene, even in the face of disaster.",
+      "The leader of my community had something wise to say on every topic, and I am eager to share that wisdom.",
+      "I feel tremendous empathy for all who suffer."
+    ],
+    "suggestedIdeals": [
+      "Greater Good. My gifts are meant to be shared with all, not used for my own benefit.",
+      "Logic. Emotions must not cloud our logical thinking.",
+      "Free Thinking. Inquiry and curiosity are the pillars of progress.",
+      "Self-Knowledge. If you know yourself, there's nothing left to know."
+    ],
+    "suggestedBonds": [
+      "Nothing is more important than the other members of my hermitage, order, or association.",
+      "I entered seclusion to hide from the ones who might still be hunting me. I must someday confront them.",
+      "I'm still seeking the enlightenment I pursued in my seclusion, and it still eludes me."
+    ],
+    "suggestedFlaws": [
+      "Now that I've returned to the world, I enjoy its delights a little too much.",
+      "I harbor dark, bloodthirsty thoughts that my isolation and meditation failed to quell.",
+      "I am dogmatic in my thoughts and philosophy."
+    ],
+    "startingEquipment": [
+      { "name": "Scroll case stuffed full of notes", "quantity": 1, "weight": 1 },
+      { "name": "Winter blanket", "quantity": 1, "weight": 3 },
+      { "name": "Common clothes", "quantity": 1, "weight": 3 },
+      { "name": "Herbalism kit", "quantity": 1, "weight": 3 }
+    ],
+    "startingGold": 5,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "outlander",
+    "name": "Outlander",
+    "skillProficiencies": ["athletics", "survival"],
+    "toolProficiencies": ["one type of musical instrument"],
+    "languages": [],
+    "freeLanguageChoices": 1,
+    "feature": {
+      "name": "Wanderer",
+      "description": "You have an excellent memory for maps and geography, and you can always recall the general layout of terrain, settlements, and other features around you. In addition, you can find food and fresh water for yourself and up to five other people each day, provided the land offers berries, small game, water, and so on."
+    },
+    "suggestedPersonalityTraits": [
+      "I'm driven by a wanderlust that led me away from home.",
+      "I watch over my friends as if they were a litter of newborn pups.",
+      "I once ran twenty-five miles without stopping to warn my clan of an approaching orc horde.",
+      "I have a lesson for every situation, drawn from observing nature."
+    ],
+    "suggestedIdeals": [
+      "Change. Life is like the seasons, in constant change, and we must change with it.",
+      "Greater Good. It is each person's responsibility to make the most happiness for the whole tribe.",
+      "Honor. If I dishonor myself, I dishonor my whole clan.",
+      "Nature. The natural world is more important than all the constructs of civilization."
+    ],
+    "suggestedBonds": [
+      "My family, clan, or tribe is the most important thing in my life, even when they are far from me.",
+      "An injury to the unspoiled wilderness of my home is an injury to me.",
+      "I am the last of my tribe, and it is up to me to ensure their names enter legend."
+    ],
+    "suggestedFlaws": [
+      "I am too enamored of ale, wine, and other intoxicants.",
+      "There's no room for caution in a life lived to the fullest.",
+      "I remember every insult I've received and nurse a silent resentment toward anyone who has ever wronged me."
+    ],
+    "startingEquipment": [
+      { "name": "Staff", "quantity": 1, "weight": 4 },
+      { "name": "Hunting trap", "quantity": 1, "weight": 25 },
+      { "name": "Trophy from an animal you killed", "quantity": 1, "weight": 0 },
+      { "name": "Traveler's clothes", "quantity": 1, "weight": 4 }
+    ],
+    "startingGold": 10,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "sailor",
+    "name": "Sailor",
+    "skillProficiencies": ["athletics", "perception"],
+    "toolProficiencies": ["navigator's tools", "vehicles (water)"],
+    "languages": [],
+    "freeLanguageChoices": 0,
+    "feature": {
+      "name": "Ship's Passage",
+      "description": "When you need to, you can secure free passage on a sailing ship for yourself and your companions. You might sail on the ship you served on, or another ship you have good relations with. In return, you and your companions are expected to assist the crew during the voyage."
+    },
+    "suggestedPersonalityTraits": [
+      "My friends know they can rely on me, no matter what.",
+      "I work hard so that I can play hard when the work is done.",
+      "I enjoy sailing into new ports and making new friends over a flagon of ale.",
+      "I stretch the truth for the sake of a good story."
+    ],
+    "suggestedIdeals": [
+      "Respect. The thing that keeps a ship together is mutual respect between captain and crew.",
+      "Fairness. We all do the work, so we all share in the rewards.",
+      "Freedom. The sea is freedom—the freedom to go anywhere and do anything.",
+      "Mastery. I'm a predator, and the other ships on the sea are my prey."
+    ],
+    "suggestedBonds": [
+      "I'm loyal to my captain first, everything else second.",
+      "The ship is most important—crewmates and captains come and go.",
+      "I'll always remember my first ship."
+    ],
+    "suggestedFlaws": [
+      "I follow orders, even if I think they're wrong.",
+      "I'll say anything to avoid having to do extra work.",
+      "Once someone questions my courage, I never back down no matter how dangerous the situation."
+    ],
+    "startingEquipment": [
+      { "name": "Belaying pin (club)", "quantity": 1, "weight": 2 },
+      { "name": "Silk rope (50 feet)", "quantity": 1, "weight": 5 },
+      { "name": "Lucky charm (rabbit foot, small stone, etc.)", "quantity": 1, "weight": 0 },
+      { "name": "Common clothes", "quantity": 1, "weight": 3 }
+    ],
+    "startingGold": 10,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "urchin",
+    "name": "Urchin",
+    "skillProficiencies": ["sleight of hand", "stealth"],
+    "toolProficiencies": ["disguise kit", "thieves' tools"],
+    "languages": [],
+    "freeLanguageChoices": 0,
+    "feature": {
+      "name": "City Secrets",
+      "description": "You know the secret patterns and flow to cities and can find passages through the urban sprawl that others would miss. When you are not in combat, you (and companions you lead) can travel between any two locations in the city twice as fast as your speed would normally allow."
+    },
+    "suggestedPersonalityTraits": [
+      "I hide scraps of food and trinkets away in my pockets.",
+      "I ask a lot of questions.",
+      "I like to squeeze into small places where no one else can get to me.",
+      "I sleep with my back to a wall or tree, with everything I own close to my body."
+    ],
+    "suggestedIdeals": [
+      "Respect. All people, rich or poor, deserve respect.",
+      "Community. We have to take care of each other, because no one else is going to do it.",
+      "Change. The low are lifted up, and the high and mighty are brought down. Change is the nature of things.",
+      "Retribution. The rich need to be shown what life and death are like in the gutters."
+    ],
+    "suggestedBonds": [
+      "My town or city is my home, and I'll fight to defend it.",
+      "I sponsor an orphanage to keep others from enduring what I was forced to endure.",
+      "I owe my survival to another urchin who taught me to live on the streets."
+    ],
+    "suggestedFlaws": [
+      "Gold seems like a lot of money to me, and I'll do just about anything for more of it.",
+      "I will never fully trust anyone other than myself.",
+      "I'd rather kill someone in their sleep than fight fair."
+    ],
+    "startingEquipment": [
+      { "name": "Small knife", "quantity": 1, "weight": 0.5 },
+      { "name": "Map of the city you grew up in", "quantity": 1, "weight": 0 },
+      { "name": "Pet mouse", "quantity": 1, "weight": 0 },
+      { "name": "Token to remember your parents by", "quantity": 1, "weight": 0 },
+      { "name": "Common clothes", "quantity": 1, "weight": 3 }
+    ],
+    "startingGold": 10,
+    "source": "Basic Rules"
+  },
+  {
+    "id": "charlatan",
+    "name": "Charlatan",
+    "skillProficiencies": ["deception", "sleight of hand"],
+    "toolProficiencies": ["disguise kit", "forgery kit"],
+    "languages": [],
+    "freeLanguageChoices": 0,
+    "feature": {
+      "name": "False Identity",
+      "description": "You have created a second identity that includes documentation, established acquaintances, and disguises that allow you to assume that persona. Additionally, you can forge documents including official papers and personal letters, as long as you have seen an example of the kind of document or the handwriting you are trying to copy."
+    },
+    "suggestedPersonalityTraits": [
+      "I fall in and out of love easily, and am always pursuing someone.",
+      "I have a joke for every occasion, especially occasions where humor is inappropriate.",
+      "Flattery is my preferred trick for getting what I want.",
+      "I'm a born gambler who can't resist taking a risk for a potential payoff."
+    ],
+    "suggestedIdeals": [
+      "Independence. I am a free spirit—no one tells me what to do.",
+      "Fairness. I never target people who can't afford to lose a few coins.",
+      "Creativity. I never run the same con twice.",
+      "Friendship. Material goods come and go. Bonds of friendship last forever."
+    ],
+    "suggestedBonds": [
+      "I fleeced the wrong person and must work to ensure that this individual never crosses paths with me or those I care about.",
+      "I owe everything to my mentor—a horrible person who's probably rotting in jail somewhere.",
+      "Somewhere out there, I have a child who doesn't know me. I'm making the world better for him or her."
+    ],
+    "suggestedFlaws": [
+      "I can't resist a pretty face.",
+      "I'm always in debt. I spend my ill-gotten gains on decadent luxuries faster than I bring them in.",
+      "I'm convinced that no one could ever fool me the way I fool others."
+    ],
+    "startingEquipment": [
+      { "name": "Fine clothes", "quantity": 1, "weight": 6 },
+      { "name": "Disguise kit", "quantity": 1, "weight": 3 },
+      { "name": "Tools of the con of your choice (stoppered bottles, weighted dice, marked cards)", "quantity": 1, "weight": 1 }
+    ],
+    "startingGold": 15,
+    "source": "Basic Rules"
+  }
+]

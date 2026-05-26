@@ -12,7 +12,7 @@ import { messagesRepo } from './db/messagesRepo'
 import { buildContext } from './ai/contextBuilder'
 import { streamChat } from './ai/llmProvider'
 import { withRetry } from './ai/retryHandler'
-import { sessionFallbackMap } from './ai/aiSessionState'
+import { sessionFallbackMap, sessionAbortMap } from './ai/aiSessionState'
 import type { LLMProviderConfig } from './ai/llmProvider'
 import {
   logLatencyToFirstToken,
@@ -211,9 +211,9 @@ if (!gotLock) {
         const fallbackKey = await secretStorage.decrypt('ai-fallback-' + campaignId)
         apiKey = fallbackKey ?? undefined
         providerConfig = {
-          type: (campaign.providerType as 'openai-compatible' | 'gemini') ?? 'openai-compatible',
-          endpointUrl: campaign.fallbackEndpointUrl,
-          modelName: campaign.fallbackModelName,
+          type: 'openai-compatible', // fallback is always URL-based (schema has no fallbackProviderType)
+          endpointUrl: campaign.fallbackEndpointUrl ?? undefined,
+          modelName: campaign.fallbackModelName ?? '',
           apiKey,
         }
         // Mark fallback as active for this session (D-19)
@@ -263,6 +263,18 @@ if (!gotLock) {
 
       // ── Step 6: Stream with retry ─────────────────────────────────────────────
       // AI-SPEC §7 metrics: track latency_to_first_token and error_count
+
+      // CR-06: helper to guard against sending on a destroyed WebContents
+      const safeSend = (channel: string, ...args: unknown[]): void => {
+        if (!event.sender.isDestroyed()) {
+          event.sender.send(channel, ...args)
+        }
+      }
+
+      // CR-02: create an AbortController so cancelStream can abort the active stream
+      const abortController = new AbortController()
+      sessionAbortMap.setAbortController(campaignId, abortController)
+
       const streamStartMs = Date.now()
       let firstTokenMs: number | null = null
       let tokenCount = 0
@@ -270,8 +282,11 @@ if (!gotLock) {
 
       try {
         await withRetry(
-          () =>
-            streamChat(providerConfig, messages, systemPrompt, {
+          () => {
+            // CR-05: reset buffer and token count at the start of each attempt
+            assistantBuffer = ''
+            tokenCount = 0
+            return streamChat(providerConfig, messages, systemPrompt, {
               onToken: (chunk) => {
                 if (firstTokenMs === null) {
                   firstTokenMs = Date.now() - streamStartMs
@@ -280,23 +295,26 @@ if (!gotLock) {
                 }
                 tokenCount++
                 assistantBuffer += chunk
-                event.sender.send('ai:token', chunk)
+                safeSend('ai:token', chunk)
               },
               onFinish: () => {
                 // Persist assistant message
                 messagesRepo.insert({ campaignId, role: 'assistant', content: assistantBuffer })
                 // AI-SPEC §7 metric: ai.stream.total_tokens_received
                 logTokensReceived(tokenCount)
-                event.sender.send('ai:finish')
+                sessionAbortMap.clearAbortController(campaignId)
+                safeSend('ai:finish')
               },
               onError: (err) => {
                 // Re-throw so withRetry can catch and retry
                 throw err
               },
-            }),
+            }, { abortSignal: abortController.signal })
+          },
           { maxAttempts: 3, baseDelayMs: 1000 },
         )
       } catch (err) {
+        sessionAbortMap.clearAbortController(campaignId)
         // Classify error coarsely — never log key or provider body (T-03-03-04)
         const errMsg = err instanceof Error ? err.message : ''
         const errorType = errMsg.includes('time') ? 'timeout'
@@ -312,7 +330,7 @@ if (!gotLock) {
         const genericMessage = err instanceof Error
           ? err.message
           : 'AI provider request failed'
-        event.sender.send('ai:error', { message: genericMessage })
+        safeSend('ai:error', { message: genericMessage })
       }
 
       // AI-SPEC §3 Async-First Design: return { started: true } so renderer knows

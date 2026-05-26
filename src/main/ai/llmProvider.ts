@@ -27,6 +27,10 @@ export interface StreamCallbacks {
   onError: (error: Error) => void
 }
 
+export interface StreamOptions {
+  abortSignal?: AbortSignal
+}
+
 /**
  * Re-export ModelMessage as CoreMessage for backwards-compatible usage.
  * In AI SDK v6 CoreMessage was renamed to ModelMessage.
@@ -44,9 +48,12 @@ export function buildModel(config: LLMProviderConfig) {
     return google(config.modelName)
   }
   // openai-compatible: LM Studio, Jan AI, Ollama, OpenRouter, OpenAI, etc.
+  if (!config.endpointUrl) {
+    throw new Error('endpointUrl is required for openai-compatible provider')
+  }
   const openai = createOpenAICompatible({
     name: 'custom',
-    baseURL: config.endpointUrl!,
+    baseURL: config.endpointUrl,
     apiKey: config.apiKey ?? 'none', // local LLMs ignore auth but SDK requires a value
   })
   return openai(config.modelName)
@@ -66,6 +73,7 @@ export async function streamChat(
   messages: ModelMessage[],
   systemPrompt: string,
   callbacks: StreamCallbacks,
+  options?: StreamOptions,
 ): Promise<void> {
   log.debug('[llmProvider] streamChat starting', {
     systemPromptLength: systemPrompt.length,
@@ -83,6 +91,7 @@ export async function streamChat(
       system: systemPrompt,
       messages,
       temperature: 0.8,
+      abortSignal: options?.abortSignal,
     })
 
     // First-token timeout (T-03-02-03 / AI-SPEC §4b "Cost/Latency"):

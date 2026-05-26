@@ -16,6 +16,9 @@ import { trpc } from '../lib/trpc'
 import { usePanelSizeStore } from '../stores/panelSizeStore'
 import { useWindowStore } from '../stores/windowStore'
 import { CharacterSheetTab } from '../components/CharacterSheetTab'
+import { StoryScrollPanel } from '../components/StoryScrollPanel'
+import { ChatInputArea } from '../components/ChatInputArea'
+import { useAiStream } from '../hooks/useAiStream'
 
 export function CampaignViewScreen() {
   const { id } = useParams<{ id: string }>()
@@ -25,6 +28,23 @@ export function CampaignViewScreen() {
   const setCampaignName = useWindowStore((s) => s.setCampaignName)
   const queryClient = useQueryClient()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+
+  // AI streaming state — plan 03-04
+  // useAiStream requires a non-null campaignId; we render a fallback before this point if id is null
+  const aiStream = useAiStream(id ?? '')
+
+  // Ref to imperatively scroll the story scroll to bottom after player sends a message
+  const scrollToBottomRef = useRef<(() => void) | null>(null)
+
+  // AiSettingsModal open state — plan 03-05 will wire the actual modal; for now a no-op stub
+  const [_showAiSettings, _setShowAiSettings] = useState(false)
+  const handleOpenSettings = useCallback(() => {
+    // Stub: plan 03-05 connects the AiSettingsModal here
+    _setShowAiSettings(true)
+  }, [])
+
+  // Track the last user message content to support Retry and Switch-to-fallback (D-18/D-19)
+  const lastUserContentRef = useRef<string>('')
 
   const campaignQuery = useQuery({
     queryKey: ['campaigns', 'get', id],
@@ -138,12 +158,48 @@ export function CampaignViewScreen() {
         className="flex-1"
         onLayout={handleLayout}
       >
-        {/* Left panel — narrative chat shell (Phase 3 fills with real chat) */}
+        {/* Left panel — story scroll + chat input (plan 03-04) */}
         <Panel defaultSize={store.sizes.leftSize} minSize={30}>
-          <div className="flex items-center justify-center h-full bg-background">
-            <p className="text-sm text-muted-foreground font-normal">
-              AI narration appears here.
-            </p>
+          <div className="flex flex-col h-full bg-background">
+            <StoryScrollPanel
+              campaignId={id}
+              isStreaming={aiStream.isStreaming}
+              streamingContent={aiStream.streamingContent}
+              error={aiStream.error}
+              hasFallback={!!(campaignQuery.data?.fallbackEndpointUrl)}
+              onRetry={() => {
+                // Retry: re-send the last user message with the same provider
+                aiStream.clearError()
+                // The last message in history is the user's — re-send by triggering send again
+                // StoryScrollPanel does not track lastContent; we rely on CampaignViewScreen to re-send
+                // The retry callback is connected below via lastUserContentRef
+                if (lastUserContentRef.current) {
+                  aiStream.send(lastUserContentRef.current)
+                }
+              }}
+              onSwitchToFallback={() => {
+                // D-19: switch to fallback for this session, re-attempt immediately
+                aiStream.clearError()
+                if (lastUserContentRef.current) {
+                  aiStream.send(lastUserContentRef.current, { useFallback: true })
+                }
+              }}
+              onOpenSettings={handleOpenSettings}
+              scrollToBottomRef={scrollToBottomRef}
+              className="flex-1"
+            />
+            <ChatInputArea
+              onSend={(content) => {
+                lastUserContentRef.current = content
+                aiStream.send(content)
+                // Force-scroll to bottom after player submits
+                scrollToBottomRef.current?.()
+              }}
+              isStreaming={aiStream.isStreaming}
+              disabled={!campaignQuery.data?.providerType}
+              onOpenSettings={handleOpenSettings}
+              className="shrink-0"
+            />
           </div>
         </Panel>
 

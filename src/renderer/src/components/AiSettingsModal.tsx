@@ -80,7 +80,13 @@ export function AiSettingsModal({ campaignId, open, onClose }: AiSettingsModalPr
       modelName: campaign.modelName ?? '',
       // D-23: API key fields always empty — keys are write-only
       apiKey: '',
-      referenceDocs: Array.isArray(campaign.referenceDocs) ? campaign.referenceDocs : [],
+      referenceDocs: (() => {
+        if (Array.isArray(campaign.referenceDocs)) return campaign.referenceDocs as string[]
+        if (typeof campaign.referenceDocs === 'string') {
+          try { return JSON.parse(campaign.referenceDocs) as string[] } catch { return [] }
+        }
+        return []
+      })(),
       fallbackEndpointUrl: campaign.fallbackEndpointUrl ?? '',
       fallbackModelName: campaign.fallbackModelName ?? '',
       // D-23: fallback key field always empty

@@ -52,10 +52,13 @@ contextBridge.exposeInMainWorld('aiStream', {
 
   /**
    * Register a callback fired when the stream fails after retries.
-   * msg is a generic string — no API key, stack trace, or provider body.
+   * err.message is a generic string — no API key, stack trace, or provider body.
    */
-  onError: (cb: (msg: string) => void) => {
-    ipcRenderer.on('ai:error', (_, m) => cb(typeof m === 'object' ? m.message : m))
+  onError: (cb: (err: { message: string }) => void) => {
+    ipcRenderer.on('ai:error', (_, m) => {
+      const message = typeof m === 'object' && m !== null ? String((m as { message?: unknown }).message ?? m) : String(m)
+      cb({ message })
+    })
   },
 
   /**

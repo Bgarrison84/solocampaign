@@ -97,7 +97,21 @@ Plans:
   3. User can send a chat message and see tokens stream back in the narrative panel from the configured provider
   4. When the configured cloud provider fails, the app automatically retries and then prompts the user to switch to a configured local LLM
   5. API keys are never visible in plaintext config files, logs, or the renderer process
-**Plans:** TBD
+**Plans:** 6 plans
+Plans:
+- [ ] 03-01-PLAN.md — Wave 0 foundation: install AI/UI deps + shadcn components, extend schema (AI config columns + messages table), generate migration 0002, messagesRepo, Wave 0 test stubs
+- [ ] 03-02-PLAN.md — AI backend: streamChat (Vercel AI SDK wrapper) + retryHandler + referenceDocLoader + ContextBuilder v1
+- [ ] 03-03-PLAN.md — IPC + tRPC bridge: ai:send-message streaming channel, window.aiStream, ai router, campaigns.updateAiConfig, prefs.isEncryptionAvailable, session fallback state
+- [ ] 03-04-PLAN.md — Renderer story scroll + chat input + useAiStream hook + inline error block + left-panel wiring
+- [ ] 03-05-PLAN.md — 3-step creation wizard + AiProviderFields + reference doc select + gear AI Settings modal
+- [ ] 03-06-PLAN.md — electron-builder reference-doc bundling + AI metrics wiring + CSP documentation
+**Wave structure:**
+  - Wave 0: 03-01 (foundation — schema, deps, migration, test scaffolds)
+  - Wave 1: 03-02 (AI engine module; depends on 03-01)
+  - Wave 2: 03-03 (IPC + tRPC bridge; depends on 03-02)
+  - Wave 3: 03-04 (renderer chat surface; depends on 03-03)
+  - Wave 4: 03-05 (wizard + gear modal; depends on 03-03 + 03-04 — shared CampaignViewScreen)
+  - Wave 5: 03-06 (packaging + metrics + CSP; depends on 03-02 + 03-03 — shared src/main/index.ts)
 **Notes:**
   - ContextBuilder v1 (system + character + last N messages) ships here; v2 three-layer memory lands in Phase 4
   - Wrap Vercel AI SDK behind an LLMProvider interface from day one so phase 4 summarization slots in cleanly
@@ -211,7 +225,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Foundation & Secure Shell | 7/7 | Complete   | 2026-05-24 |
 | 2. Character Domain & Live Sheet | 7/7 | Complete   | 2026-05-25 |
-| 3. AI Engine & Provider Abstraction | 0/0 | Not started | - |
+| 3. AI Engine & Provider Abstraction | 0/6 | Planned | - |
 | 4. Long-Campaign Memory & Session Flow | 0/0 | Not started | - |
 | 5. Rules Engine, Dice & Combat | 0/0 | Not started | - |
 | 6. Quests, NPCs & World State | 0/0 | Not started | - |

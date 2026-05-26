@@ -8,10 +8,35 @@ export const campaigns = sqliteTable('campaigns', {
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
+  // AI config columns — D-07 (no api_key: keys live in SecretStorageService only — D-08/D-23)
+  providerType: text('provider_type'),
+  endpointUrl: text('endpoint_url'),
+  modelName: text('model_name'),
+  referenceDocs: text('reference_docs').notNull().default('[]'),
+  dmPersonality: text('dm_personality'),
+  strictness: text('strictness').notNull().default('balanced'),
+  fallbackEndpointUrl: text('fallback_endpoint_url'),
+  fallbackModelName: text('fallback_model_name'),
 })
 
 export type Campaign = typeof campaigns.$inferSelect
 export type NewCampaign = typeof campaigns.$inferInsert
+
+// Messages table — D-17: one continuous chat per campaign, no session_id in Phase 3
+export const messages = sqliteTable('messages', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  role: text('role').notNull(), // 'user' | 'assistant'
+  content: text('content').notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+})
+
+export type Message = typeof messages.$inferSelect
+export type NewMessage = typeof messages.$inferInsert
 
 export const characters = sqliteTable(
   'characters',

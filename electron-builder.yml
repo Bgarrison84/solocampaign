@@ -26,6 +26,10 @@ extraResources:
     to: .
     filter:
       - "*.json"
+  - from: "Reference Documents/Converted"
+    to: reference-docs
+    filter:
+      - "**/*.md"
 
 mac:
   icon: src/resources/build/icons/icon.icns

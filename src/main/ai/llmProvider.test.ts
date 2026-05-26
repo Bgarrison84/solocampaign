@@ -63,9 +63,10 @@ describe('llmProvider', () => {
   })
 
   it('streamChat delivers tokens via onToken callback', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(streamText).mockResolvedValue({
       textStream: makeTextStream(['Hello, ', 'adventurer.']),
-    } as ReturnType<typeof streamText> extends Promise<infer T> ? T : never)
+    } as any)
 
     const tokens: string[] = []
     const callbacks: StreamCallbacks = {
@@ -144,17 +145,18 @@ describe('llmProvider', () => {
 
     // streamText resolves but textStream is a generator that blocks on a promise
     // we control via fake timers — never resolves without time advancing
-    let unblockGenerator: (() => void) | null = null
+    const unblock = { fn: () => { /* placeholder */ } }
     const blockingPromise = new Promise<void>((resolve) => {
-      unblockGenerator = resolve
+      unblock.fn = resolve
     })
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(streamText).mockResolvedValue({
       textStream: (async function* () {
         await blockingPromise
         yield 'too late'
       })(),
-    } as ReturnType<typeof streamText> extends Promise<infer T> ? T : never)
+    } as any)
 
     const callbacks: StreamCallbacks = {
       onToken: vi.fn(),
@@ -168,7 +170,7 @@ describe('llmProvider', () => {
     await vi.advanceTimersByTimeAsync(15001)
 
     // Unblock the generator so the for-await can proceed and observe streamAborted
-    unblockGenerator?.()
+    unblock.fn()
 
     await chatPromise
 

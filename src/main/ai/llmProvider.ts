@@ -9,7 +9,7 @@
  */
 
 import { streamText } from 'ai'
-import type { CoreMessage } from 'ai'
+import type { ModelMessage } from 'ai'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import log from 'electron-log'
@@ -27,8 +27,12 @@ export interface StreamCallbacks {
   onError: (error: Error) => void
 }
 
-// Re-export for consumers
-export type { CoreMessage }
+/**
+ * Re-export ModelMessage as CoreMessage for backwards-compatible usage.
+ * In AI SDK v6 CoreMessage was renamed to ModelMessage.
+ */
+export type CoreMessage = ModelMessage
+export type { ModelMessage }
 
 /**
  * Build the provider model from config.
@@ -59,7 +63,7 @@ export function buildModel(config: LLMProviderConfig) {
  */
 export async function streamChat(
   config: LLMProviderConfig,
-  messages: CoreMessage[],
+  messages: ModelMessage[],
   systemPrompt: string,
   callbacks: StreamCallbacks,
 ): Promise<void> {

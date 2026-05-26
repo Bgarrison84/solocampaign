@@ -44,7 +44,7 @@ export const contentRouter = t.router({
      */
     listForClass: t.procedure
       .input(z.object({ className: z.string() }))
-      .query(({ input }) => loadContent().equipment[input.className] ?? []),
+      .query(({ input }) => loadContent().equipment[input.className.toLowerCase()] ?? []),
   }),
 
   spellSlots: t.router({
@@ -54,6 +54,6 @@ export const contentRouter = t.router({
      */
     forClass: t.procedure
       .input(z.object({ className: z.string() }))
-      .query(({ input }) => loadContent().spellSlotsByClass[input.className] ?? null),
+      .query(({ input }) => loadContent().spellSlotsByClass[input.className.toLowerCase()] ?? null),
   }),
 })

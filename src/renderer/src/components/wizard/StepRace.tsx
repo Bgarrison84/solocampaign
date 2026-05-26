@@ -81,7 +81,7 @@ export function StepRace({ wizardState, races, onChange }: StepRaceProps) {
             Choose a Species
           </p>
           {parentRaces.map((race) => {
-            const subraces = subracesByParent[race.name] ?? []
+            const subraces = subracesByParent[race.id] ?? []
             const isSelected = wizardState.selectedRace?.id === race.id
             return (
               <React.Fragment key={race.id}>

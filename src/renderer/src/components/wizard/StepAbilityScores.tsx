@@ -27,12 +27,41 @@ interface StepAbilityScoresProps {
  * Per UI-SPEC §3.4 and D-10: standard array with optional manual override per stat.
  * Per D-16: saving throws are class-fixed, shown read-only. Skills are player-chosen.
  */
+function roll4d6DropLowest(): number {
+  const dice = Array.from({ length: 4 }, () => Math.ceil(Math.random() * 6))
+  dice.sort((a, b) => a - b)
+  return dice[1] + dice[2] + dice[3]
+}
+
 export function StepAbilityScores({ wizardState, onChange }: StepAbilityScoresProps) {
   const [overrideErrors, setOverrideErrors] = useState<Partial<Record<AbilityName, string>>>({})
 
   const scores = wizardState.abilityScores
   const overrides = wizardState.abilityOverrides
   const selectedClass = wizardState.selectedClass
+
+  function handleRollAll() {
+    const rolled: Record<AbilityName, number> = {
+      strength: roll4d6DropLowest(),
+      dexterity: roll4d6DropLowest(),
+      constitution: roll4d6DropLowest(),
+      intelligence: roll4d6DropLowest(),
+      wisdom: roll4d6DropLowest(),
+      charisma: roll4d6DropLowest(),
+    }
+    onChange({
+      abilityScores: rolled,
+      abilityOverrides: {
+        strength: true,
+        dexterity: true,
+        constitution: true,
+        intelligence: true,
+        wisdom: true,
+        charisma: true,
+      },
+    })
+    setOverrideErrors({})
+  }
 
   // Which standard array values are currently assigned (excluding the one for a given ability)
   function getAssignedValues(excludeAbility?: AbilityName): number[] {
@@ -130,9 +159,19 @@ export function StepAbilityScores({ wizardState, onChange }: StepAbilityScoresPr
     <div className="flex h-full overflow-hidden">
       {/* Left column — standard array display (200px) */}
       <div className="w-[200px] flex-shrink-0 border-r border-border overflow-y-auto p-4">
-        <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-          Standard Array
-        </p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Standard Array
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleRollAll}
+          className="w-full mb-3 px-2 py-1.5 text-sm font-semibold rounded border border-border hover:bg-surface/60 transition-colors"
+          title="Roll 4d6 drop lowest for each ability"
+        >
+          Roll Stats (4d6)
+        </button>
         <div className="flex flex-col gap-2">
           {[...STANDARD_ARRAY].map((value) => {
             const assignedTo = ABILITY_NAMES.find(
@@ -286,6 +325,7 @@ export function StepAbilityScores({ wizardState, onChange }: StepAbilityScoresPr
               {eligibleSkills.map((skill) => {
                 const isSelected = selected.includes(skill)
                 const isDisabled = !isSelected && selected.length >= required
+                const label = skill.charAt(0).toUpperCase() + skill.slice(1)
                 return (
                   <label
                     key={skill}
@@ -301,7 +341,7 @@ export function StepAbilityScores({ wizardState, onChange }: StepAbilityScoresPr
                       disabled={isDisabled}
                       className="w-4 h-4 accent-amber-500"
                     />
-                    {skill}
+                    {label}
                   </label>
                 )
               })}

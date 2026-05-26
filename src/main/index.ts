@@ -48,23 +48,25 @@ if (!gotLock) {
       log.error('[main] Failed to initialize secret storage:', err)
     }
 
-    // Set CSP on every response
-    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-      callback({
-        responseHeaders: {
-          ...details.responseHeaders,
-          'Content-Security-Policy': [
-            "default-src 'self'; " +
-            "script-src 'self'; " +
-            "style-src 'self' 'unsafe-inline'; " +
-            "img-src 'self' data: blob:; " +
-            "font-src 'self'; " +
-            "connect-src 'self' https://api.openai.com https://generativelanguage.googleapis.com http://localhost:* http://127.0.0.1:*; " +
-            "object-src 'none'; base-uri 'none'; form-action 'none';"
-          ],
-        },
+    // Set CSP on every response — skip in dev so Vite HMR inline scripts aren't blocked
+    if (process.env.NODE_ENV !== 'development') {
+      session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+        callback({
+          responseHeaders: {
+            ...details.responseHeaders,
+            'Content-Security-Policy': [
+              "default-src 'self'; " +
+              "script-src 'self'; " +
+              "style-src 'self' 'unsafe-inline'; " +
+              "img-src 'self' data: blob:; " +
+              "font-src 'self'; " +
+              "connect-src 'self' https://api.openai.com https://generativelanguage.googleapis.com http://localhost:* http://127.0.0.1:*; " +
+              "object-src 'none'; base-uri 'none'; form-action 'none';"
+            ],
+          },
+        })
       })
-    })
+    }
 
     // Restore saved bounds from previous session (D-14: 1280×800 default, persist bounds)
     const savedBounds = boundsStore.get('windowBounds', { width: 1280, height: 800 })
@@ -95,6 +97,9 @@ if (!gotLock) {
 
     mainWindow.once('ready-to-show', () => {
       mainWindow?.show()
+      if (process.env.NODE_ENV === 'development') {
+        mainWindow?.webContents.openDevTools({ mode: 'detach' })
+      }
     })
 
     // Persist window bounds on resize and move with 1s debounce (D-14)

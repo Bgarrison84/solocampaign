@@ -62,7 +62,9 @@ export function StepBackground({ wizardState, backgrounds, onChange }: StepBackg
               >
                 <p className="text-base font-semibold leading-tight">{bg.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {bg.skillProficiencies.join(', ')}
+                  {bg.skillProficiencies
+                    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                    .join(', ')}
                 </p>
               </button>
             )
@@ -80,7 +82,10 @@ export function StepBackground({ wizardState, backgrounds, onChange }: StepBackg
                 {displayBg.skillProficiencies.length > 0 && (
                   <div>
                     <span className="font-semibold">Auto-granted: </span>
-                    {displayBg.skillProficiencies.join(', ')} (skills)
+                    {displayBg.skillProficiencies
+                      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                      .join(', ')}{' '}
+                    (skills)
                   </div>
                 )}
                 {displayBg.toolProficiencies.length > 0 ? (

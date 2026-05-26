@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { t } from '../_base'
 import Store from 'electron-store'
+import { secretStorage } from '../../secrets'
 
 /**
  * Per-campaign panel size store backed by electron-store.
@@ -27,8 +28,21 @@ const panelSizeSchema = z.object({
  *
  * Provides per-campaign panel size persistence via electron-store (not SQLite).
  * Panel size data is UI preference, not campaign data — electron-store is correct per D-14.
+ *
+ * Also exposes isEncryptionAvailable for the D-24 headless-Linux safeStorage warning.
  */
 export const prefsRouter = t.router({
+  /**
+   * Report whether safeStorage provides secure encryption on this platform.
+   * Returns false on headless Linux where the backend is basic_text (plaintext).
+   * Used by the AI config wizard to show a security warning (D-24).
+   * Calls SecretStorageService.isSecure() which checks both isEncryptionAvailable()
+   * AND getSelectedStorageBackend() !== 'basic_text'.
+   */
+  isEncryptionAvailable: t.procedure.query(() => {
+    return secretStorage.isSecure()
+  }),
+
   panelSize: t.router({
     /**
      * Get persisted panel sizes for a campaign.

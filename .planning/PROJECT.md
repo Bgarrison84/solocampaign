@@ -12,7 +12,12 @@ A player with no group and no DM can sit down, load SoloCampaign, and play a ful
 
 ### Validated
 
-(None yet — ship to validate)
+**Phase 2: Character Domain & Live Sheet** (2026-05-25)
+- [x] **CHAR-01**: Step-by-step character builder — race, class, background, equipment from SRD content (6-step wizard with auto-calculated HP/AC/spell slots)
+- [x] **CHAR-06**: Character portrait image imported from local file (OS picker, resized, persisted in userData)
+- [x] **CHAR-07**: Live HP, spell slots, death saves, inspiration, XP, currency, and conditions tracking on character sheet panel with zero-debounce optimistic persistence
+- [x] **CHAR-09**: Attuned magic items tracked (attunement limit displayed, not enforced)
+- [x] **WORLD-02**: Campaign cover image and character portrait imported from local files
 
 ### Active
 

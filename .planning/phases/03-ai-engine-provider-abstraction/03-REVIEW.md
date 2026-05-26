@@ -38,7 +38,7 @@ findings:
   warning: 6
   info: 3
   total: 15
-status: issues_found
+status: critical_fixed
 ---
 
 # Phase 03: Code Review Report
@@ -58,7 +58,7 @@ However, six blockers were identified. Two are correctness crashes: a null-deref
 
 ## Critical Issues
 
-### CR-01: `buildModel` crashes with non-null assertion on `endpointUrl` for Gemini provider
+### CR-01: `buildModel` crashes with non-null assertion on `endpointUrl` for Gemini provider ✓ FIXED (c62d97f)
 
 **File:** `src/main/ai/llmProvider.ts:49`
 **Issue:** `buildModel` has a non-null assertion `config.endpointUrl!` on the last line of the `openai-compatible` branch, but the Gemini path exits early at line 44. The problem is that the fallback provider config in `src/main/index.ts:214` always uses `campaign.providerType` for the fallback provider type — even when that type is `'gemini'`. If a user has `providerType: 'gemini'` and configures a fallback, the fallback config will be constructed with `type: 'gemini'` but `endpointUrl: campaign.fallbackEndpointUrl` (an URL that only makes sense for openai-compatible). Conversely, if `providerType` is `'openai-compatible'` and `endpointUrl` is `null` or `undefined` in the DB (the column is nullable per schema.ts line 14), `config.endpointUrl!` will forcibly pass `undefined` as a string to `createOpenAICompatible`, causing an SDK-level failure or throwing inside the provider at runtime. The `!` operator suppresses TypeScript's safety check but does not guarantee a non-null value.
@@ -83,7 +83,7 @@ if (providerConfig.type === 'openai-compatible' && !providerConfig.endpointUrl) 
 
 ---
 
-### CR-02: `cancelStream` tRPC procedure does not cancel the running stream
+### CR-02: `cancelStream` tRPC procedure does not cancel the running stream ✓ FIXED (0c33f5f)
 
 **File:** `src/main/trpc/routers/ai.ts:54-59`
 **Issue:** The `cancelStream` procedure only calls `sessionFallbackMap.clearFallback(campaignId)`. There is no `AbortController` or any mechanism to interrupt the `streamText` call or the `for await` loop in `llmProvider.ts`. Calling `cancelStream` clears the fallback flag but the active `streamText` loop in the main process continues running, consuming AI provider quota, appending tokens to `assistantBuffer`, and calling `event.sender.send('ai:token', ...)` on a potentially dead or re-navigated renderer WebContents. The docstring says "cancel the active stream" but the implementation cannot fulfil that contract.
@@ -119,7 +119,7 @@ cancelStream: t.procedure
 
 ---
 
-### CR-03: `onError` callback type mismatch between preload, type declaration, and hook
+### CR-03: `onError` callback type mismatch between preload, type declaration, and hook ✓ FIXED (13db955)
 
 **File:** `src/preload/index.ts:57` / `src/renderer/src/types/aiStream.d.ts:47` / `src/renderer/src/hooks/useAiStream.ts:58`
 **Issue:** There is a three-way type inconsistency that causes a runtime crash.
@@ -143,7 +143,7 @@ onError: (cb: (err: { message: string }) => void) => {
 
 ---
 
-### CR-04: `referenceDocs` returned from DB as JSON string, UI treats it as array — silent data loss
+### CR-04: `referenceDocs` returned from DB as JSON string, UI treats it as array — silent data loss ✓ FIXED (98572c5)
 
 **File:** `src/renderer/src/components/AiSettingsModal.tsx:83` / `src/main/db/schema.ts:15`
 **Issue:** `campaigns.referenceDocs` is stored as a `text` column (JSON string, e.g. `'["foo","bar"]'`). The tRPC `campaigns.get` procedure returns the raw `Campaign` row with `referenceDocs: string`. In `AiSettingsModal.tsx:83`:
@@ -176,7 +176,7 @@ Alternatively, apply `JSON.parse` in `AiSettingsModal` when `typeof campaign.ref
 
 ---
 
-### CR-05: `assistantBuffer` is never reset between retries — duplicate content on retry
+### CR-05: `assistantBuffer` is never reset between retries — duplicate content on retry ✓ FIXED (c62d97f)
 
 **File:** `src/main/index.ts:269` and `src/main/index.ts:287`
 **Issue:** `assistantBuffer` is initialised once before `withRetry(...)`. If the first attempt streams 200 tokens and then errors, `assistantBuffer` contains those 200 tokens. The second retry calls `streamChat` fresh, and on success, `onFinish` calls `messagesRepo.insert` with `assistantBuffer` that includes the partial tokens from attempt 1 prepended to the full tokens from attempt 2. The persisted assistant message is therefore duplicated/corrupted.
@@ -198,7 +198,7 @@ await withRetry(
 
 ---
 
-### CR-06: `event.sender.send` called after renderer WebContents may be destroyed
+### CR-06: `event.sender.send` called after renderer WebContents may be destroyed ✓ FIXED (c62d97f)
 
 **File:** `src/main/index.ts:283,290,315`
 **Issue:** The `ai:send-message` handler is `async` and can take many seconds (up to 3 retries × 15s timeout = 45+ seconds). During that time the user can navigate away, close the campaign, or the window can be closed. When `event.sender.send('ai:token', chunk)` executes on a destroyed WebContents, Electron throws an unhandled error in the main process: `"Error: Object has been destroyed"`. This can crash the IPC handler loop. The `mainWindow.isDestroyed()` check at line 138 applies only to `boundsStore.set`, not to the streaming callback.

@@ -103,7 +103,7 @@ Plans:
 - [x] 03-02-PLAN.md — AI backend: streamChat (Vercel AI SDK wrapper) + retryHandler + referenceDocLoader + ContextBuilder v1 ✓ 2026-05-26
 - [x] 03-03-PLAN.md — IPC + tRPC bridge: ai:send-message streaming channel, window.aiStream, ai router, campaigns.updateAiConfig, prefs.isEncryptionAvailable, session fallback state ✓ 2026-05-26
 - [x] 03-04-PLAN.md — Renderer story scroll + chat input + useAiStream hook + inline error block + left-panel wiring ✓ 2026-05-26
-- [ ] 03-05-PLAN.md — 3-step creation wizard + AiProviderFields + reference doc select + gear AI Settings modal
+- [x] 03-05-PLAN.md — 3-step creation wizard + AiProviderFields + reference doc select + gear AI Settings modal ✓ 2026-05-26
 - [ ] 03-06-PLAN.md — electron-builder reference-doc bundling + AI metrics wiring + CSP documentation
 **Wave structure:**
   - Wave 0: 03-01 (foundation — schema, deps, migration, test scaffolds)

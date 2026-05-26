@@ -14,6 +14,13 @@ import { streamChat } from './ai/llmProvider'
 import { withRetry } from './ai/retryHandler'
 import { sessionFallbackMap } from './ai/aiSessionState'
 import type { LLMProviderConfig } from './ai/llmProvider'
+import {
+  logLatencyToFirstToken,
+  logTokensReceived,
+  logStreamError,
+  logFallbackActivated,
+  logSystemPromptLength,
+} from './ai/aiMetrics'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -63,6 +70,19 @@ if (!gotLock) {
           responseHeaders: {
             ...details.responseHeaders,
             'Content-Security-Policy': [
+              // NOTE (Pitfall 8 / AI-SPEC §3 / T-03-06-02):
+              // connect-src intentionally does NOT include arbitrary user-configured LLM endpoints
+              // (e.g. http://192.168.1.x:*, https://openrouter.ai, etc.).
+              //
+              // ALL provider HTTP calls are made from the MAIN process (Node.js fetch, not the
+              // sandboxed renderer). The renderer never contacts LLM providers directly —
+              // it only talks to ipcMain via contextBridge. Therefore, connect-src does NOT
+              // gate those calls and must NOT be broadened to '*' (which would weaken the
+              // renderer's network posture for zero benefit).
+              //
+              // Known limitation: a user running a remote LAN Ollama (e.g. 192.168.1.100:11434)
+              // will not be blocked by CSP — the call works fine via main-process fetch.
+              // Do not "fix" this by adding '*' or broad CIDR ranges to connect-src.
               "default-src 'self'; " +
               "script-src 'self'; " +
               "style-src 'self' 'unsafe-inline'; " +
@@ -233,11 +253,19 @@ if (!gotLock) {
         },
       })
 
+      // AI-SPEC §7 metric: ai.context.system_prompt_length (character count, not content)
+      logSystemPromptLength(systemPrompt.length)
+
+      // AI-SPEC §7 metric: ai.fallback.activated — logged once when session switches to fallback
+      if (shouldUseFallback) {
+        logFallbackActivated()
+      }
+
       // ── Step 6: Stream with retry ─────────────────────────────────────────────
       // AI-SPEC §7 metrics: track latency_to_first_token and error_count
       const streamStartMs = Date.now()
       let firstTokenMs: number | null = null
-      let errorCount = 0
+      let tokenCount = 0
       let assistantBuffer = ''
 
       try {
@@ -247,21 +275,18 @@ if (!gotLock) {
               onToken: (chunk) => {
                 if (firstTokenMs === null) {
                   firstTokenMs = Date.now() - streamStartMs
-                  log.info('[ai:send-message] First token latency:', firstTokenMs, 'ms', {
-                    systemPromptLength: systemPrompt.length,
-                    messageCount: messages.length,
-                  })
+                  // AI-SPEC §7 metric: ai.stream.latency_to_first_token_ms
+                  logLatencyToFirstToken(firstTokenMs)
                 }
+                tokenCount++
                 assistantBuffer += chunk
                 event.sender.send('ai:token', chunk)
               },
               onFinish: () => {
                 // Persist assistant message
                 messagesRepo.insert({ campaignId, role: 'assistant', content: assistantBuffer })
-                log.info('[ai:send-message] Stream complete', {
-                  latencyToFirstTokenMs: firstTokenMs,
-                  totalContentLength: assistantBuffer.length,
-                })
+                // AI-SPEC §7 metric: ai.stream.total_tokens_received
+                logTokensReceived(tokenCount)
                 event.sender.send('ai:finish')
               },
               onError: (err) => {
@@ -272,11 +297,16 @@ if (!gotLock) {
           { maxAttempts: 3, baseDelayMs: 1000 },
         )
       } catch (err) {
-        errorCount++
+        // Classify error coarsely — never log key or provider body (T-03-03-04)
+        const errMsg = err instanceof Error ? err.message : ''
+        const errorType = errMsg.includes('time') ? 'timeout'
+          : errMsg.includes('network') || errMsg.includes('fetch') ? 'network'
+          : 'api'
+        // AI-SPEC §7 metric: ai.stream.error_count
+        logStreamError(errorType)
         log.error('[ai:send-message] Stream failed after retries', {
-          errorCount,
-          errorMessage: err instanceof Error ? err.message : 'Unknown error',
-          // No stack trace / key / provider body sent to renderer — T-03-03-04
+          errorType,
+          // No stack trace / key / provider body logged — T-03-03-04
         })
         // Generic error message to renderer (T-03-03-04: no stack, no key leak)
         const genericMessage = err instanceof Error

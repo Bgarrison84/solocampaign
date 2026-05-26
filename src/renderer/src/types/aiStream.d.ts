@@ -1,0 +1,62 @@
+/**
+ * Window interface augmentation for window.aiStream and window.platform.
+ *
+ * window.aiStream is the narrow contextBridge surface for the AI streaming IPC channel.
+ * See src/preload/index.ts for the implementation and security notes.
+ *
+ * Security (D-23):
+ *   - sendMessage transmits only campaignId + content (no API key)
+ *   - onToken/onFinish/onError receive only tokens and generic error strings
+ *   - removeAllListeners MUST be called in useEffect cleanup to prevent listener stacking (Pitfall 2)
+ */
+
+export {}
+
+declare global {
+  interface Window {
+    /**
+     * Narrow IPC surface for AI streaming.
+     * Exposed by preload/index.ts via contextBridge.exposeInMainWorld('aiStream', ...).
+     */
+    aiStream: {
+      /**
+       * Send a message to the AI and initiate streaming.
+       * Register onToken/onFinish/onError BEFORE calling sendMessage.
+       * Returns { started: true } when the stream has been initiated.
+       */
+      sendMessage(payload: {
+        campaignId: string
+        content: string
+        useFallback?: boolean
+      }): Promise<{ started: boolean }>
+
+      /**
+       * Register a callback to receive streamed token chunks.
+       */
+      onToken(cb: (token: string) => void): void
+
+      /**
+       * Register a callback fired when the stream completes successfully.
+       */
+      onFinish(cb: () => void): void
+
+      /**
+       * Register a callback fired when the stream fails after retries.
+       * err.message is a generic string — no API key, stack trace, or provider body.
+       */
+      onError(cb: (err: { message: string }) => void): void
+
+      /**
+       * Remove all listeners for ai:token, ai:finish, ai:error.
+       * MUST be called in React useEffect cleanup to prevent listener stacking.
+       */
+      removeAllListeners(): void
+    }
+
+    /**
+     * Current process platform, exposed by preload for title-bar rendering.
+     * Consolidates the previously untyped window.platform reference.
+     */
+    platform: NodeJS.Platform
+  }
+}

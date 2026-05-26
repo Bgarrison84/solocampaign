@@ -76,6 +76,12 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Blinking cursor animation for the AI streaming state (D-13 / UI-SPEC §S1a) */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

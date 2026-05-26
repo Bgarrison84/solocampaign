@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Camera, ChevronLeft, Trash2 } from 'lucide-react'
+import { Camera, ChevronLeft, SlidersHorizontal, Trash2 } from 'lucide-react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import { Button } from '../components/ui/button'
@@ -12,12 +12,19 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../components/ui/dialog'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from '../components/ui/tooltip'
 import { trpc } from '../lib/trpc'
 import { usePanelSizeStore } from '../stores/panelSizeStore'
 import { useWindowStore } from '../stores/windowStore'
 import { CharacterSheetTab } from '../components/CharacterSheetTab'
 import { StoryScrollPanel } from '../components/StoryScrollPanel'
 import { ChatInputArea } from '../components/ChatInputArea'
+import { AiSettingsModal } from '../components/AiSettingsModal'
 import { useAiStream } from '../hooks/useAiStream'
 
 export function CampaignViewScreen() {
@@ -36,11 +43,10 @@ export function CampaignViewScreen() {
   // Ref to imperatively scroll the story scroll to bottom after player sends a message
   const scrollToBottomRef = useRef<(() => void) | null>(null)
 
-  // AiSettingsModal open state — plan 03-05 will wire the actual modal; for now a no-op stub
-  const [_showAiSettings, _setShowAiSettings] = useState(false)
+  // AiSettingsModal open state — plan 03-05: wired to the actual AiSettingsModal
+  const [showAiSettings, setShowAiSettings] = useState(false)
   const handleOpenSettings = useCallback(() => {
-    // Stub: plan 03-05 connects the AiSettingsModal here
-    _setShowAiSettings(true)
+    setShowAiSettings(true)
   }, [])
 
   // Track the last user message content to support Retry and Switch-to-fallback (D-18/D-19)
@@ -142,6 +148,25 @@ export function CampaignViewScreen() {
           Campaigns
         </Button>
         <span className="flex-1" />
+        <TooltipProvider>
+          <Tooltip delayDuration={600}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleOpenSettings}
+                className="gap-1 text-muted-foreground hover:text-foreground transition-colors duration-200"
+                aria-describedby="ai-settings-tooltip"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                AI Settings
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent id="ai-settings-tooltip">
+              Configure AI provider, DM personality, and rules
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <Button
           variant="ghost"
           size="sm"
@@ -299,6 +324,15 @@ export function CampaignViewScreen() {
         </Panel>
       </PanelGroup>
     </div>
+
+    {/* AI Settings modal — opened by gear button in action bar or onOpenSettings from chat area */}
+    {id && (
+      <AiSettingsModal
+        campaignId={id}
+        open={showAiSettings}
+        onClose={() => setShowAiSettings(false)}
+      />
+    )}
 
     {/* Delete confirmation dialog */}
     <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>

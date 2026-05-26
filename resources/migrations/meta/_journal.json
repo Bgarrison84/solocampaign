@@ -15,6 +15,13 @@
       "when": 1779687847136,
       "tag": "0001_far_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1779804898195,
+      "tag": "0002_handy_spectrum",
+      "breakpoints": true
     }
   ]
 }

@@ -66,5 +66,16 @@ blocked: 0
   reason: "User reported: Pips start hollow/empty, unable to click and show it gold/filled"
   severity: major
   test: 6
-  artifacts: []
-  missing: []
+  artifacts:
+    - src/main/trpc/routers/characters.ts (buildSpellSlots call)
+    - src/main/db/charactersRepo.ts (createWithResources, spellSlots storage)
+    - resources/spells-by-class.json (content data)
+  root_cause: |
+    Characters created before the content.ts .toLowerCase() fix have spellSlots='{}' in the DB
+    because the class name lookup in buildSpellSlots failed (e.g. 'Wizard' vs 'wizard').
+    The component shows 'Not a spellcaster' / no pips rather than gold pips.
+    New characters created after the fix work correctly.
+    Existing characters need a backfill: recompute spell slots from content data and update the DB.
+  missing:
+    - A backfill/repair tRPC procedure that recomputes spell slots for characters with spellSlots='{}'
+    - Or a one-time migration that patches existing character_resources rows

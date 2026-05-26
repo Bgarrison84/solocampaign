@@ -64,6 +64,11 @@ vi.mock('../../ai/aiSessionState', () => ({
     isFallbackActive: vi.fn(() => false),
     clearFallback: vi.fn(),
   },
+  sessionAbortMap: {
+    setAbortController: vi.fn(),
+    abortStream: vi.fn(),
+    clearAbortController: vi.fn(),
+  },
 }))
 
 const TEST_CAMPAIGN_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'

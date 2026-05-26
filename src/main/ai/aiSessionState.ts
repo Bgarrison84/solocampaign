@@ -16,6 +16,12 @@
 const _fallbackMap = new Map<string, boolean>()
 
 /**
+ * Map<campaignId, AbortController> — one controller per active stream.
+ * Replaced each time a new stream starts; deleted when the stream ends or is cancelled.
+ */
+const _abortMap = new Map<string, AbortController>()
+
+/**
  * Mark that the user wants to use the fallback provider for this session.
  */
 function setFallbackActive(campaignId: string): void {
@@ -37,12 +43,34 @@ function clearFallback(campaignId: string): void {
   _fallbackMap.delete(campaignId)
 }
 
+/** Register an AbortController for the active stream of a campaign. */
+function setAbortController(campaignId: string, controller: AbortController): void {
+  _abortMap.set(campaignId, controller)
+}
+
+/** Abort and remove the active stream controller for a campaign. */
+function abortStream(campaignId: string): void {
+  _abortMap.get(campaignId)?.abort()
+  _abortMap.delete(campaignId)
+}
+
+/** Remove the abort controller without aborting (call when stream finishes normally). */
+function clearAbortController(campaignId: string): void {
+  _abortMap.delete(campaignId)
+}
+
 /**
- * Exported accessor bundle — the Map itself is not exported to prevent
- * external mutation that bypasses the clearFallback cleanup path.
+ * Exported accessor bundle — the Maps themselves are not exported to prevent
+ * external mutation that bypasses the cleanup paths.
  */
 export const sessionFallbackMap = {
   setFallbackActive,
   isFallbackActive,
   clearFallback,
+} as const
+
+export const sessionAbortMap = {
+  setAbortController,
+  abortStream,
+  clearAbortController,
 } as const

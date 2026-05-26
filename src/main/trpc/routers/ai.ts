@@ -18,7 +18,7 @@ import { t } from '../_base'
 import { campaignIdSchema } from '../schemas'
 import { listReferenceDocs } from '../../ai/referenceDocLoader'
 import { messagesRepo } from '../../db/messagesRepo'
-import { sessionFallbackMap } from '../../ai/aiSessionState'
+import { sessionFallbackMap, sessionAbortMap } from '../../ai/aiSessionState'
 
 export const aiRouter = t.router({
   /**
@@ -49,11 +49,12 @@ export const aiRouter = t.router({
 
   /**
    * Cancel the active stream for a campaign.
-   * In-memory only — clears the session fallback state (D-19).
+   * Aborts the running streamText call via AbortController and clears fallback state (D-19).
    */
   cancelStream: t.procedure
     .input(z.object({ campaignId: campaignIdSchema }))
     .mutation(({ input }) => {
+      sessionAbortMap.abortStream(input.campaignId)
       sessionFallbackMap.clearFallback(input.campaignId)
       return { cancelled: true }
     }),

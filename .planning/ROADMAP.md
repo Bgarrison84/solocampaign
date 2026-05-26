@@ -100,7 +100,7 @@ Plans:
 **Plans:** 6 plans
 Plans:
 - [x] 03-01-PLAN.md — Wave 0 foundation: install AI/UI deps + shadcn components, extend schema (AI config columns + messages table), generate migration 0002, messagesRepo, Wave 0 test stubs ✓ 2026-05-26
-- [ ] 03-02-PLAN.md — AI backend: streamChat (Vercel AI SDK wrapper) + retryHandler + referenceDocLoader + ContextBuilder v1
+- [x] 03-02-PLAN.md — AI backend: streamChat (Vercel AI SDK wrapper) + retryHandler + referenceDocLoader + ContextBuilder v1 ✓ 2026-05-26
 - [ ] 03-03-PLAN.md — IPC + tRPC bridge: ai:send-message streaming channel, window.aiStream, ai router, campaigns.updateAiConfig, prefs.isEncryptionAvailable, session fallback state
 - [ ] 03-04-PLAN.md — Renderer story scroll + chat input + useAiStream hook + inline error block + left-panel wiring
 - [ ] 03-05-PLAN.md — 3-step creation wizard + AiProviderFields + reference doc select + gear AI Settings modal

@@ -886,7 +886,7 @@ safeSend('ai:finish', { isL1Overflow: finalIsL1Overflow })
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **D-06 Detection Timing — When Is "Unsummarized Session" Checked?**
    - What we know: `isSummarized = false` on sessions where `ended_at IS NOT NULL`.

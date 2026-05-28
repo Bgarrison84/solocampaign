@@ -25,10 +25,10 @@ progress:
 
 ## Current Position
 
-Phase: 4 (Long-Campaign Memory & Session Flow) — IN PROGRESS (3/6 plans)
+Phase: 4 (Long-Campaign Memory & Session Flow) — IN PROGRESS (4/6 plans)
 **Milestone:** v1
 **Phase:** Phase 4 — Long-Campaign Memory & Session Flow
-**Status:** Phase 4 in progress. Wave 3 complete: recapGenerator, sessions tRPC router (7 procedures), window.sessionRecap IPC surface, app.before-quit handler.
+**Status:** Phase 4 in progress. Wave 4 complete: ai:send-message fully session-aware (sessionContext + rollingSummary + isL1Overflow), D-06 pre-check in sessions.start.
 
 **Progress:** [██████░░░░░░░░░░░░░░] 33% (3/9 phases complete)
 

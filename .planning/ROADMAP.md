@@ -128,10 +128,10 @@ Plans:
   2. User can end a session and review an AI-generated recap, add personal notes, and save it to the session journal
   3. When the user starts session N+1, the AI demonstrably references events from earlier sessions (verified via prompt inspection that summaries are injected)
   4. A campaign played across 10+ sessions does not exhibit context overflow errors or token-budget collapse
-**Plans:** 1/6 plans complete
+**Plans:** 2/6 plans complete
 Plans:
 - [x] 04-01-PLAN.md — Schema extension (sessions table + migration 0003), sessionsRepo, scroll-area component, Wave 0 test stubs
-- [ ] 04-02-PLAN.md — ContextBuilder v2 with three-layer memory (L1/L2/L3) + aiSessionState
+- [x] 04-02-PLAN.md — ContextBuilder v2 with three-layer memory (L1/L2/L3) + aiSessionState
 - [ ] 04-03-PLAN.md — RecapGenerator, sessions tRPC router, IPC surface, app.before-quit handler
 - [ ] 04-04-PLAN.md — Extend ai:send-message handler for session awareness + D-06 pre-check
 - [ ] 04-05-PLAN.md — Session UI: SessionStartModal, EndSessionModal, sessionStore, chat lock, L1 overflow warning

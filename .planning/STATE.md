@@ -25,10 +25,10 @@ progress:
 
 ## Current Position
 
-Phase: 4 (Long-Campaign Memory & Session Flow) — IN PROGRESS (1/6 plans)
+Phase: 4 (Long-Campaign Memory & Session Flow) — IN PROGRESS (2/6 plans)
 **Milestone:** v1
 **Phase:** Phase 4 — Long-Campaign Memory & Session Flow
-**Status:** Phase 4 in progress. Wave 1 complete: sessions schema + migration 0003 + sessionsRepo + scroll-area.
+**Status:** Phase 4 in progress. Wave 2 complete: ContextBuilder v2 (L1/L2/L3 three-layer memory) + aiSessionState sessionActiveMap.
 
 **Progress:** [██████░░░░░░░░░░░░░░] 33% (3/9 phases complete)
 

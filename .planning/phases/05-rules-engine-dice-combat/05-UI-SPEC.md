@@ -61,24 +61,26 @@ Inherited from Phase 1, unchanged. Multiples of 4 only.
 - Combatant row expanded area: `px-4 py-3` (16px horizontal, 12px vertical).
 - Dice roller popover body: `p-3` (12px = 3×4 — tight grid of die buttons).
 - Die button size: `h-9 w-9` (36px = 9×4) — square touch targets for the 7 die-type buttons.
-- HP bar in combat tracker row: `h-1.5` (6px = 1.5×4 — ultra-thin progress bar, purely informational beside the HP fraction text).
+- HP bar in combat tracker row: `h-2` (8px — thin progress bar, purely informational beside the HP fraction text; stays on the 4-point grid).
 - showDiceRoll chip in StoryScrollPanel: `px-3 py-2` (12px horizontal, 8px vertical).
-- Toast chip: `px-3 py-1.5` (12px horizontal, 6px vertical = 1.5×4).
+- Toast chip: `px-3 py-1` (12px horizontal, 4px vertical — pill shape; minimum vertical padding).
 - Level-up banner: `px-4 py-3` (16px horizontal, 12px vertical = 3×4) — same cadence as Phase 4 journal card collapsed state.
 - Level-up modal width: `max-w-[480px]` — same as Session Start modal (Phase 4).
 - Rest picker dialog width: `max-w-[400px]` — narrower than level-up; two-button choice only.
 - Short rest hit die modal width: `max-w-[440px]`.
 - Spell list section spell card expanded area: `px-4 py-3` (16px horizontal, 12px vertical).
 - "Add Combatant" form: `p-3 gap-3` (12px padding, 12px gap).
+- Icon sizes (`h-3.5 w-3.5` = 14px): lucide-react icons at 14px are a standard cross-phase convention for compact UI chrome (chevrons, inline chip icons). This is the single permitted exception to the 4-point grid for icon sizing — it applies only to `h-3.5 w-3.5` on `<svg>`/lucide icon elements, not to any padding, margin, or gap utility.
 
 ---
 
 ## Typography
 
-Inherited from Phase 1 (4 roles, 2 weights). Phase 5 adds no new type roles.
+Inherited from Phase 1. Phase 5 adds no new type roles; the existing 4-role table is updated to include the Micro role established for all sub-14px text.
 
 | Role | Size | Weight | Line Height | Phase 5 Usage |
 |------|------|--------|-------------|---------------|
+| Micro | 12px | 400 | 1.4 (17px) | Condition badges in combat rows, dice breakdown text, spell card metadata (cast time / range / duration / components), die button labels, C/R concentration/ritual flags in spell rows, new spell slots table in Level-Up modal, subclass deferred note |
 | Body | 14px | 400 | 1.6 (22px) | Combatant name in list; spell name in list; spell card description text; level-up modal body text; rest dialog body text; showDiceRoll chip breakdown text; toast chip text |
 | Label | 14px | 600 | 1.4 (20px) | Combatant row HP fraction ("14 / 28"); initiative order number; "Start Combat" / "Rest" button labels; spell level group header (e.g., "1st Level"); "Level Up" banner CTA text; dice expression input label |
 | Heading | 20px | 600 | 1.3 (26px) | Level-up modal title ("Level Up"); rest picker title ("Take a Rest"); hit die modal title ("Short Rest — Hit Dice"); Combat Tracker section heading |
@@ -88,14 +90,18 @@ Inherited from Phase 1 (4 roles, 2 weights). Phase 5 adds no new type roles.
 
 - Dice expression text in popover input: 14px / 400 / `font-mono` (JetBrains Mono) — monospace because it is a technical expression field.
 - showDiceRoll chip result number: 14px / 600 / `font-mono` — the **14** in "1d20+3 = **14**" is bold + monospace.
-- showDiceRoll chip breakdown: 12px / 400 / `font-mono` / `--muted-foreground` — `[11]+3` in parenthetical below.
+- showDiceRoll chip breakdown: 12px / 400 / `font-mono` / `--muted-foreground` — `[11]+3` in parenthetical below. Use `text-xs` (12px Micro role).
 - Hit die roll results in short rest modal: 14px / 400 / `font-mono` — per-die results shown in monospace.
 - System event message in StoryScrollPanel (`[System: Name reached Level 5!]`): 14px / 400 / `text-amber-400 italic` — consistent with the amber warning family from Phase 4.
-- "Subclass selection will be available in a future update." note in Level-Up modal: 12px / 400 / `--muted-foreground` / italic.
-- Die button labels (d4, d6, d8…): 12px / 600 — compact, above the die icon.
-- Spell cast time / range / duration metadata in expanded spell card: 12px / 400 / `--muted-foreground`.
+- "Subclass selection will be available in a future update." note in Level-Up modal: 12px / 400 / `--muted-foreground` / italic — Micro role, use `text-xs`.
+- Die button labels (d4, d6, d8…): 12px / 600 — Micro role, use `text-xs font-semibold`.
+- Spell cast time / range / duration metadata in expanded spell card: 12px / 400 / `--muted-foreground` — Micro role, use `text-xs`.
 - Level-Up HP option labels ("Roll d8" / "Take average 5"): 14px / 600.
-- New spell slots table in Level-Up modal: 12px / 400 / `--muted-foreground`.
+- New spell slots table in Level-Up modal: 12px / 400 / `--muted-foreground` — Micro role, use `text-xs`.
+- Concentration flag `C` and Ritual flag `R` in spell rows: 12px / 600 / uppercase — Micro role, use `text-xs font-semibold`.
+- Cast time abbreviation in collapsed spell row: 12px / 400 / `--muted-foreground` — Micro role, use `text-xs`.
+- Expression helper text (`e.g. 4d6kh3, d20+5`) and invalid expression error: 12px — Micro role, use `text-xs`.
+- Concentrating pill label: 12px / 600 / `text-amber-400` — Micro role, use `text-xs font-semibold`.
 
 ---
 
@@ -147,15 +153,15 @@ OKLCH dark palette — inherited from Phase 1. Phase 5 introduces no new color t
 
 **Color application for specific Phase 5 elements:**
 
-- **"Start Combat" button (no combat active):** `Button variant="outline" size="sm" className="gap-1.5"` — `border-border text-foreground hover:bg-secondary hover:text-foreground`. Neutral, not gold — same principle as "Start Session".
-- **"End Combat" button (combat active):** `Button variant="outline" size="sm" className="gap-1.5 border-destructive/60 text-destructive hover:bg-destructive/10 hover:border-destructive"` — muted destructive at rest, full destructive on hover.
-- **"Rest" button:** `Button variant="outline" size="sm" className="gap-1.5"` — `border-border text-foreground hover:bg-secondary` — neutral outline. Tooltip: "Take a short or long rest".
+- **"Start Combat" button (no combat active):** `Button variant="outline" size="sm" className="gap-2"` — `border-border text-foreground hover:bg-secondary hover:text-foreground`. Neutral, not gold — same principle as "Start Session".
+- **"End Combat" button (combat active):** `Button variant="outline" size="sm" className="gap-2 border-destructive/60 text-destructive hover:bg-destructive/10 hover:border-destructive"` — muted destructive at rest, full destructive on hover.
+- **"Rest" button:** `Button variant="outline" size="sm" className="gap-2"` — `border-border text-foreground hover:bg-secondary` — neutral outline. Tooltip: "Take a short or long rest".
 - **Level-up amber banner:** `bg-amber-950/30 border border-amber-900/40 rounded-lg px-4 py-3 flex items-center gap-3` — placed at top of CharacterSheetTab content, above the sheet sections, below the tab strip.
 - **showDiceRoll chip:** `bg-amber-950/40 border border-amber-800/50 rounded-md px-3 py-2 flex items-center gap-2` — a subtle dark amber block in the story scroll flow.
 - **Combatant row (player character, collapsed):** `bg-card border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-secondary transition-colors border-l-2 border-l-primary/60` — the left border in gold distinguishes PC from enemies.
 - **Combatant row (enemy, collapsed):** `bg-card border border-border rounded-lg px-3 py-2 cursor-pointer hover:bg-secondary transition-colors` — no left accent.
 - **Combatant row (active turn, any):** `bg-primary/10 border border-primary/40 rounded-lg px-3 py-2 cursor-pointer transition-colors` — the gold tint marks whose turn it is.
-- **Toast mutation chips:** `bg-card border border-border rounded-full px-3 py-1.5 text-sm text-foreground shadow-md` — pill shape, neutral card surface, subtle shadow to lift above the panel content.
+- **Toast mutation chips:** `bg-card border border-border rounded-full px-3 py-1 text-sm text-foreground shadow-md` — pill shape, neutral card surface, subtle shadow to lift above the panel content.
 - **HP bar colors in combat tracker:** `bg-green-700` (hp > 50%), `bg-amber-500` (hp 25–50%), `bg-red-600` (hp < 25%), `bg-muted` (background track).
 - **Concentration warning dialog border:** `border-amber-600/60` on the `DialogContent` — subtle amber to signal a consequential interruption.
 
@@ -207,7 +213,7 @@ When combat is active, "Start Combat" becomes "End Combat" in the same position:
 ```
 
 **"Start Combat" button spec:**
-- Component: `<Button variant="outline" size="sm" className="gap-1.5" onClick={handleStartCombat}>`
+- Component: `<Button variant="outline" size="sm" className="gap-2" onClick={handleStartCombat}>`
 - Icon: `<Swords className="h-4 w-4" />` (lucide-react `Swords`)
 - Label: `"Start Combat"` — visible text
 - Color: neutral outline — `border-border text-foreground hover:bg-secondary`
@@ -216,7 +222,7 @@ When combat is active, "Start Combat" becomes "End Combat" in the same position:
 - Disabled condition: none — always clickable; clicking while already in combat shows "End Combat" instead
 
 **"End Combat" button spec:**
-- Component: `<Button variant="outline" size="sm" className="gap-1.5 border-destructive/60 text-destructive hover:bg-destructive/10 hover:border-destructive" onClick={handleEndCombat}>`
+- Component: `<Button variant="outline" size="sm" className="gap-2 border-destructive/60 text-destructive hover:bg-destructive/10 hover:border-destructive" onClick={handleEndCombat}>`
 - Icon: `<Swords className="h-4 w-4" />` (same icon)
 - Label: `"End Combat"` — visible text
 - Color: muted destructive at rest, full destructive on hover
@@ -224,7 +230,7 @@ When combat is active, "Start Combat" becomes "End Combat" in the same position:
 - onClick: calls `combat.endCombat` mutation — marks all combatants `is_active = false`; writes `combat_ended` event; shows mutation chip `"Combat ended"`
 
 **"Rest" button spec:**
-- Component: `<Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowRestPicker(true)}>`
+- Component: `<Button variant="outline" size="sm" className="gap-2" onClick={() => setShowRestPicker(true)}>`
 - Icon: `<Moon className="h-4 w-4" />` (lucide-react `Moon`)
 - Label: `"Rest"` — visible text
 - Color: neutral outline — `border-border text-foreground hover:bg-secondary`
@@ -308,7 +314,7 @@ className="bg-card border border-border border-l-2 border-l-primary/60 rounded-l
 ```
 className="bg-primary/10 border border-primary/40 rounded-lg cursor-pointer transition-colors"
 ```
-- Active turn indicator: `<div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse mr-1" />` — tiny pulsing gold dot before the name
+- Active turn indicator: `<div className="w-2 h-2 rounded-full bg-primary animate-pulse mr-1" />` — tiny pulsing gold dot before the name
 
 **Combatant Row (collapsed — enemy):**
 ```
@@ -317,12 +323,12 @@ className="bg-card border border-border rounded-lg cursor-pointer hover:bg-secon
 
 **Collapsed row inner layout** (`className="px-3 py-2 flex items-center gap-3"`):
 - Initiative order: `<span className="text-sm font-semibold text-muted-foreground w-5 text-right shrink-0">{order}</span>`
-- Active indicator: `<div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />` — only shown when this is the active turn; otherwise `<div className="w-1.5 h-1.5 shrink-0" />` (invisible spacer to maintain layout).
+- Active indicator: `<div className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />` — only shown when this is the active turn; otherwise `<div className="w-2 h-2 shrink-0" />` (invisible spacer to maintain layout).
 - Name: `<span className="text-sm text-foreground flex-1 truncate font-semibold">{name}</span>` — font-semibold for PC rows, font-normal for enemies (distinguish PC from NPCs)
-- Condition badges (display-only, when conditions present): `<div className="flex gap-1">{conditions.map(c => <Badge key={c} variant="outline" className="text-[11px] px-1.5 py-0 h-5">{c}</Badge>)}</div>` — wraps only if ≤ 2 conditions; overflow hidden otherwise (expanded row shows all)
-- HP bar: `<div className="w-16 shrink-0"><Progress value={hpPercent} className="h-1.5" /></div>` — color applied via CSS vars based on percent
+- Condition badges (display-only, when conditions present): `<div className="flex gap-1">{conditions.map(c => <Badge key={c} variant="outline" className="text-xs px-1 py-0 h-5">{c}</Badge>)}</div>` — wraps only if ≤ 2 conditions; overflow hidden otherwise (expanded row shows all)
+- HP bar: `<div className="w-16 shrink-0"><Progress value={hpPercent} className="h-2" /></div>` — color applied via CSS vars based on percent
 - HP text: `<span className="text-sm font-semibold text-foreground w-16 text-right shrink-0">{hpCurrent} <span className="text-muted-foreground font-normal">/ {hpMax}</span></span>`
-- Chevron: `<ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-150 data-[state=open]:rotate-180 shrink-0" />`
+- Chevron: `<ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-150 data-[state=open]:rotate-180 shrink-0" />` — h-3.5/w-3.5 permitted as the icon exception documented in Spacing Scale
 
 **Expanded row layout** (inside `<CollapsibleContent>`):
 ```
@@ -343,7 +349,7 @@ className="border-t border-border px-4 py-3 bg-secondary flex flex-col gap-3 rou
 
 - Condition picker row:
   ```
-  <div className="flex flex-col gap-1.5">
+  <div className="flex flex-col gap-2">
     <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Conditions</span>
     <div className="flex flex-wrap gap-1">
       {ALL_CONDITIONS.map(condition => (
@@ -453,7 +459,7 @@ className="border-t border-border px-4 py-3 bg-secondary flex flex-col gap-3 rou
     key={die}
     variant="outline"
     size="sm"
-    className="h-9 w-9 p-0 text-xs font-semibold flex flex-col items-center justify-center gap-0.5"
+    className="h-9 w-9 p-0 text-xs font-semibold flex flex-col items-center justify-center gap-1"
     onClick={() => handleDieClick(die)}
     aria-label={`Roll ${die}`}
   >
@@ -461,7 +467,7 @@ className="border-t border-border px-4 py-3 bg-secondary flex flex-col gap-3 rou
   </Button>
 ))}
 ```
-- Container: `<div className="flex flex-wrap gap-1.5 justify-center">`
+- Container: `<div className="flex flex-wrap gap-2 justify-center">`
 - Clicking a die button: rolls immediately using the dice library; result formatted as `[d20: 14] `; prepended to textarea value; popover closes.
 
 **Expression input:**
@@ -477,7 +483,7 @@ className="border-t border-border px-4 py-3 bg-secondary flex flex-col gap-3 rou
   />
   <Button size="sm" className="h-8 shrink-0" onClick={handleExpressionRoll}>Roll</Button>
 </div>
-<p className="text-[11px] text-muted-foreground mt-1">e.g. 4d6kh3, d20+5</p>
+<p className="text-xs text-muted-foreground mt-1">e.g. 4d6kh3, d20+5</p>
 ```
 
 **Roll result format:**
@@ -496,7 +502,7 @@ className="border-t border-border px-4 py-3 bg-secondary flex flex-col gap-3 rou
 | Open roller | Click dice button | Popover opens above button |
 | Quick roll (die button) | Click d20 etc. | Roll computed; `[d20: 14] ` prepended to textarea; popover closes; textarea focused |
 | Expression roll | Click Roll or Enter in input | Expression evaluated; `[2d6+3: 11] ` prepended; popover closes; textarea focused |
-| Invalid expression | Bad notation in input | Roll button disabled; `<span className="text-[11px] text-destructive">Invalid expression</span>` shown below input |
+| Invalid expression | Bad notation in input | Roll button disabled; `<span className="text-xs text-destructive">Invalid expression</span>` shown below input |
 | Player deletes prefix | Backspace in textarea | Prefix removed; no dice event logged (D-21 — logging only on message send) |
 | Send with prefix | Player clicks Send | Message sends with `[d20: 14] I attack the goblin!`; `dice_roll` campaign_events row written with `{expression: 'd20', result: 14, breakdown: [14]}` |
 
@@ -526,7 +532,7 @@ className="border-t border-border px-4 py-3 bg-secondary flex flex-col gap-3 rou
   aria-label={`Dice roll: ${label}`}
 >
   <span aria-hidden="true" className="text-amber-400 shrink-0">🎲</span>
-  <div className="flex flex-col gap-0.5">
+  <div className="flex flex-col gap-1">
     <span className="text-foreground">
       <span className="font-semibold">{label}</span>
       {' — '}
@@ -535,7 +541,7 @@ className="border-t border-border px-4 py-3 bg-secondary flex flex-col gap-3 rou
       <span className="font-mono font-semibold text-amber-300">{result}</span>
     </span>
     {breakdown && breakdown.length > 0 && (
-      <span className="text-[12px] font-mono text-muted-foreground">
+      <span className="text-xs font-mono text-muted-foreground">
         ({formatBreakdown(breakdown)})
       </span>
     )}
@@ -587,7 +593,7 @@ Section header (CollapsibleTrigger):
     <h2 className="text-xl font-semibold text-foreground">Spells</h2>
   </div>
   {concentratingOn && (
-    <span className="text-[11px] font-semibold text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded-full">
+    <span className="text-xs font-semibold text-amber-400 bg-amber-950/40 px-2 py-1 rounded-full">
       Concentrating: {concentratingOn}
     </span>
   )}
@@ -630,7 +636,7 @@ Section header (CollapsibleTrigger):
     {spellLevel === 0 ? 'Cantrips' : `${ordinal(spellLevel)} Level`}
   </span>
   {spellLevel > 0 && slotsRemaining !== null && (
-    <span className="text-[12px] text-muted-foreground">
+    <span className="text-xs text-muted-foreground">
       ({slotsRemaining} slot{slotsRemaining !== 1 ? 's' : ''} remaining)
     </span>
   )}
@@ -644,12 +650,12 @@ Section header (CollapsibleTrigger):
     <ChevronRight className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-100 data-[state=open]:rotate-90 shrink-0" />
     <span className="flex-1 text-sm text-foreground font-semibold truncate">{spellName}</span>
     {isConcentration && (
-      <span className="text-[10px] font-semibold text-amber-400 uppercase tracking-wide shrink-0">C</span>
+      <span className="text-xs font-semibold text-amber-400 uppercase tracking-wide shrink-0">C</span>
     )}
     {isRitual && (
-      <span className="text-[10px] font-semibold text-sky-400 uppercase tracking-wide shrink-0">R</span>
+      <span className="text-xs font-semibold text-sky-400 uppercase tracking-wide shrink-0">R</span>
     )}
-    <span className="text-[11px] text-muted-foreground shrink-0 ml-auto">{castTimeShort}</span>
+    <span className="text-xs text-muted-foreground shrink-0 ml-auto">{castTimeShort}</span>
   </CollapsibleTrigger>
 </div>
 ```
@@ -663,7 +669,7 @@ Section header (CollapsibleTrigger):
 <CollapsibleContent>
   <div className="border-t border-border px-4 py-3 bg-secondary flex flex-col gap-2">
     {/* Metadata row */}
-    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-muted-foreground">
+    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
       <span><span className="font-semibold">Cast:</span> {castTime}</span>
       <span><span className="font-semibold">Range:</span> {range}</span>
       <span><span className="font-semibold">Duration:</span> {duration}</span>
@@ -689,7 +695,7 @@ Section header (CollapsibleTrigger):
         </Button>
       ) : (
         /* Leveled spell — upcast slot buttons */
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-muted-foreground shrink-0">Cast at:</span>
           {availableSlotLevels.map(level => (
             <Button
@@ -766,13 +772,13 @@ If the player manually deletes the cast prefix `[Casting Fireball — 3rd level 
 </div>
 ```
 
-`MutationChipStack` uses `position: fixed` or an absolute container constrained to the right panel width. Implementation: `<div className="absolute top-0 left-0 right-0 z-50 px-3 py-2 flex flex-col gap-1.5 pointer-events-none">` — `pointer-events-none` so chips don't block interaction with tabs below.
+`MutationChipStack` uses `position: fixed` or an absolute container constrained to the right panel width. Implementation: `<div className="absolute top-0 left-0 right-0 z-50 px-3 py-2 flex flex-col gap-2 pointer-events-none">` — `pointer-events-none` so chips don't block interaction with tabs below.
 
 **Individual chip:**
 ```jsx
 <div
-  className="bg-card border border-border rounded-full px-3 py-1.5 text-sm text-foreground
-             shadow-md flex items-center gap-1.5 animate-in slide-in-from-top-2 duration-200
+  className="bg-card border border-border rounded-full px-3 py-1 text-sm text-foreground
+             shadow-md flex items-center gap-2 animate-in slide-in-from-top-2 duration-200
              self-start"
   role="status"
   aria-live="polite"
@@ -796,6 +802,8 @@ If the player manually deletes the cast prefix `[Casting Fireball — 3rd level 
 | Currency change | `<Coins className="h-3.5 w-3.5 text-amber-400" />` | `+50 GP` | Amber |
 | Combatant added | `<UserPlus className="h-3.5 w-3.5 text-muted-foreground" />` | `Goblin Scout added` | Muted |
 | Combat ended | `<Shield className="h-3.5 w-3.5 text-muted-foreground" />` | `Combat ended` | Muted |
+
+Note: `h-3.5 w-3.5` on icons is the permitted icon-sizing exception documented in Spacing Scale.
 
 **Stack behavior:**
 - Max 4 chips visible simultaneously; 5th chip pushes the 1st off the top (FIFO)
@@ -943,7 +951,7 @@ If the player manually deletes the cast prefix `[Casting Fireball — 3rd level 
 {newSpellSlots && Object.keys(newSpellSlots).length > 0 && (
   <div>
     <p className="text-sm font-semibold text-foreground mb-1">New spell slot totals at Level {nextLevel}:</p>
-    <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-muted-foreground">
+    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
       {Object.entries(newSpellSlots).map(([level, max]) => (
         <span key={level}>{ordinal(parseInt(level))}: {max}</span>
       ))}
@@ -955,7 +963,7 @@ If the player manually deletes the cast prefix `[Casting Fireball — 3rd level 
 **Subclass note (shown only at subclass-granting levels):**
 ```jsx
 {isSubclassLevel && (
-  <p className="text-[12px] text-muted-foreground italic">
+  <p className="text-xs text-muted-foreground italic">
     Subclass selection will be available in a future update.
   </p>
 )}
@@ -1425,18 +1433,19 @@ These are NOT part of this design contract. Do not partially implement.
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: FLAG (non-blocking — "Add" button in Add Combatant form is single-word; all other copy exact and actionable)
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS (4 distinct sizes: 12/14/20/28px; 2 weights: 400/600)
+- [x] Dimension 5 Spacing: FLAG (non-blocking — h-3.5/w-3.5 icon exception documented; all prior violations corrected)
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-05-28
 
 ---
 
 *Phase: 5 — Rules Engine, Dice & Combat*
 *UI-SPEC authored: 2026-05-28*
+*UI-SPEC revised: 2026-05-28 — typography consolidated (6 sizes → 4: Micro/Body/Label/Heading/Display), spacing grid violations corrected (h-1.5→h-2, py-1.5→py-1, gap-1.5→gap-2, w-1.5 h-1.5→w-2 h-2, px-1.5→px-1, py-0.5→py-1, gap-0.5→gap-1), icon exception documented*
 *Source decisions: 05-CONTEXT.md (D-01 through D-40, all locked — zero re-asks), 04-UI-SPEC.md (primary baseline — full design system inherited), 02-UI-SPEC.md (ConditionBadge, SpellSlotPips, Stepper reuse patterns), CampaignViewScreen.tsx (header layout, tab structure), ChatInputArea.tsx (input row layout), StoryScrollPanel.tsx (message rendering patterns)*
 *Pre-populated from context: D-07 through D-40 (34 UI-relevant decisions), plus Claude's Discretion items (breakdowns formatting, chip anchoring, HP bar color semantics, spell section position, short rest modal implementation) resolved inline*

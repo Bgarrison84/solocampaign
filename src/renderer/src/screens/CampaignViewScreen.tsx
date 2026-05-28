@@ -23,6 +23,7 @@ import { usePanelSizeStore } from '../stores/panelSizeStore'
 import { useWindowStore } from '../stores/windowStore'
 import { useSessionStore } from '../stores/sessionStore'
 import { CharacterSheetTab } from '../components/CharacterSheetTab'
+import { SessionJournalTab } from '../components/SessionJournalTab'
 import { StoryScrollPanel } from '../components/StoryScrollPanel'
 import { ChatInputArea } from '../components/ChatInputArea'
 import { AiSettingsModal } from '../components/AiSettingsModal'
@@ -415,13 +416,8 @@ export function CampaignViewScreen() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="session-journal" className="flex-1 overflow-auto p-6">
-                <div className="flex flex-col items-center max-w-[400px] mx-auto" style={{ paddingTop: '30%' }}>
-                  <h2 className="text-xl font-semibold text-foreground mb-2">Session Journal</h2>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Your session recaps and notes will live here once session memory ships in Phase 4.
-                  </p>
-                </div>
+              <TabsContent value="session-journal" className="flex-1 overflow-hidden p-0">
+                <SessionJournalTab campaignId={id} />
               </TabsContent>
 
               <TabsContent value="inventory" className="flex-1 overflow-auto p-6">

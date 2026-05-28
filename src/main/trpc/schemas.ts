@@ -35,6 +35,14 @@ export const sendMessageSchema = z.object({
   content: z.string().min(1).max(10000),
 })
 
+// Session schemas — D-19/D-20
+export const sessionIdSchema = z.string().uuid()
+export const sessionLocationSchema = z.string().max(200)
+export const sessionGoalSchema = z.string().max(1000)
+export const sessionContextNotesSchema = z.string().max(1000)
+export const sessionRecapSchema = z.string().max(50000)
+export const playerNotesSchema = z.string().max(10000)
+
 // Condition names — exactly the 14 standard D&D 5e conditions
 export const conditionNameSchema = z.enum([
   'blinded',

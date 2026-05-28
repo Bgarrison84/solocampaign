@@ -45,9 +45,10 @@ contextBridge.exposeInMainWorld('aiStream', {
 
   /**
    * Register a callback fired when the stream completes successfully.
+   * meta is optional — may include isL1Overflow flag (D-14 context overflow warning).
    */
-  onFinish: (cb: () => void) => {
-    ipcRenderer.on('ai:finish', () => cb())
+  onFinish: (cb: (meta?: { isL1Overflow?: boolean }) => void) => {
+    ipcRenderer.on('ai:finish', (_, meta) => cb(meta))
   },
 
   /**
@@ -69,5 +70,57 @@ contextBridge.exposeInMainWorld('aiStream', {
     ipcRenderer.removeAllListeners('ai:token')
     ipcRenderer.removeAllListeners('ai:finish')
     ipcRenderer.removeAllListeners('ai:error')
+  },
+})
+
+/**
+ * window.sessionRecap — narrow contextBridge surface for streaming session recap generation.
+ *
+ * Architecture: Mirrors window.aiStream but uses dedicated 'ai:recap-*' channels.
+ * The recap stream is initiated by 'ai:recap-start' and delivers tokens via 'ai:recap-token'.
+ *
+ * Security:
+ * - startStream invokes 'ai:recap-start' via ipcRenderer.invoke (senderFrame validated in main)
+ * - No API key ever passes through this surface (T-04-03-03)
+ * - removeAllListeners cleans up all three recap channels
+ */
+contextBridge.exposeInMainWorld('sessionRecap', {
+  /**
+   * Initiate recap streaming for a session.
+   * Returns { started: true } when the stream has been initiated.
+   */
+  startStream: (payload: { campaignId: string; sessionId: string }) =>
+    ipcRenderer.invoke('ai:recap-start', payload),
+
+  /**
+   * Register a callback to receive streamed recap tokens.
+   */
+  onToken: (cb: (token: string) => void) => {
+    ipcRenderer.on('ai:recap-token', (_, t) => cb(t))
+  },
+
+  /**
+   * Register a callback fired when the recap stream completes successfully.
+   * finalText is the full accumulated recap text.
+   */
+  onFinish: (cb: (finalText: string) => void) => {
+    ipcRenderer.on('ai:recap-finish', (_, text) => cb(text))
+  },
+
+  /**
+   * Register a callback fired when the recap stream fails.
+   */
+  onError: (cb: (err: { message: string }) => void) => {
+    ipcRenderer.on('ai:recap-error', (_, m) => cb(m))
+  },
+
+  /**
+   * Remove all listeners for ai:recap-token, ai:recap-finish, ai:recap-error.
+   * MUST be called in React useEffect cleanup.
+   */
+  removeAllListeners: () => {
+    ipcRenderer.removeAllListeners('ai:recap-token')
+    ipcRenderer.removeAllListeners('ai:recap-finish')
+    ipcRenderer.removeAllListeners('ai:recap-error')
   },
 })

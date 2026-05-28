@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-05-28T00:00:00.000Z"
+status: completed
+last_updated: "2026-05-28T19:18:00.260Z"
 progress:
   total_phases: 9
   completed_phases: 4
@@ -19,7 +19,7 @@ progress:
 **Project:** SoloCampaign
 **Mode:** mvp
 **Core Value:** A player with no group and no DM can sit down, load SoloCampaign, and play a full D&D 5e campaign — from character creation to level 20+ — with a competent AI DM that remembers everything, follows the rules (or bends them on command), and keeps the world alive.
-**Current Focus:** Phase 4 — Long-Campaign Memory & Session Flow
+**Current Focus:** Phase 5 — Rules Engine, Dice & Combat
 
 ---
 
@@ -119,18 +119,18 @@ None.
 ### Last Session
 
 **Date:** 2026-05-28
-**Activity:** Phase 4 UAT — 12 tests, 12 passed. Two bugs fixed during UAT: scroll-area.tsx import used absolute path instead of @/ alias (Vite error on boot); useRecapStream listener race condition caused recap stream to not appear (listeners registered after startStream fired). Also: dev DB had prototype tables causing migration 0003 to fail — wiped DB, migrations now run clean 0000–0003.
-**Outcome:** Phase 4 complete and verified. ROADMAP + STATE updated.
+**Activity:** Phase 5 discuss — 6 areas captured: AI Tool-Call Schema, Combat Tracker, Dice Roller, Spell Casting, Level-Up Flow, Rest System. 40 decisions captured in 05-CONTEXT.md.
+**Outcome:** Phase 5 context ready for planning. Key architectural decision: fine-grained AI tool calls + JSON-tail fallback + campaign_events log locked in.
 
 ### Stopped At
 
-Phase 4 complete. Ready for Phase 5.
+Phase 5 context gathered. Ready for planning.
 
 ### Next Session
 
-**Suggested action:** `/gsd:discuss-phase 5` — Rules Engine, Dice & Combat.
+**Suggested action:** `/gsd:plan-phase 5` — Rules Engine, Dice & Combat.
 
-**Phase 5 goal:** In-app dice roller, combat tracker, AI-managed initiative/enemy turns, conditions applied by player or AI.
+**Phase 5 goal:** In-app dice roller, combat tracker, AI-managed initiative/enemy turns, conditions applied by player or AI. Context captured 2026-05-28.
 
 ---
 

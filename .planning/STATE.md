@@ -25,10 +25,10 @@ progress:
 
 ## Current Position
 
-Phase: 4 (Long-Campaign Memory & Session Flow) — IN PROGRESS (2/6 plans)
+Phase: 4 (Long-Campaign Memory & Session Flow) — IN PROGRESS (3/6 plans)
 **Milestone:** v1
 **Phase:** Phase 4 — Long-Campaign Memory & Session Flow
-**Status:** Phase 4 in progress. Wave 2 complete: ContextBuilder v2 (L1/L2/L3 three-layer memory) + aiSessionState sessionActiveMap.
+**Status:** Phase 4 in progress. Wave 3 complete: recapGenerator, sessions tRPC router (7 procedures), window.sessionRecap IPC surface, app.before-quit handler.
 
 **Progress:** [██████░░░░░░░░░░░░░░] 33% (3/9 phases complete)
 

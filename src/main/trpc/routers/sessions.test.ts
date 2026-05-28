@@ -41,6 +41,7 @@ vi.mock('../../db/sessionsRepo', () => ({
     getActiveByCampaignId: vi.fn(),
     getLastNCompleted: vi.fn().mockReturnValue([]),
     getOlderThan: vi.fn().mockReturnValue([]),
+    getUnsummarized: vi.fn().mockReturnValue([]),
     list: vi.fn().mockReturnValue([]),
     end: vi.fn(),
     saveRecap: vi.fn(),

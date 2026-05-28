@@ -38,6 +38,85 @@ import {
 } from '../schemas'
 import type { LLMProviderConfig } from '../../ai/llmProvider'
 
+// ─── D-06 recovery helper ─────────────────────────────────────────────────────
+//
+// If the app exited mid-session (via before-quit raw SQL UPDATE), there may be
+// sessions with endedAt set but isSummarized=false. This runs before a new
+// session is started so Layer 3 memory is up-to-date for the next session.
+// Errors are caught and logged — non-fatal (rolling summary is best-effort).
+async function runD06Recovery(campaignId: string): Promise<void> {
+  const unsummarized = sessionsRepo.getUnsummarized(campaignId)
+  if (unsummarized.length === 0) return
+
+  log.debug('[sessions] D-06 recovery: found unsummarized sessions', {
+    campaignId,
+    count: unsummarized.length,
+  })
+
+  try {
+    const campaign = campaignsRepo.get(campaignId)
+    if (!campaign) {
+      log.error('[sessions] D-06 recovery: campaign not found', { campaignId })
+      return
+    }
+
+    // Use the most recently ended unsummarized session as reference point
+    const lastUnsummarized = unsummarized[unsummarized.length - 1]
+
+    // Sessions older than the current L2 window
+    const olderSessions = sessionsRepo.getOlderThan(
+      campaignId,
+      lastUnsummarized.sessionNumber - 2,
+    )
+
+    if (olderSessions.length === 0) {
+      // Nothing old enough to summarize — mark all as summarized and return
+      for (const s of unsummarized) {
+        sessionsRepo.markSummarized(s.id)
+      }
+      return
+    }
+
+    const apiKey = await secretStorage.decrypt('ai-key-' + campaignId)
+
+    const providerConfig: LLMProviderConfig = {
+      type: (campaign.providerType as 'openai-compatible' | 'gemini') ?? 'openai-compatible',
+      endpointUrl: campaign.endpointUrl ?? undefined,
+      modelName: campaign.modelName ?? '',
+      apiKey: apiKey ?? undefined,
+    }
+
+    const summary = await generateRollingSummary(
+      providerConfig,
+      olderSessions.map((s) => ({
+        sessionNumber: s.sessionNumber,
+        aiRecap: s.aiRecap ?? '',
+      })),
+    )
+
+    const truncated = summary.substring(0, 4000)
+
+    campaignsRepo.updateRollingSummary(campaignId, truncated)
+
+    // Mark all recovered sessions as summarized
+    for (const s of unsummarized) {
+      sessionsRepo.markSummarized(s.id)
+    }
+
+    log.debug('[sessions] D-06 recovery: rolling summary updated', {
+      campaignId,
+      summaryLength: truncated.length,
+      sessionCount: unsummarized.length,
+    })
+  } catch (err) {
+    // Non-fatal — new session will proceed, L3 just won't be updated
+    log.error(
+      '[sessions] D-06 recovery failed:',
+      err instanceof Error ? err.message : String(err),
+    )
+  }
+}
+
 export const sessionsRouter = t.router({
   /**
    * Start a new session for a campaign.
@@ -53,7 +132,11 @@ export const sessionsRouter = t.router({
         contextNotes: sessionContextNotesSchema.nullish(),
       }),
     )
-    .mutation(({ input }) => {
+    .mutation(async ({ input }) => {
+      // D-06 recovery: if any sessions ended without a rolling summary (e.g. app crash / before-quit),
+      // generate the rolling summary now before starting the new session so L3 is current.
+      await runD06Recovery(input.campaignId)
+
       const session = sessionsRepo.create({
         campaignId: input.campaignId,
         location: input.location ?? null,

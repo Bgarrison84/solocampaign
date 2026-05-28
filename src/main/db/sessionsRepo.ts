@@ -220,6 +220,27 @@ export const sessionsRepo = {
   },
 
   /**
+   * Get all sessions for a campaign that ended but were never incorporated into the rolling summary.
+   * Used by D-06 recovery: if a session ended (via before-quit auto-end) but isSummarized=false,
+   * the next sessions.start call will generate the rolling summary before creating the new session.
+   */
+  getUnsummarized(campaignId: string): Session[] {
+    const db = getDb()
+    return db
+      .select()
+      .from(sessions)
+      .where(
+        and(
+          eq(sessions.campaignId, campaignId),
+          isNotNull(sessions.endedAt),
+          eq(sessions.isSummarized, false),
+        ),
+      )
+      .orderBy(asc(sessions.sessionNumber))
+      .all()
+  },
+
+  /**
    * End all active sessions for a campaign.
    * Called by the app before-quit handler to clean up mid-session exits (D-06).
    */

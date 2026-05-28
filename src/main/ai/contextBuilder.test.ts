@@ -1,8 +1,12 @@
 /**
- * Tests for contextBuilder.
+ * Tests for contextBuilder v2.
  * SESS-06: Character summary format (D-21).
  * SESS-07: Strictness directive + DM personality injection.
- * D-20: Last 20 messages from messagesRepo.
+ * D-20: Message history from current session (L1).
+ * D-14: L1 overflow detection (>24000 chars → fallback to last 30).
+ * D-15: L2 session recaps in system prompt.
+ * D-16: L3 rolling campaign summary in system prompt.
+ * D-17: System prompt injection order.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -21,6 +25,14 @@ vi.mock('../db/charactersRepo', () => ({
 vi.mock('../db/messagesRepo', () => ({
   messagesRepo: {
     getLastN: vi.fn().mockReturnValue([]),
+    getBySessionId: vi.fn().mockReturnValue([]),
+    getLastNForSession: vi.fn().mockReturnValue([]),
+  },
+}))
+
+vi.mock('../db/sessionsRepo', () => ({
+  sessionsRepo: {
+    getLastNCompleted: vi.fn().mockReturnValue([]),
   },
 }))
 
@@ -31,8 +43,10 @@ vi.mock('./referenceDocLoader', () => ({
 import { buildContext, STRICTNESS_DIRECTIVES, abilityMod, formatCharacterSummary } from './contextBuilder'
 import { charactersRepo } from '../db/charactersRepo'
 import { messagesRepo } from '../db/messagesRepo'
+import { sessionsRepo } from '../db/sessionsRepo'
 import { readReferenceDocs } from './referenceDocLoader'
 import type { CharacterWithResources } from '../db/charactersRepo'
+import type { Session } from '../db/schema'
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -96,10 +110,29 @@ function makeCharacter(overrides: Partial<CharacterWithResources> = {}): Charact
   }
 }
 
+function makeSession(overrides: Partial<Session> = {}): Session {
+  return {
+    id: 'session-1',
+    campaignId: 'campaign-1',
+    sessionNumber: 1,
+    startedAt: new Date(),
+    endedAt: new Date(),
+    location: null,
+    goal: null,
+    contextNotes: null,
+    aiRecap: null,
+    playerNotes: null,
+    isSummarized: false,
+    ...overrides,
+  }
+}
+
 describe('contextBuilder', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(messagesRepo.getLastN).mockReturnValue([])
+    vi.mocked(messagesRepo.getBySessionId).mockReturnValue([])
+    vi.mocked(messagesRepo.getLastNForSession).mockReturnValue([])
+    vi.mocked(sessionsRepo.getLastNCompleted).mockReturnValue([])
     vi.mocked(readReferenceDocs).mockReturnValue([])
   })
 
@@ -120,6 +153,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: { strictness: 'balanced' },
       })
 
@@ -135,6 +169,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: { strictness: 'balanced' },
       })
 
@@ -149,6 +184,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: { strictness: 'strict' },
       })
 
@@ -161,6 +197,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: { strictness: 'narrative' },
       })
 
@@ -173,6 +210,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: { strictness: 'balanced' },
       })
 
@@ -184,6 +222,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: {
           strictness: 'balanced',
           dmPersonality: 'A grim, world-weary narrator with dark humor.',
@@ -198,6 +237,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: { strictness: 'balanced', dmPersonality: '' },
       })
 
@@ -212,6 +252,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: {
           strictness: 'balanced',
           referenceDocs: ['SRD v5.1/SRD v5.1.md'],
@@ -223,19 +264,20 @@ describe('contextBuilder', () => {
       expect(readReferenceDocs).toHaveBeenCalledWith(['SRD v5.1/SRD v5.1.md'])
     })
 
-    it('returns last 20 messages for context window', () => {
+    it('returns session messages for context window when sessionId provided', () => {
       vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
-      vi.mocked(messagesRepo.getLastN).mockReturnValue([
-        { id: '1', campaignId: 'campaign-1', role: 'user', content: 'Hello DM', createdAt: new Date(), sessionId: null },
-        { id: '2', campaignId: 'campaign-1', role: 'assistant', content: 'Welcome adventurer!', createdAt: new Date(), sessionId: null },
+      vi.mocked(messagesRepo.getBySessionId).mockReturnValue([
+        { id: '1', campaignId: 'campaign-1', role: 'user', content: 'Hello DM', createdAt: new Date(), sessionId: 'session-1' },
+        { id: '2', campaignId: 'campaign-1', role: 'assistant', content: 'Welcome adventurer!', createdAt: new Date(), sessionId: 'session-1' },
       ])
 
       const { messages } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: 'session-1',
         config: { strictness: 'balanced' },
       })
 
-      expect(messagesRepo.getLastN).toHaveBeenCalledWith('campaign-1', 20)
+      expect(messagesRepo.getBySessionId).toHaveBeenCalledWith('session-1')
       expect(messages).toHaveLength(2)
       expect(messages[0]).toEqual({ role: 'user', content: 'Hello DM' })
       expect(messages[1]).toEqual({ role: 'assistant', content: 'Welcome adventurer!' })
@@ -247,6 +289,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: { strictness: 'balanced' },
       })
 
@@ -259,6 +302,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: { strictness: 'balanced' },
       })
 
@@ -273,6 +317,7 @@ describe('contextBuilder', () => {
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',
+        sessionId: null,
         config: { strictness: 'balanced' },
       })
 
@@ -305,14 +350,173 @@ describe('contextBuilder', () => {
     })
   })
 
-  // Wave 0 stubs for ContextBuilder v2 (Phase 4 — Plans 02/03 fill these in)
+  // ─── ContextBuilder v2 behavior tests ─────────────────────────────────────────
   describe('v2 behavior', () => {
-    it.todo('assembles L1 from session messages (getBySessionId) when sessionId is provided')
-    it.todo('L1 overflow triggers fallback to getLastNForSession(30) + sets isL1Overflow flag')
-    it.todo('L2 summaries injected with labels (Session N:, Session N-1:, Session N-2:)')
-    it.todo('L3 rolling summary injected under "Campaign History So Far:" when present')
-    it.todo('system prompt injection order matches D-17: preamble > ref docs > L3 > L2 > session start context')
-    it.todo('session start context (location, goal, contextNotes) appears under "Current Session:" label')
-    it.todo('falls back to getLastN(20) for L1 when no sessionId is provided (backward compat)')
+    it('assembles L1 from session messages (getBySessionId) when sessionId is provided', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+      vi.mocked(messagesRepo.getBySessionId).mockReturnValue([
+        { id: 'm1', campaignId: 'campaign-1', role: 'user', content: 'I enter the tavern.', createdAt: new Date(), sessionId: 's1' },
+        { id: 'm2', campaignId: 'campaign-1', role: 'assistant', content: 'The tavern is dark.', createdAt: new Date(), sessionId: 's1' },
+        { id: 'm3', campaignId: 'campaign-1', role: 'user', content: 'I talk to the innkeeper.', createdAt: new Date(), sessionId: 's1' },
+        { id: 'm4', campaignId: 'campaign-1', role: 'assistant', content: 'He shrugs.', createdAt: new Date(), sessionId: 's1' },
+        { id: 'm5', campaignId: 'campaign-1', role: 'user', content: 'I order ale.', createdAt: new Date(), sessionId: 's1' },
+      ])
+
+      const { messages, isL1Overflow } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: 's1',
+        config: { strictness: 'balanced' },
+      })
+
+      expect(messagesRepo.getBySessionId).toHaveBeenCalledWith('s1')
+      expect(messages).toHaveLength(5)
+      expect(isL1Overflow).toBe(false)
+    })
+
+    it('L1 overflow triggers fallback to getLastNForSession(30) + sets isL1Overflow flag', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+
+      // Create messages that total > 24000 chars
+      const longContent = 'x'.repeat(5000)
+      const overflowMessages = Array.from({ length: 6 }, (_, i) => ({
+        id: `m${i}`,
+        campaignId: 'campaign-1',
+        role: (i % 2 === 0 ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: longContent, // 6 * 5000 = 30000 > 24000
+        createdAt: new Date(),
+        sessionId: 's1',
+      }))
+
+      const fallbackMessages = [
+        { id: 'f1', campaignId: 'campaign-1', role: 'user' as const, content: 'fallback message', createdAt: new Date(), sessionId: 's1' },
+      ]
+
+      vi.mocked(messagesRepo.getBySessionId).mockReturnValue(overflowMessages)
+      vi.mocked(messagesRepo.getLastNForSession).mockReturnValue(fallbackMessages)
+
+      const { messages, isL1Overflow } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: 's1',
+        config: { strictness: 'balanced' },
+      })
+
+      expect(isL1Overflow).toBe(true)
+      expect(messagesRepo.getLastNForSession).toHaveBeenCalledWith('s1', 30)
+      expect(messages).toHaveLength(1)
+      expect(messages[0]).toEqual({ role: 'user', content: 'fallback message' })
+    })
+
+    it('L2 summaries injected with labels (Previous Sessions — Session N:)', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+
+      vi.mocked(sessionsRepo.getLastNCompleted).mockReturnValue([
+        makeSession({ id: 'sess-1', sessionNumber: 1, aiRecap: 'The party began their journey.' }),
+        makeSession({ id: 'sess-2', sessionNumber: 2, aiRecap: 'They reached the dungeon.' }),
+        makeSession({ id: 'sess-3', sessionNumber: 3, aiRecap: 'They defeated the goblin king.' }),
+      ])
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: { strictness: 'balanced' },
+      })
+
+      expect(sessionsRepo.getLastNCompleted).toHaveBeenCalledWith('campaign-1', 3)
+      expect(systemPrompt).toContain('Previous Sessions — Session')
+      expect(systemPrompt).toContain('The party began their journey.')
+      expect(systemPrompt).toContain('They reached the dungeon.')
+      expect(systemPrompt).toContain('They defeated the goblin king.')
+    })
+
+    it('L3 rolling summary injected under "Campaign History So Far:" when present', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: {
+          strictness: 'balanced',
+          rollingSummary: 'The heroes have been adventuring for three months, defeating many foes.',
+        },
+      })
+
+      expect(systemPrompt).toContain('Campaign History So Far:')
+      expect(systemPrompt).toContain('The heroes have been adventuring for three months, defeating many foes.')
+    })
+
+    it('system prompt injection order matches D-17: preamble > ref docs > L3 > L2 > session start context', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+      vi.mocked(readReferenceDocs).mockReturnValue([
+        { title: 'SRD', content: 'Rules content.' },
+      ])
+      vi.mocked(sessionsRepo.getLastNCompleted).mockReturnValue([
+        makeSession({ id: 'sess-1', sessionNumber: 1, aiRecap: 'Session one summary.' }),
+      ])
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        sessionContext: { location: 'Tavern', goal: 'Find the map', contextNotes: null },
+        config: {
+          strictness: 'balanced',
+          rollingSummary: 'Campaign history text.',
+          referenceDocs: ['SRD/SRD.md'],
+        },
+      })
+
+      const preamblePos = systemPrompt.indexOf('Dungeon Master')
+      const refDocPos = systemPrompt.indexOf('=== SRD ===')
+      const l3Pos = systemPrompt.indexOf('Campaign History So Far:')
+      const l2Pos = systemPrompt.indexOf('Previous Sessions — Session')
+      const sessionCtxPos = systemPrompt.indexOf('Current Session:')
+
+      // All blocks should be present
+      expect(preamblePos).toBeGreaterThanOrEqual(0)
+      expect(refDocPos).toBeGreaterThanOrEqual(0)
+      expect(l3Pos).toBeGreaterThanOrEqual(0)
+      expect(l2Pos).toBeGreaterThanOrEqual(0)
+      expect(sessionCtxPos).toBeGreaterThanOrEqual(0)
+
+      // Verify injection order
+      expect(preamblePos).toBeLessThan(refDocPos)
+      expect(refDocPos).toBeLessThan(l3Pos)
+      expect(l3Pos).toBeLessThan(l2Pos)
+      expect(l2Pos).toBeLessThan(sessionCtxPos)
+    })
+
+    it('session start context (location, goal, contextNotes) appears under "Current Session:" label', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: 's1',
+        sessionContext: {
+          location: 'The Misty Mountains',
+          goal: 'Recover the ancient artifact',
+          contextNotes: 'Party is low on resources',
+        },
+        config: { strictness: 'balanced' },
+      })
+
+      expect(systemPrompt).toContain('Current Session:')
+      expect(systemPrompt).toContain('Location: The Misty Mountains')
+      expect(systemPrompt).toContain('Goal: Recover the ancient artifact')
+      expect(systemPrompt).toContain('Notes: Party is low on resources')
+    })
+
+    it('falls back to empty messages for L1 when no sessionId is provided (sessionId=null)', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+
+      const { messages, isL1Overflow } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: { strictness: 'balanced' },
+      })
+
+      // No session — L1 is empty
+      expect(messagesRepo.getBySessionId).not.toHaveBeenCalled()
+      expect(messages).toHaveLength(0)
+      expect(isL1Overflow).toBe(false)
+    })
   })
 })

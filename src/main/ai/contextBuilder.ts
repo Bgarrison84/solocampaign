@@ -1,8 +1,14 @@
 /**
- * ContextBuilder v1 — assembles the system prompt and message history for AI calls.
- * D-20: System prompt order: preamble + strictness + personality + character summary + reference docs.
- * D-21: Character summary format (verbatim from AI-SPEC §4b).
- * D-20: Last 20 messages from messages table, mapped to CoreMessage[].
+ * ContextBuilder v2 — session-aware three-layer memory assembly for AI calls.
+ *
+ * D-17: System prompt injection order:
+ *   preamble + strictness + personality + character summary + reference docs
+ *   + L3 (rolling campaign summary) + L2 (recent session recaps) + sessionContext
+ *
+ * D-14 (L1): Current session messages via getBySessionId.
+ *   Overflow (>24000 chars) triggers fallback to last 30 messages.
+ * D-15 (L2): Last 3 completed session recaps, truncated to 8000 chars.
+ * D-16 (L3): campaigns.rollingSummary, truncated to 4000 chars.
  *
  * The assembled context is passed to llmProvider.streamChat().
  * The renderer never sees the system prompt.
@@ -12,6 +18,7 @@ import type { ModelMessage } from 'ai'
 import { charactersRepo } from '../db/charactersRepo'
 import type { CharacterWithResources } from '../db/charactersRepo'
 import { messagesRepo } from '../db/messagesRepo'
+import { sessionsRepo } from '../db/sessionsRepo'
 import { readReferenceDocs } from './referenceDocLoader'
 import log from 'electron-log'
 
@@ -26,20 +33,28 @@ const STRICTNESS_DIRECTIVES: Record<'strict' | 'balanced' | 'narrative', string>
     'Rules are flavor. Prioritize dramatic storytelling, player enjoyment, and narrative logic over mechanical accuracy.',
 }
 
-// ─── Input Types ──────────────────────────────────────────────────────────────
+// ─── Input Types (v2) ─────────────────────────────────────────────────────────
 
 export interface BuildContextArgs {
   campaignId: string
+  sessionId: string | null   // null = no active session (graceful degradation)
+  sessionContext?: {
+    location: string | null
+    goal: string | null
+    contextNotes: string | null
+  }
   config: {
     strictness: 'strict' | 'balanced' | 'narrative'
     dmPersonality?: string | null
     referenceDocs?: string[] // relative paths from campaigns.reference_docs
+    rollingSummary?: string | null // campaigns.rolling_summary (L3)
   }
 }
 
 export interface BuiltContext {
   systemPrompt: string
   messages: ModelMessage[]
+  isL1Overflow: boolean // flag for renderer warning banner
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -119,25 +134,76 @@ function formatCharacterSummary(char: CharacterWithResources): string {
   return lines.join('\n')
 }
 
-// ─── ContextBuilder ────────────────────────────────────────────────────────────
+// ─── ContextBuilder v2 ────────────────────────────────────────────────────────
+
+// Token estimation: 4 chars ≈ 1 token (D-18 — best-effort estimate)
+const CHARS_L1_OVERFLOW = 6000 * 4 // 24,000 chars
+const CHARS_L2_CAP = 2000 * 4      // 8,000 chars
+const CHARS_L3_CAP = 1000 * 4      // 4,000 chars
 
 /**
  * Assemble the full context (system prompt + message history) for an AI call.
  *
- * System prompt assembly order (D-20 / AI-SPEC §4b):
- *   1. Fixed preamble
- *   2. Strictness directive
- *   3. DM personality (or generic fallback)
- *   4. Character summary (D-21 format)
- *   5. Reference documents (one labelled section per doc)
+ * System prompt assembly order (D-17):
+ *   1. Preamble + strictness + personality + character summary
+ *   2. Reference documents
+ *   3. L3: rolling campaign summary (campaigns.rollingSummary)
+ *   4. L2: up to 3 recent completed session recaps
+ *   5. Session start context (location, goal, contextNotes)
  *
- * Messages: last 20 from messagesRepo (D-20), mapped to CoreMessage[].
+ * Messages (L1): current session messages via getBySessionId.
+ *   Overflow (>CHARS_L1_OVERFLOW) falls back to getLastNForSession(30).
  */
 export function buildContext(args: BuildContextArgs): BuiltContext {
-  const { campaignId, config } = args
+  const { campaignId, sessionId, sessionContext, config } = args
 
-  // Retrieve character (may be undefined if campaign has no character yet)
-  const character = charactersRepo.getByCampaignId(campaignId)
+  // --- L1: current session messages (D-14) ---
+  let sessionMessages = sessionId ? messagesRepo.getBySessionId(sessionId) : []
+  let isL1Overflow = false
+  if (sessionMessages.length > 0) {
+    const totalChars = sessionMessages.reduce((sum, m) => sum + m.content.length, 0)
+    if (totalChars > CHARS_L1_OVERFLOW) {
+      isL1Overflow = true
+      sessionMessages = messagesRepo.getLastNForSession(sessionId!, 30)
+    }
+  }
+
+  // --- L2: 3 most recent completed session recaps (D-15) ---
+  const recentSessions = sessionsRepo.getLastNCompleted(campaignId, 3)
+  let l2Block = ''
+  let l2CharCount = 0
+  // recentSessions is oldest-first; iterate newest-first so most-recent sessions
+  // get included when cap is tight
+  for (const session of [...recentSessions].reverse()) {
+    const label = `\nPrevious Sessions — Session ${session.sessionNumber}:\n`
+    const content = session.aiRecap ?? ''
+    const candidate = label + content
+    if (l2CharCount + candidate.length > CHARS_L2_CAP) {
+      const remaining = CHARS_L2_CAP - l2CharCount
+      if (remaining > 0) {
+        l2Block += candidate.substring(0, remaining)
+      }
+      break
+    }
+    l2Block += candidate
+    l2CharCount += candidate.length
+  }
+
+  // --- L3: rolling campaign summary (D-16) ---
+  const rollingSummary = config.rollingSummary
+    ? config.rollingSummary.substring(0, CHARS_L3_CAP)
+    : null
+  const l3Block = rollingSummary ? `\nCampaign History So Far:\n${rollingSummary}` : ''
+
+  // --- Session start context block (D-17 item 5) ---
+  let sessionContextBlock = ''
+  if (sessionContext) {
+    const parts: string[] = ['\nCurrent Session:']
+    if (sessionContext.location) parts.push(`Location: ${sessionContext.location}`)
+    if (sessionContext.goal) parts.push(`Goal: ${sessionContext.goal}`)
+    if (sessionContext.contextNotes) parts.push(`Notes: ${sessionContext.contextNotes}`)
+    sessionContextBlock = parts.join('\n')
+  }
 
   // --- Preamble ---
   const preamble =
@@ -155,10 +221,8 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
     : 'DM style: Classic adventure DM — balanced tone, fair challenges, memorable moments.'
 
   // --- Character summary ---
-  let characterSummaryBlock = ''
-  if (character) {
-    characterSummaryBlock = '\n' + formatCharacterSummary(character)
-  }
+  const character = charactersRepo.getByCampaignId(campaignId)
+  const characterSummaryBlock = character ? '\n' + formatCharacterSummary(character) : ''
 
   // --- Reference documents ---
   const referenceDocs = config.referenceDocs ?? []
@@ -174,31 +238,37 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
     }
   }
 
-  // --- Assemble system prompt ---
-  const systemPrompt = [preamble, strictnessDirective, personality, characterSummaryBlock]
-    .filter((part) => part.length > 0)
-    .join('\n\n')
+  // --- Assemble system prompt (D-17 order) ---
+  // preamble + strictness + personality + character, then referenceDocBlock,
+  // then l3Block, then l2Block, then sessionContextBlock
+  const systemPrompt =
+    [preamble, strictnessDirective, personality, characterSummaryBlock]
+      .filter((part) => part.length > 0)
+      .join('\n\n')
     + referenceDocBlock
+    + l3Block
+    + l2Block
+    + sessionContextBlock
 
-  // --- Message history (last 20, D-20) ---
-  const rawMessages = messagesRepo.getLastN(campaignId, 20)
-  // Map DB messages to ModelMessage union — role is stored as 'user' | 'assistant'
-  const messages: ModelMessage[] = rawMessages.map((msg) => {
+  // --- Messages array: L1 (current session — NOT in system prompt) ---
+  const messages: ModelMessage[] = sessionMessages.map((msg) => {
     if (msg.role === 'assistant') {
       return { role: 'assistant' as const, content: msg.content }
     }
     return { role: 'user' as const, content: msg.content }
   })
 
-  log.debug('[contextBuilder] buildContext', {
+  log.debug('[contextBuilder] buildContext v2', {
     campaignId,
+    sessionId,
     systemPromptLength: systemPrompt.length,
     messageCount: messages.length,
-    hasCharacter: !!character,
-    referenceDocCount: referenceDocs.length,
+    isL1Overflow,
+    l2Sessions: recentSessions.length,
+    hasL3: !!rollingSummary,
   })
 
-  return { systemPrompt, messages }
+  return { systemPrompt, messages, isL1Overflow }
 }
 
 /**

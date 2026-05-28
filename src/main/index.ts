@@ -246,6 +246,7 @@ if (!gotLock) {
 
       const { systemPrompt, messages } = buildContext({
         campaignId,
+        sessionId: null, // Phase 4 plan 04-03 will wire sessionActiveMap here
         config: {
           strictness: (campaign.strictness as 'strict' | 'balanced' | 'narrative') ?? 'balanced',
           dmPersonality: campaign.dmPersonality,

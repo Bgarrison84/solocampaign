@@ -1,49 +1,21 @@
 /**
  * useRecapStream — manages the session recap streaming state and IPC listener lifecycle.
  *
- * Architecture mirrors useAiStream.ts:
- *   - Registers onToken/onFinish/onError listeners in a useEffect
- *   - Calls window.sessionRecap.removeAllListeners() in cleanup
- *   - Accumulates tokens in recapText; sets finalText on stream completion
- *
- * Usage:
- *   const { recapText, finalText, isStreaming, error, startRecap, clearError } =
- *     useRecapStream(campaignId, sessionId)
+ * Listeners are registered inside startRecap (not in a useEffect) so they are
+ * always set up synchronously before startStream is invoked — no tokens can be dropped.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 // ── Window type augmentation ──────────────────────────────────────────────────
 
 declare global {
   interface Window {
     sessionRecap: {
-      /**
-       * Initiate recap streaming for a session.
-       * Register onToken/onFinish/onError BEFORE calling startStream.
-       */
       startStream: (payload: { campaignId: string; sessionId: string }) => Promise<void>
-
-      /**
-       * Register a callback to receive streamed recap token chunks.
-       */
       onToken: (cb: (token: string) => void) => void
-
-      /**
-       * Register a callback fired when the recap stream completes.
-       * Receives the full concatenated text from the main process.
-       */
       onFinish: (cb: (finalText: string) => void) => void
-
-      /**
-       * Register a callback fired when recap streaming fails.
-       */
       onError: (cb: (err: { message: string }) => void) => void
-
-      /**
-       * Remove all recap stream listeners.
-       * MUST be called in React useEffect cleanup to prevent listener stacking.
-       */
       removeAllListeners: () => void
     }
   }
@@ -56,13 +28,10 @@ export interface RecapStreamError {
 }
 
 export interface UseRecapStreamReturn {
-  /** Accumulated raw tokens during the active stream */
   recapText: string
-  /** Full text set when streaming completes (from onFinish); used to seed the editable textarea */
   finalText: string
   isStreaming: boolean
   error: RecapStreamError | null
-  /** Start the recap stream — sets isStreaming, resets state, calls window.sessionRecap.startStream */
   startRecap: () => void
   clearError: () => void
 }
@@ -75,32 +44,15 @@ export function useRecapStream(
   const [finalText, setFinalText] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<RecapStreamError | null>(null)
-  // CR-04: track whether IPC listeners are registered before startStream is called
-  const listenersRegisteredRef = useRef(false)
 
-  // Register listeners; reset state and cleanup on unmount or sessionId change
+  // Reset state when session changes; clean up listeners on unmount
   useEffect(() => {
     setRecapText('')
     setFinalText('')
     setIsStreaming(false)
     setError(null)
-
-    window.sessionRecap.onToken((token: string) => {
-      setRecapText((prev) => prev + token)
-    })
-    window.sessionRecap.onFinish((fullText: string) => {
-      setIsStreaming(false)
-      setFinalText(fullText)
-    })
-    window.sessionRecap.onError((err: { message: string }) => {
-      setIsStreaming(false)
-      setError(err)
-    })
-    listenersRegisteredRef.current = true
-
     return () => {
       window.sessionRecap.removeAllListeners()
-      listenersRegisteredRef.current = false
     }
   }, [campaignId, sessionId])
 
@@ -112,36 +64,34 @@ export function useRecapStream(
     setFinalText('')
     setError(null)
 
-    const doStart = () => {
-      window.sessionRecap
-        .startStream({ campaignId, sessionId })
-        .catch((err: unknown) => {
-          setIsStreaming(false)
-          setError({
-            message:
-              err instanceof Error ? err.message : 'Failed to generate recap. Please try again.',
-          })
-        })
-    }
+    // Register listeners synchronously BEFORE invoking startStream so no tokens are dropped
+    window.sessionRecap.removeAllListeners()
+    window.sessionRecap.onToken((token: string) => {
+      setRecapText((prev) => prev + token)
+    })
+    window.sessionRecap.onFinish((fullText: string) => {
+      setIsStreaming(false)
+      setFinalText(fullText)
+    })
+    window.sessionRecap.onError((err: { message: string }) => {
+      setIsStreaming(false)
+      setError(err)
+    })
 
-    // CR-04: defer startStream by one tick if listeners haven't been registered yet
-    if (listenersRegisteredRef.current) {
-      doStart()
-    } else {
-      setTimeout(doStart, 0)
-    }
+    window.sessionRecap
+      .startStream({ campaignId, sessionId })
+      .catch((err: unknown) => {
+        setIsStreaming(false)
+        setError({
+          message:
+            err instanceof Error ? err.message : 'Failed to generate recap. Please try again.',
+        })
+      })
   }, [campaignId, sessionId])
 
   const clearError = useCallback(() => {
     setError(null)
   }, [])
 
-  return {
-    recapText,
-    finalText,
-    isStreaming,
-    error,
-    startRecap,
-    clearError,
-  }
+  return { recapText, finalText, isStreaming, error, startRecap, clearError }
 }

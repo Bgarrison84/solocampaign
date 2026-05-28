@@ -11,7 +11,7 @@
  *     useRecapStream(campaignId, sessionId)
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 // ── Window type augmentation ──────────────────────────────────────────────────
 
@@ -75,25 +75,32 @@ export function useRecapStream(
   const [finalText, setFinalText] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<RecapStreamError | null>(null)
+  // CR-04: track whether IPC listeners are registered before startStream is called
+  const listenersRegisteredRef = useRef(false)
 
-  // Register listeners; cleanup on unmount or campaignId/sessionId change
+  // Register listeners; reset state and cleanup on unmount or sessionId change
   useEffect(() => {
+    setRecapText('')
+    setFinalText('')
+    setIsStreaming(false)
+    setError(null)
+
     window.sessionRecap.onToken((token: string) => {
       setRecapText((prev) => prev + token)
     })
-
     window.sessionRecap.onFinish((fullText: string) => {
       setIsStreaming(false)
       setFinalText(fullText)
     })
-
     window.sessionRecap.onError((err: { message: string }) => {
       setIsStreaming(false)
       setError(err)
     })
+    listenersRegisteredRef.current = true
 
     return () => {
       window.sessionRecap.removeAllListeners()
+      listenersRegisteredRef.current = false
     }
   }, [campaignId, sessionId])
 
@@ -105,15 +112,24 @@ export function useRecapStream(
     setFinalText('')
     setError(null)
 
-    window.sessionRecap
-      .startStream({ campaignId, sessionId })
-      .catch((err: unknown) => {
-        setIsStreaming(false)
-        setError({
-          message:
-            err instanceof Error ? err.message : 'Failed to generate recap. Please try again.',
+    const doStart = () => {
+      window.sessionRecap
+        .startStream({ campaignId, sessionId })
+        .catch((err: unknown) => {
+          setIsStreaming(false)
+          setError({
+            message:
+              err instanceof Error ? err.message : 'Failed to generate recap. Please try again.',
+          })
         })
-      })
+    }
+
+    // CR-04: defer startStream by one tick if listeners haven't been registered yet
+    if (listenersRegisteredRef.current) {
+      doStart()
+    } else {
+      setTimeout(doStart, 0)
+    }
   }, [campaignId, sessionId])
 
   const clearError = useCallback(() => {

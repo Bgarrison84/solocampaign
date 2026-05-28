@@ -187,6 +187,8 @@ export const sessionsRouter = t.router({
       }),
     )
     .mutation(({ input }) => {
+      // CR-05: End the session first (set endedAt) so it appears in getLastNCompleted / L2 / Journal
+      sessionsRepo.end(input.sessionId)
       // Persist recap + notes to DB
       sessionsRepo.saveRecap(input.sessionId, input.aiRecap, input.playerNotes ?? null)
 
@@ -211,15 +213,14 @@ export const sessionsRouter = t.router({
             return
           }
 
-          // Sessions older than current L2 window (sessions 1..N-3)
+          // Sessions older than current L2 window (keep N, N-1, N-2 in L2; roll up < N-2)
           const olderSessions = sessionsRepo.getOlderThan(
             campaignId,
-            savedSession.sessionNumber - 3,
+            savedSession.sessionNumber - 2, // CR-03 fix: was -3 (off-by-one)
           )
 
           if (olderSessions.length === 0) {
-            // No old sessions to summarize — clear any existing L3 summary
-            campaignsRepo.updateRollingSummary(campaignId, null)
+            // No old sessions to summarize yet — leave existing L3 intact (WR-02 fix)
             return
           }
 
@@ -283,7 +284,14 @@ export const sessionsRouter = t.router({
   getActive: t.procedure
     .input(z.object({ campaignId: campaignIdSchema }))
     .query(({ input }) => {
-      return sessionsRepo.getActiveByCampaignId(input.campaignId) ?? null
+      const session = sessionsRepo.getActiveByCampaignId(input.campaignId) ?? null
+      // CR-02: Re-hydrate in-memory sessionActiveMap after app restart/page reload
+      if (session) {
+        sessionActiveMap.set(input.campaignId, session.id)
+      } else {
+        sessionActiveMap.clear(input.campaignId)
+      }
+      return session
     }),
 
   /**

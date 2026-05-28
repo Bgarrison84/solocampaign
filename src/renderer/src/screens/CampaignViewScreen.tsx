@@ -143,21 +143,24 @@ export function CampaignViewScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // D-04: When isSessionActive transitions to true and no messages exist for this session yet,
+  // D-04: When isSessionActive transitions to true and no messages exist for this campaign yet,
   // auto-send a trigger prompt so the AI narrates the session opening without the player typing.
-  // The trigger text is invisible framing; ContextBuilder v2 injects session start context into the
-  // system prompt (location, goal, contextNotes) via the sessionActiveMap (plan 04-04).
+  // CR-01 fix: track which sessionId has already triggered auto-narration via a ref so this only
+  // fires once per new session (not every session after session 1, and not on page-reload mid-session).
   const prevIsSessionActive = useRef(false)
+  const autoNarrationSentRef = useRef<string | null>(null)
   useEffect(() => {
     const justActivated = sessionStore.isSessionActive && !prevIsSessionActive.current
     prevIsSessionActive.current = sessionStore.isSessionActive
     if (!justActivated) return
     if (!id || !sessionStore.activeSessionId) return
-    // Guard: only auto-send if there are no existing messages for this campaign
-    // (prevents re-firing on page-refresh when a session was already active with messages)
-    const messageCount = messagesQuery.data?.length ?? 0
+    // Only fire once per unique sessionId
+    if (autoNarrationSentRef.current === sessionStore.activeSessionId) return
+    // Only auto-narrate if no campaign messages exist (truly first session, first message)
+    const messageCount = messagesQuery.data?.length ?? null
+    if (messageCount === null) return // still loading — bail, will re-run when data arrives
     if (messageCount > 0) return
-    // Send invisible trigger — ContextBuilder v2 has actual session context in system prompt
+    autoNarrationSentRef.current = sessionStore.activeSessionId
     window.aiStream.sendMessage({
       campaignId: id,
       content: '[Begin session narration]',

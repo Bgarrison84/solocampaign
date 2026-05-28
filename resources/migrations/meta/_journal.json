@@ -22,6 +22,13 @@
       "when": 1779804898195,
       "tag": "0002_handy_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1779975976269,
+      "tag": "0003_slippery_carnage",
+      "breakpoints": true
     }
   ]
 }

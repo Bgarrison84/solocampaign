@@ -15,6 +15,8 @@ export interface InsertMessageInput {
   campaignId: string
   role: 'user' | 'assistant'
   content: string
+  // D-20: optional session FK — set from main-process sessionActiveMap only
+  sessionId?: string | null
 }
 
 export const messagesRepo = {
@@ -32,6 +34,7 @@ export const messagesRepo = {
         campaignId: input.campaignId,
         role: input.role,
         content: input.content,
+        sessionId: input.sessionId ?? null,
       })
       .run()
 
@@ -83,5 +86,36 @@ export const messagesRepo = {
       .where(eq(messages.campaignId, campaignId))
       .orderBy(asc(sql`rowid`))
       .all()
+  },
+
+  /**
+   * Return all messages for a session in chronological order.
+   * Used for recap generation (D-11: all messages from the current session).
+   */
+  getBySessionId(sessionId: string): Message[] {
+    const db = getDb()
+    return db
+      .select()
+      .from(messages)
+      .where(eq(messages.sessionId, sessionId))
+      .orderBy(asc(sql`rowid`))
+      .all()
+  },
+
+  /**
+   * Return the last n messages for a session in chronological order.
+   * Used for Layer 1 hot-context when L1 overflow threshold is exceeded (D-14).
+   */
+  getLastNForSession(sessionId: string, n: number): Message[] {
+    const db = getDb()
+    const rows = db
+      .select()
+      .from(messages)
+      .where(eq(messages.sessionId, sessionId))
+      .orderBy(desc(sql`rowid`))
+      .limit(n)
+      .all()
+
+    return rows.reverse()
   },
 }

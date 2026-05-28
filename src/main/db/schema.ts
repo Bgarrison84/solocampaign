@@ -17,12 +17,41 @@ export const campaigns = sqliteTable('campaigns', {
   strictness: text('strictness').notNull().default('balanced'),
   fallbackEndpointUrl: text('fallback_endpoint_url'),
   fallbackModelName: text('fallback_model_name'),
+  // D-21: Layer 3 rolling campaign summary (regenerated at each session end)
+  rollingSummary: text('rolling_summary'),
 })
 
 export type Campaign = typeof campaigns.$inferSelect
 export type NewCampaign = typeof campaigns.$inferInsert
 
-// Messages table — D-17: one continuous chat per campaign, no session_id in Phase 3
+// D-19: Sessions table — one row per play session per campaign
+export const sessions = sqliteTable('sessions', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  sessionNumber: integer('session_number').notNull(),
+  startedAt: integer('started_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+  // nullable — null while session is active
+  endedAt: integer('ended_at', { mode: 'timestamp_ms' }),
+  // Session start context fields (all optional)
+  location: text('location'),
+  goal: text('goal'),
+  contextNotes: text('context_notes'),
+  // End-of-session content
+  aiRecap: text('ai_recap'),
+  playerNotes: text('player_notes'),
+  // D-19: set true when Layer 3 rolling summary has incorporated this session
+  isSummarized: integer('is_summarized', { mode: 'boolean' }).notNull().default(false),
+})
+
+export type Session = typeof sessions.$inferSelect
+export type NewSession = typeof sessions.$inferInsert
+
+// Messages table — D-17: one continuous chat per campaign
+// D-20: session_id nullable FK added in Phase 4; rows from Phase 3 get session_id = NULL
 export const messages = sqliteTable('messages', {
   id: text('id').primaryKey(),
   campaignId: text('campaign_id')
@@ -33,6 +62,8 @@ export const messages = sqliteTable('messages', {
   createdAt: integer('created_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
+  // D-20: nullable FK to sessions — no ON DELETE SET NULL (SQLite rejects on ALTER TABLE ADD)
+  sessionId: text('session_id').references(() => sessions.id),
 })
 
 export type Message = typeof messages.$inferSelect

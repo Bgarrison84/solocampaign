@@ -226,8 +226,8 @@ describe('contextBuilder', () => {
     it('returns last 20 messages for context window', () => {
       vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
       vi.mocked(messagesRepo.getLastN).mockReturnValue([
-        { id: '1', campaignId: 'campaign-1', role: 'user', content: 'Hello DM', createdAt: new Date() },
-        { id: '2', campaignId: 'campaign-1', role: 'assistant', content: 'Welcome adventurer!', createdAt: new Date() },
+        { id: '1', campaignId: 'campaign-1', role: 'user', content: 'Hello DM', createdAt: new Date(), sessionId: null },
+        { id: '2', campaignId: 'campaign-1', role: 'assistant', content: 'Welcome adventurer!', createdAt: new Date(), sessionId: null },
       ])
 
       const { messages } = buildContext({
@@ -303,5 +303,16 @@ describe('contextBuilder', () => {
       const summary = formatCharacterSummary(char)
       expect(summary).toContain('Fighter (Battle Master)')
     })
+  })
+
+  // Wave 0 stubs for ContextBuilder v2 (Phase 4 — Plans 02/03 fill these in)
+  describe('v2 behavior', () => {
+    it.todo('assembles L1 from session messages (getBySessionId) when sessionId is provided')
+    it.todo('L1 overflow triggers fallback to getLastNForSession(30) + sets isL1Overflow flag')
+    it.todo('L2 summaries injected with labels (Session N:, Session N-1:, Session N-2:)')
+    it.todo('L3 rolling summary injected under "Campaign History So Far:" when present')
+    it.todo('system prompt injection order matches D-17: preamble > ref docs > L3 > L2 > session start context')
+    it.todo('session start context (location, goal, contextNotes) appears under "Current Session:" label')
+    it.todo('falls back to getLastN(20) for L1 when no sessionId is provided (backward compat)')
   })
 })

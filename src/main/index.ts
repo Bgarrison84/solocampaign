@@ -253,13 +253,25 @@ if (!gotLock) {
       // 04-03: Wire sessionActiveMap — get active session ID for L1 memory (D-14)
       const activeSessionId = sessionActiveMap.get(campaignId)
 
+      // Load session context (location, goal, contextNotes) for system prompt injection (D-17 item 5)
+      const activeSession = activeSessionId ? sessionsRepo.getById(activeSessionId) : undefined
+      const sessionContext = activeSession
+        ? {
+            location: activeSession.location ?? null,
+            goal: activeSession.goal ?? null,
+            contextNotes: activeSession.contextNotes ?? null,
+          }
+        : undefined
+
       const { systemPrompt, messages, isL1Overflow } = buildContext({
         campaignId,
         sessionId: activeSessionId,
+        sessionContext,
         config: {
           strictness: (campaign.strictness as 'strict' | 'balanced' | 'narrative') ?? 'balanced',
           dmPersonality: campaign.dmPersonality,
           referenceDocs,
+          rollingSummary: campaign.rollingSummary ?? null,
         },
       })
 
@@ -319,7 +331,7 @@ if (!gotLock) {
                 logTokensReceived(tokenCount)
                 sessionAbortMap.clearAbortController(campaignId)
                 // Pass isL1Overflow flag so renderer can show context-window warning (D-14)
-                safeSend('ai:finish', isL1Overflow ? { isL1Overflow: true } : undefined)
+                safeSend('ai:finish', { isL1Overflow })
               },
               onError: (err) => {
                 // Re-throw so withRetry can catch and retry

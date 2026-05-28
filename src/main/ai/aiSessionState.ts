@@ -22,6 +22,12 @@ const _fallbackMap = new Map<string, boolean>()
 const _abortMap = new Map<string, AbortController>()
 
 /**
+ * Map<campaignId, sessionId> — active game session per campaign (D-04).
+ * In-memory only; cleared on app restart.
+ */
+const _activeSessionMap = new Map<string, string>()
+
+/**
  * Mark that the user wants to use the fallback provider for this session.
  */
 function setFallbackActive(campaignId: string): void {
@@ -73,4 +79,14 @@ export const sessionAbortMap = {
   setAbortController,
   abortStream,
   clearAbortController,
+} as const
+
+/**
+ * Map<campaignId, sessionId> — active game session per campaign (D-04).
+ * In-memory only; cleared on app restart.
+ */
+export const sessionActiveMap = {
+  set: (campaignId: string, sessionId: string) => _activeSessionMap.set(campaignId, sessionId),
+  get: (campaignId: string): string | null => _activeSessionMap.get(campaignId) ?? null,
+  clear: (campaignId: string) => _activeSessionMap.delete(campaignId),
 } as const

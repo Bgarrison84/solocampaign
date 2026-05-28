@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-28T14:54:06.084Z"
+last_updated: "2026-05-28T00:00:00.000Z"
 progress:
   total_phases: 9
   completed_phases: 4
@@ -25,18 +25,18 @@ progress:
 
 ## Current Position
 
-Phase: 4 (Long-Campaign Memory & Session Flow) — IN PROGRESS (5/6 plans)
+Phase: 4 (Long-Campaign Memory & Session Flow) — COMPLETE (6/6 plans)
 **Milestone:** v1
-**Phase:** Phase 4 — Long-Campaign Memory & Session Flow
-**Status:** Phase 4 in progress. Wave 5 complete: sessionStore, useRecapStream, SessionStartModal, EndSessionModal, ChatInputArea locked state, StoryScrollPanel L1 overflow warning, CampaignViewScreen wired.
+**Phase:** Phase 5 — Rules Engine, Dice & Combat (next)
+**Status:** Phase 4 complete. UAT passed 12/12. Two bugs found and fixed during UAT: scroll-area.tsx bad import path; useRecapStream listener race condition.
 
-**Progress:** [██████░░░░░░░░░░░░░░] 33% (3/9 phases complete)
+**Progress:** [████████░░░░░░░░░░░░] 44% (4/9 phases complete)
 
 ```
 Phase 1: Foundation & Secure Shell              [COMPLETE — 7/7 plans, 2026-05-24]
 Phase 2: Character Domain & Live Sheet          [COMPLETE — 7/7 plans, 2026-05-25]
 Phase 3: AI Engine & Provider Abstraction       [COMPLETE — 6/6 plans, 2026-05-26]
-Phase 4: Long-Campaign Memory & Session Flow    [Not started]
+Phase 4: Long-Campaign Memory & Session Flow    [COMPLETE — 6/6 plans, 2026-05-28]
 Phase 5: Rules Engine, Dice & Combat            [Not started]
 Phase 6: Quests, NPCs & World State             [Not started]
 Phase 7: Content Depth & Advanced Character     [Not started]
@@ -118,20 +118,20 @@ None.
 
 ### Last Session
 
-**Date:** 2026-05-26
-**Activity:** Phase 3 execution — 6 plans across 6 waves. AI engine (llmProvider, retryHandler, contextBuilder, referenceDocLoader), tRPC AI router + IPC streaming, story scroll UI, 3-step wizard, AI settings modal, metrics + packaging. 6 code review criticals fixed post-review.
-**Outcome:** All 6 plans complete. 159 tests passing. 13/13 must-haves verified. Human UAT pending (5 items).
+**Date:** 2026-05-28
+**Activity:** Phase 4 UAT — 12 tests, 12 passed. Two bugs fixed during UAT: scroll-area.tsx import used absolute path instead of @/ alias (Vite error on boot); useRecapStream listener race condition caused recap stream to not appear (listeners registered after startStream fired). Also: dev DB had prototype tables causing migration 0003 to fail — wiped DB, migrations now run clean 0000–0003.
+**Outcome:** Phase 4 complete and verified. ROADMAP + STATE updated.
 
 ### Stopped At
 
-Phase 3 complete. Human UAT pending before advancing.
+Phase 4 complete. Ready for Phase 5.
 
 ### Next Session
 
-**Suggested action:** Human UAT for Phase 3 (launch app, test streaming chat with LM Studio, verify key security, test wizard) then `/gsd:discuss-phase 4` — Long-Campaign Memory & Session Flow.
+**Suggested action:** `/gsd:discuss-phase 5` — Rules Engine, Dice & Combat.
 
-**Phase 4 goal:** Three-layer memory architecture, structured session start prompts, end-of-session recap, and AI-generated summaries that keep months-long campaigns coherent.
+**Phase 5 goal:** In-app dice roller, combat tracker, AI-managed initiative/enemy turns, conditions applied by player or AI.
 
 ---
 
-*Last updated: 2026-05-26 — Phase 3 complete. 3/9 phases done.*
+*Last updated: 2026-05-28 — Phase 4 complete. 4/9 phases done.*

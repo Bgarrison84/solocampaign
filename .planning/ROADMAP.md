@@ -128,10 +128,25 @@ Plans:
   2. User can end a session and review an AI-generated recap, add personal notes, and save it to the session journal
   3. When the user starts session N+1, the AI demonstrably references events from earlier sessions (verified via prompt inspection that summaries are injected)
   4. A campaign played across 10+ sessions does not exhibit context overflow errors or token-budget collapse
-**Plans:** TBD
+**Plans:** 1/6 plans complete
+Plans:
+- [x] 04-01-PLAN.md — Schema extension (sessions table + migration 0003), sessionsRepo, scroll-area component, Wave 0 test stubs
+- [ ] 04-02-PLAN.md — ContextBuilder v2 with three-layer memory (L1/L2/L3) + aiSessionState
+- [ ] 04-03-PLAN.md — RecapGenerator, sessions tRPC router, IPC surface, app.before-quit handler
+- [ ] 04-04-PLAN.md — Extend ai:send-message handler for session awareness + D-06 pre-check
+- [ ] 04-05-PLAN.md — Session UI: SessionStartModal, EndSessionModal, sessionStore, chat lock, L1 overflow warning
+- [ ] 04-06-PLAN.md — SessionJournalTab with collapsible timeline and inline note editing
+**Wave structure:**
+  - Wave 1: 04-01 (foundation — schema, migration, repos, test stubs) ✓
+  - Wave 2: 04-02 (ContextBuilder v2; depends on 04-01)
+  - Wave 3: 04-03 (recap + tRPC + IPC; depends on 04-02)
+  - Wave 4: 04-04 (ai:send-message session wiring; depends on 04-03)
+  - Wave 5: 04-05 (session UI; depends on 04-04)
+  - Wave 6: 04-06 (journal tab; depends on 04-05)
 **Notes:**
   - Token allocation per memory layer is configurable per campaign (research flag — empirical tuning required)
   - Session Journal tab UI lands here alongside the recap flow
+  - 04-01 complete: sessions schema, migration 0003, sessionsRepo (12 methods), messagesRepo extension, scroll-area
 **UI hint:** yes
 
 ### Phase 5: Rules Engine, Dice & Combat

@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-last_updated: "2026-05-26T21:27:14.040Z"
+status: executing
+last_updated: "2026-05-28T00:00:00.000Z"
 progress:
   total_phases: 9
   completed_phases: 3
-  total_plans: 20
+  total_plans: 26
   completed_plans: 20
   percent: 33
 ---
@@ -19,16 +19,16 @@ progress:
 **Project:** SoloCampaign
 **Mode:** mvp
 **Core Value:** A player with no group and no DM can sit down, load SoloCampaign, and play a full D&D 5e campaign — from character creation to level 20+ — with a competent AI DM that remembers everything, follows the rules (or bends them on command), and keeps the world alive.
-**Current Focus:** Phase 3 — AI Engine & Provider Abstraction
+**Current Focus:** Phase 4 — Long-Campaign Memory & Session Flow
 
 ---
 
 ## Current Position
 
-Phase: 3 (AI Engine & Provider Abstraction) — COMPLETE (6/6 plans, human UAT pending)
+Phase: 4 (Long-Campaign Memory & Session Flow) — IN PROGRESS (1/6 plans)
 **Milestone:** v1
-**Phase:** Phase 3 — AI Engine & Provider Abstraction
-**Status:** Phase 3 complete (6/6 plans). Human UAT pending (5 items in 03-VERIFICATION.md). 6 code review criticals fixed.
+**Phase:** Phase 4 — Long-Campaign Memory & Session Flow
+**Status:** Phase 4 in progress. Wave 1 complete: sessions schema + migration 0003 + sessionsRepo + scroll-area.
 
 **Progress:** [██████░░░░░░░░░░░░░░] 33% (3/9 phases complete)
 

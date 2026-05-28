@@ -12,8 +12,11 @@ import { messagesRepo } from './db/messagesRepo'
 import { buildContext } from './ai/contextBuilder'
 import { streamChat } from './ai/llmProvider'
 import { withRetry } from './ai/retryHandler'
-import { sessionFallbackMap, sessionAbortMap } from './ai/aiSessionState'
+import { sessionFallbackMap, sessionAbortMap, sessionActiveMap } from './ai/aiSessionState'
 import type { LLMProviderConfig } from './ai/llmProvider'
+import { sessionsRepo } from './db/sessionsRepo'
+import { generateSessionRecap, RECAP_SYSTEM_PROMPT } from './ai/recapGenerator'
+import { getDb } from './db/index'
 import {
   logLatencyToFirstToken,
   logTokensReceived,
@@ -233,8 +236,11 @@ if (!gotLock) {
       }
       // apiKey is intentionally not logged — T-03-03-01
 
-      // ── Step 4: Persist user message ──────────────────────────────────────────
-      messagesRepo.insert({ campaignId, role: 'user', content })
+      // ── Step 4: Persist user message (with session FK if a session is active — D-20) ──
+      // Note: activeSessionId resolved in Step 5 after buildContext call.
+      // Here we resolve it early so it's available at insert time.
+      const userSessionId = sessionActiveMap.get(campaignId)
+      messagesRepo.insert({ campaignId, role: 'user', content, sessionId: userSessionId })
 
       // ── Step 5: Build context (system prompt + message history) ───────────────
       let referenceDocs: string[] = []
@@ -244,9 +250,12 @@ if (!gotLock) {
         referenceDocs = []
       }
 
-      const { systemPrompt, messages } = buildContext({
+      // 04-03: Wire sessionActiveMap — get active session ID for L1 memory (D-14)
+      const activeSessionId = sessionActiveMap.get(campaignId)
+
+      const { systemPrompt, messages, isL1Overflow } = buildContext({
         campaignId,
-        sessionId: null, // Phase 4 plan 04-03 will wire sessionActiveMap here
+        sessionId: activeSessionId,
         config: {
           strictness: (campaign.strictness as 'strict' | 'balanced' | 'narrative') ?? 'balanced',
           dmPersonality: campaign.dmPersonality,
@@ -299,12 +308,18 @@ if (!gotLock) {
                 safeSend('ai:token', chunk)
               },
               onFinish: () => {
-                // Persist assistant message
-                messagesRepo.insert({ campaignId, role: 'assistant', content: assistantBuffer })
+                // Persist assistant message, including session FK if a session is active (D-20)
+                messagesRepo.insert({
+                  campaignId,
+                  role: 'assistant',
+                  content: assistantBuffer,
+                  sessionId: activeSessionId,
+                })
                 // AI-SPEC §7 metric: ai.stream.total_tokens_received
                 logTokensReceived(tokenCount)
                 sessionAbortMap.clearAbortController(campaignId)
-                safeSend('ai:finish')
+                // Pass isL1Overflow flag so renderer can show context-window warning (D-14)
+                safeSend('ai:finish', isL1Overflow ? { isL1Overflow: true } : undefined)
               },
               onError: (err) => {
                 // Re-throw so withRetry can catch and retry
@@ -340,6 +355,103 @@ if (!gotLock) {
     })
     // ─────────────────────────────────────────────────────────────────────────────
 
+    // ─── AI Recap Streaming IPC Handler ──────────────────────────────────────────
+    //
+    // Streams a session recap into the end-session modal.
+    // Uses streamText (not generateText) so tokens appear incrementally in the modal.
+    //
+    // Security contract:
+    //   T-04-03-01: senderFrame validation (verbatim copy from ai:send-message)
+    //   T-04-03-03: API key decrypted in main process only — never sent to renderer
+    ipcMain.handle('ai:recap-start', async (event, payload) => {
+      // ── Step 1: senderFrame validation (T-04-03-01) ──────────────────────────
+      const senderUrl = (event as any).senderFrame?.url ?? ''
+      const isDev = process.env.NODE_ENV === 'development'
+      if (
+        !senderUrl.startsWith('file://') &&
+        !senderUrl.startsWith('app://') &&
+        !(isDev && senderUrl.startsWith('http://localhost:'))
+      ) {
+        throw new Error('IPC sender frame URL not allowed')
+      }
+
+      // ── Step 2: Validate IPC payload ─────────────────────────────────────────
+      const { z } = await import('zod')
+      const recapStartSchema = z.object({
+        campaignId: z.string().uuid(),
+        sessionId: z.string().uuid(),
+      })
+      const { campaignId, sessionId } = recapStartSchema.parse(payload)
+
+      // ── Step 3: Load campaign config (primary provider only — Pitfall 4) ─────
+      const campaign = campaignsRepo.get(campaignId)
+      if (!campaign) {
+        event.sender.send('ai:recap-error', { message: 'Campaign not found' })
+        return { started: false }
+      }
+
+      const primaryKey = await secretStorage.decrypt('ai-key-' + campaignId)
+      const providerConfig: LLMProviderConfig = {
+        type: (campaign.providerType as 'openai-compatible' | 'gemini') ?? 'openai-compatible',
+        endpointUrl: campaign.endpointUrl ?? undefined,
+        modelName: campaign.modelName ?? '',
+        apiKey: primaryKey ?? undefined,
+      }
+
+      // ── Step 4: Load session messages — map to ModelMessage shape ────────────
+      const rawMessages = messagesRepo.getBySessionId(sessionId)
+      const sessionMessages: import('ai').ModelMessage[] = rawMessages.map((m) => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      }))
+
+      // ── Step 5: safeSend helper (guard against destroyed WebContents) ─────────
+      const safeSend = (channel: string, ...args: unknown[]): void => {
+        if (!event.sender.isDestroyed()) {
+          event.sender.send(channel, ...args)
+        }
+      }
+
+      // ── Step 6: Stream recap using streamText ─────────────────────────────────
+      // Using streamText (not generateText) so the modal can show tokens as they arrive.
+      const { streamText } = await import('ai')
+      const { buildModel } = await import('./ai/llmProvider')
+
+      let fullRecapText = ''
+
+      try {
+        log.debug('[ai:recap-start] Starting recap stream', {
+          campaignId,
+          sessionId,
+          messageCount: sessionMessages.length,
+        })
+
+        const model = buildModel(providerConfig)
+
+        const result = await streamText({
+          model,
+          system: RECAP_SYSTEM_PROMPT,
+          messages: sessionMessages,
+          temperature: 0.3,
+        })
+
+        for await (const chunk of result.textStream) {
+          fullRecapText += chunk
+          safeSend('ai:recap-token', chunk)
+        }
+
+        safeSend('ai:recap-finish', fullRecapText)
+        log.debug('[ai:recap-start] Recap stream complete', { sessionId, length: fullRecapText.length })
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Recap generation failed'
+        log.error('[ai:recap-start] Stream error:', message)
+        safeSend('ai:recap-error', { message })
+      }
+
+      return { started: true }
+    })
+    // ─────────────────────────────────────────────────────────────────────────────
+
     // Load the renderer
     if (process.env.NODE_ENV === 'development') {
       mainWindow.loadURL('http://localhost:5173')
@@ -355,6 +467,20 @@ if (!gotLock) {
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
       app.quit()
+    }
+  })
+
+  // D-06: Auto-end any active sessions on app close.
+  // Uses a synchronous raw better-sqlite3 UPDATE to ensure the write completes before
+  // the process exits. Do NOT call any async LLM functions here (Pitfall 6 in RESEARCH.md).
+  // Sessions with isSummarized=false will have rolling summary generated on next session start.
+  app.on('before-quit', () => {
+    try {
+      // getDb().$client is the underlying better-sqlite3 Database instance
+      getDb().$client.prepare('UPDATE sessions SET ended_at = ? WHERE ended_at IS NULL').run(Date.now())
+      log.info('[main] before-quit: ended all active sessions')
+    } catch (err) {
+      log.error('[main] before-quit: failed to end active sessions:', err instanceof Error ? err.message : String(err))
     }
   })
 

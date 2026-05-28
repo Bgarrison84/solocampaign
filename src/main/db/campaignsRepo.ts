@@ -82,6 +82,19 @@ export const campaignsRepo = {
       .run()
   },
 
+  /**
+   * Persist the Layer 3 rolling campaign summary.
+   * Called at session end after generating the rolling summary (D-16/D-21).
+   * Pass null to clear the rolling summary (e.g. when olderSessions is empty).
+   */
+  updateRollingSummary(campaignId: string, value: string | null): void {
+    const db = getDb()
+    db.update(campaigns)
+      .set({ rollingSummary: value })
+      .where(eq(campaigns.id, campaignId))
+      .run()
+  },
+
   delete(id: string): void {
     const db = getDb()
     db.delete(campaigns).where(eq(campaigns.id, id)).run()

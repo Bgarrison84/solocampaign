@@ -5,6 +5,7 @@ import { charactersRouter } from './routers/characters'
 import { contentRouter } from './routers/content'
 import { prefsRouter } from './routers/prefs'
 import { secretsRouter } from './routers/secrets'
+import { sessionsRouter } from './routers/sessions'
 import { windowRouter } from './routers/window'
 
 export const router = t.router({
@@ -14,6 +15,7 @@ export const router = t.router({
   content: contentRouter,
   prefs: prefsRouter,
   secrets: secretsRouter,
+  sessions: sessionsRouter,
   window: windowRouter,
 })
 

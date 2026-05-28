@@ -226,8 +226,8 @@ describe('contextBuilder', () => {
     it('returns last 20 messages for context window', () => {
       vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
       vi.mocked(messagesRepo.getLastN).mockReturnValue([
-        { id: '1', campaignId: 'campaign-1', role: 'user', content: 'Hello DM', createdAt: new Date() },
-        { id: '2', campaignId: 'campaign-1', role: 'assistant', content: 'Welcome adventurer!', createdAt: new Date() },
+        { id: '1', campaignId: 'campaign-1', role: 'user', content: 'Hello DM', createdAt: new Date(), sessionId: null },
+        { id: '2', campaignId: 'campaign-1', role: 'assistant', content: 'Welcome adventurer!', createdAt: new Date(), sessionId: null },
       ])
 
       const { messages } = buildContext({

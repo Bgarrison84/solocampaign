@@ -37,8 +37,9 @@ declare global {
 
       /**
        * Register a callback fired when the stream completes successfully.
+       * meta.isL1Overflow is set by plan 04-04 when the AI context window overflowed L1.
        */
-      onFinish(cb: () => void): void
+      onFinish(cb: (meta?: { isL1Overflow?: boolean }) => void): void
 
       /**
        * Register a callback fired when the stream fails after retries.

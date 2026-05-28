@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Camera, ChevronLeft, SlidersHorizontal, Trash2 } from 'lucide-react'
+import { Camera, ChevronLeft, Play, SlidersHorizontal, Square, Trash2 } from 'lucide-react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import { Button } from '../components/ui/button'
@@ -21,10 +21,13 @@ import {
 import { trpc } from '../lib/trpc'
 import { usePanelSizeStore } from '../stores/panelSizeStore'
 import { useWindowStore } from '../stores/windowStore'
+import { useSessionStore } from '../stores/sessionStore'
 import { CharacterSheetTab } from '../components/CharacterSheetTab'
 import { StoryScrollPanel } from '../components/StoryScrollPanel'
 import { ChatInputArea } from '../components/ChatInputArea'
 import { AiSettingsModal } from '../components/AiSettingsModal'
+import { SessionStartModal } from '../components/SessionStartModal'
+import { EndSessionModal } from '../components/EndSessionModal'
 import { useAiStream } from '../hooks/useAiStream'
 
 export function CampaignViewScreen() {
@@ -39,6 +42,11 @@ export function CampaignViewScreen() {
   // AI streaming state — plan 03-04
   // useAiStream requires a non-null campaignId; we render a fallback before this point if id is null
   const aiStream = useAiStream(id ?? '')
+
+  // Session lifecycle state — plan 04-05
+  const sessionStore = useSessionStore()
+  const [showSessionStart, setShowSessionStart] = useState(false)
+  const [showEndSession, setShowEndSession] = useState(false)
 
   // Ref to imperatively scroll the story scroll to bottom after player sends a message
   const scrollToBottomRef = useRef<(() => void) | null>(null)
@@ -56,6 +64,28 @@ export function CampaignViewScreen() {
     queryKey: ['campaigns', 'get', id],
     queryFn: () => trpc.campaigns.get.query({ id: id! }),
     enabled: !!id,
+  })
+
+  // Restore active session from DB on campaign load (handles page refresh / navigate back — D-05)
+  const activeSessionQuery = useQuery({
+    queryKey: ['sessions', 'getActive', id],
+    queryFn: () => trpc.sessions.getActive.query({ campaignId: id! }),
+    enabled: !!id,
+  })
+
+  // Pre-fill location for SessionStartModal from the last completed session (D-07)
+  const lastLocationQuery = useQuery({
+    queryKey: ['sessions', 'lastLocation', id],
+    queryFn: () => trpc.sessions.getLastLocation.query({ campaignId: id! }),
+    enabled: !!id,
+  })
+
+  // Message count query for D-04 auto-narration guard (prevent re-firing on page refresh)
+  const messagesQuery = useQuery({
+    queryKey: ['ai', 'getMessages', id],
+    queryFn: () => trpc.ai.getMessages.query({ campaignId: id! }),
+    enabled: !!id,
+    staleTime: Infinity,
   })
 
   const coverMutation = useMutation({
@@ -83,6 +113,55 @@ export function CampaignViewScreen() {
       setCampaignName(null)
     }
   }, [campaignQuery.data?.name, setCampaignName])
+
+  // Restore active session on campaign load (handles window reload / navigation back — D-05)
+  useEffect(() => {
+    if (activeSessionQuery.data) {
+      const s = activeSessionQuery.data
+      useSessionStore.getState().startSession(s.id, s.sessionNumber, {
+        location: s.location ?? null,
+        goal: s.goal ?? null,
+        contextNotes: s.contextNotes ?? null,
+      })
+    } else if (activeSessionQuery.isSuccess && !activeSessionQuery.data) {
+      // No active session — ensure store is cleared (page refresh with no active session)
+      useSessionStore.getState().endSession()
+    }
+  }, [activeSessionQuery.data, activeSessionQuery.isSuccess])
+
+  // Register L1Overflow listener on mount; window.aiStream.onFinish now carries meta (plan 04-04)
+  // Note: useAiStream also registers onFinish; both run for the same event.
+  // useAiStream handles cleanup via removeAllListeners on its effect cleanup.
+  useEffect(() => {
+    const handler = (meta?: { isL1Overflow?: boolean }) => {
+      if (meta?.isL1Overflow) {
+        useSessionStore.getState().setL1Overflow(true)
+      }
+    }
+    window.aiStream.onFinish(handler)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // D-04: When isSessionActive transitions to true and no messages exist for this session yet,
+  // auto-send a trigger prompt so the AI narrates the session opening without the player typing.
+  // The trigger text is invisible framing; ContextBuilder v2 injects session start context into the
+  // system prompt (location, goal, contextNotes) via the sessionActiveMap (plan 04-04).
+  const prevIsSessionActive = useRef(false)
+  useEffect(() => {
+    const justActivated = sessionStore.isSessionActive && !prevIsSessionActive.current
+    prevIsSessionActive.current = sessionStore.isSessionActive
+    if (!justActivated) return
+    if (!id || !sessionStore.activeSessionId) return
+    // Guard: only auto-send if there are no existing messages for this campaign
+    // (prevents re-firing on page-refresh when a session was already active with messages)
+    const messageCount = messagesQuery.data?.length ?? 0
+    if (messageCount > 0) return
+    // Send invisible trigger — ContextBuilder v2 has actual session context in system prompt
+    window.aiStream.sendMessage({
+      campaignId: id,
+      content: '[Begin session narration]',
+    })
+  }, [sessionStore.isSessionActive, sessionStore.activeSessionId, id, messagesQuery.data])
 
   // Load persisted panel sizes on mount or campaign change
   useEffect(() => {
@@ -167,6 +246,38 @@ export function CampaignViewScreen() {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip delayDuration={600}>
+            <TooltipTrigger asChild>
+              {!sessionStore.isSessionActive ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowSessionStart(true)}
+                  className="gap-1.5"
+                >
+                  <Play className="h-4 w-4" />
+                  Start Session
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowEndSession(true)}
+                  className="gap-1.5 border-destructive/60 text-destructive hover:bg-destructive/10 hover:border-destructive"
+                >
+                  <Square className="h-4 w-4" />
+                  End Session
+                </Button>
+              )}
+            </TooltipTrigger>
+            <TooltipContent>
+              {!sessionStore.isSessionActive
+                ? 'Begin a new play session'
+                : 'End this session and save a recap'}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <Button
           variant="ghost"
           size="sm"
@@ -192,6 +303,7 @@ export function CampaignViewScreen() {
               streamingContent={aiStream.streamingContent}
               error={aiStream.error}
               hasFallback={!!(campaignQuery.data?.fallbackEndpointUrl)}
+              isL1Overflow={sessionStore.isL1Overflow}
               onRetry={() => {
                 // Retry: re-send the last user message with the same provider
                 aiStream.clearError()
@@ -222,6 +334,7 @@ export function CampaignViewScreen() {
               }}
               isStreaming={aiStream.isStreaming}
               disabled={!campaignQuery.data?.providerType}
+              isSessionActive={sessionStore.isSessionActive}
               onOpenSettings={handleOpenSettings}
               className="shrink-0"
             />
@@ -258,7 +371,7 @@ export function CampaignViewScreen() {
                   value="session-journal"
                   className="px-4 py-2 text-sm font-semibold text-muted-foreground data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
                 >
-                  Session Journal
+                  Journal
                 </TabsTrigger>
                 <TabsTrigger
                   value="inventory"
@@ -331,6 +444,27 @@ export function CampaignViewScreen() {
         campaignId={id}
         open={showAiSettings}
         onClose={() => setShowAiSettings(false)}
+      />
+    )}
+
+    {/* Session Start modal — plan 04-05 */}
+    {id && (
+      <SessionStartModal
+        open={showSessionStart}
+        onClose={() => setShowSessionStart(false)}
+        campaignId={id}
+        lastLocation={lastLocationQuery.data ?? null}
+      />
+    )}
+
+    {/* End Session modal — plan 04-05 */}
+    {id && sessionStore.activeSessionId && (
+      <EndSessionModal
+        open={showEndSession}
+        onClose={() => setShowEndSession(false)}
+        campaignId={id}
+        sessionId={sessionStore.activeSessionId}
+        sessionNumber={sessionStore.sessionNumber}
       />
     )}
 

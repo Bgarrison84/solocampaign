@@ -11,8 +11,8 @@
  *   - Accessibility: sr-only label for the textarea
  */
 
-import { useCallback, useRef, useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Loader2, Play } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Button } from './ui/button'
 import { Textarea } from './ui/textarea'
@@ -26,6 +26,11 @@ export interface ChatInputAreaProps {
   isStreaming: boolean
   /** True when no AI provider is configured for this campaign */
   disabled?: boolean
+  /**
+   * True when a session is active — unlocks the input.
+   * Defaults to true to avoid breaking callers that don't yet pass this prop.
+   */
+  isSessionActive?: boolean
   /** Open the AI settings modal (gear icon modal, Plan 03-05) */
   onOpenSettings: () => void
   className?: string
@@ -35,12 +40,21 @@ export function ChatInputArea({
   onSend,
   isStreaming,
   disabled = false,
+  isSessionActive = true,
   onOpenSettings,
   className,
 }: ChatInputAreaProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   // Track empty state to reactively disable Send button
   const [isEmpty, setIsEmpty] = useState(true)
+
+  // When isSessionActive transitions to true, autofocus the textarea
+  useEffect(() => {
+    if (isSessionActive) {
+      // Small timeout to let the DOM swap complete before focusing
+      setTimeout(() => textareaRef.current?.focus(), 50)
+    }
+  }, [isSessionActive])
 
   const handleSend = useCallback(() => {
     const textarea = textareaRef.current
@@ -65,7 +79,7 @@ export function ChatInputArea({
     },
     {
       enableOnFormTags: ['TEXTAREA'],
-      enabled: !isStreaming && !disabled,
+      enabled: !isStreaming && !disabled && !!isSessionActive,
     },
   )
 
@@ -80,6 +94,18 @@ export function ChatInputArea({
   }, [])
 
   const sendDisabled = isStreaming || disabled || isEmpty
+
+  // Locked state: no active session — show banner instead of input
+  if (!isSessionActive) {
+    return (
+      <div className={cn('border-t border-border bg-background px-4 py-4 flex items-center gap-2', className)}>
+        <div role="status" aria-live="polite" className="flex items-center gap-2">
+          <Play className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="text-sm text-muted-foreground">Start your session to begin playing.</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={cn('border-t border-border bg-background p-3 flex flex-col gap-1', className)}>

@@ -65,6 +65,12 @@ declare global {
           chips: Array<{ id: string; label: string; type: string }>
         }) => void,
       ): void
+
+      /**
+       * Remove all listeners for ai:mutations-applied channel only.
+       * Use in component cleanup when not relying on removeAllListeners.
+       */
+      removeOnMutationsApplied(): void
     }
 
     /**

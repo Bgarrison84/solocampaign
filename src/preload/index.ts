@@ -87,6 +87,15 @@ contextBridge.exposeInMainWorld('aiStream', {
   ) => {
     ipcRenderer.on('ai:mutations-applied', (_, payload) => cb(payload))
   },
+
+  /**
+   * Remove all listeners for the ai:mutations-applied channel.
+   * Call in useEffect cleanup for components that register onMutationsApplied
+   * independently of useAiStream (e.g. MutationChipStack, CampaignViewScreen).
+   */
+  removeOnMutationsApplied: () => {
+    ipcRenderer.removeAllListeners('ai:mutations-applied')
+  },
 })
 
 /**

@@ -119,11 +119,11 @@ export function MutationChipStack() {
 
     window.aiStream.onMutationsApplied(handler)
 
-    // Cleanup: removeAllListeners is called by useAiStream's effect cleanup, which covers
-    // ai:mutations-applied (preload removeAllListeners removes it). No additional teardown needed.
-    // If this component unmounts independently, explicitly remove the channel listener.
     return () => {
-      // Clear local chip state to avoid stale chips on remount
+      // WR-01: remove the ai:mutations-applied listener so it does not stack on remount.
+      // removeOnMutationsApplied removes all listeners for this channel — safe because
+      // useAiStream re-registers its own cleanup on its next mount.
+      window.aiStream.removeOnMutationsApplied()
       setChips([])
     }
   }, [])

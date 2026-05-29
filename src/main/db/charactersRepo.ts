@@ -326,11 +326,22 @@ export const charactersRepo = {
     denomination: 'cp' | 'sp' | 'ep' | 'gp' | 'pp',
     delta: number,
   ): void {
+    // WR-03: use a lookup table to map denomination to a Drizzle column reference
+    // instead of sql.raw() — eliminates the SQL injection risk if the call site
+    // ever bypasses the Zod enum validation.
+    const DENOM_COL = {
+      cp: characterResources.cp,
+      sp: characterResources.sp,
+      ep: characterResources.ep,
+      gp: characterResources.gp,
+      pp: characterResources.pp,
+    } as const
+    const col = DENOM_COL[denomination]
     const db = getDb()
     const now = new Date(Date.now())
     db.update(characterResources)
       .set({
-        [denomination]: sql`MAX(0, ${sql.raw(denomination)} + ${delta})`,
+        [denomination]: sql`MAX(0, ${col} + ${delta})`,
         updatedAt: now,
       })
       .where(eq(characterResources.characterId, characterId))

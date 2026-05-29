@@ -187,10 +187,9 @@ export const sessionsRouter = t.router({
       }),
     )
     .mutation(({ input }) => {
-      // CR-05: End the session first (set endedAt) so it appears in getLastNCompleted / L2 / Journal
-      sessionsRepo.end(input.sessionId)
-      // Persist recap + notes to DB
-      sessionsRepo.saveRecap(input.sessionId, input.aiRecap, input.playerNotes ?? null)
+      // CR-04/WR-08: end + saveRecap atomically to prevent partial state
+      // (session ended with no recap if saveRecap had previously failed).
+      sessionsRepo.endAndSaveRecap(input.sessionId, input.aiRecap, input.playerNotes ?? null)
 
       // Clear in-memory active session
       sessionActiveMap.clear(input.campaignId)

@@ -175,6 +175,32 @@ export const sessionsRepo = {
   },
 
   /**
+   * End a session and save its recap atomically in a single transaction.
+   * Use this instead of calling end() then saveRecap() separately.
+   * Returns the updated Session row.
+   */
+  endAndSaveRecap(
+    sessionId: string,
+    aiRecap: string,
+    playerNotes?: string | null,
+  ): Session {
+    const db = getDb()
+    db.transaction(() => {
+      db.update(sessions).set({ endedAt: new Date(Date.now()) }).where(eq(sessions.id, sessionId)).run()
+      const updateValues: Partial<typeof sessions.$inferInsert> = { aiRecap }
+      if (playerNotes !== undefined) {
+        updateValues.playerNotes = playerNotes
+      }
+      db.update(sessions).set(updateValues).where(eq(sessions.id, sessionId)).run()
+    })
+    const updated = db.select().from(sessions).where(eq(sessions.id, sessionId)).get()
+    if (!updated) {
+      throw new Error(`[sessions] Session not found after endAndSaveRecap: ${sessionId}`)
+    }
+    return updated
+  },
+
+  /**
    * Update the player notes for a session.
    * Returns the updated Session row.
    */

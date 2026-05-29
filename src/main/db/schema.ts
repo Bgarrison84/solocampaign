@@ -19,6 +19,8 @@ export const campaigns = sqliteTable('campaigns', {
   fallbackModelName: text('fallback_model_name'),
   // D-21: Layer 3 rolling campaign summary (regenerated at each session end)
   rollingSummary: text('rolling_summary'),
+  // Phase 5 (PROG-04): permadeath mode — when true, death at 0 HP is final
+  permadeathMode: integer('permadeath_mode', { mode: 'boolean' }).notNull().default(false),
 })
 
 export type Campaign = typeof campaigns.$inferSelect
@@ -155,6 +157,13 @@ export const characterResources = sqliteTable('character_resources', {
   deathSaveFailures: integer('death_save_failures').notNull().default(0),
   // Inspiration
   hasInspiration: integer('has_inspiration', { mode: 'boolean' }).notNull().default(false),
+  // Phase 5: concentration tracking (D-25, Pitfall 8) — nullable
+  concentratingOn: text('concentrating_on'),
+  // Phase 5: hit dice for short-rest healing — nullable until seeded
+  hitDiceCurrent: integer('hit_dice_current'),
+  hitDiceTotal: integer('hit_dice_total'),
+  // Phase 5: warlock pact magic slots — JSON { "1": {used:0,max:1}, ... }
+  pactSlots: text('pact_slots').notNull().default('{}'),
   updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
     .notNull()
     .default(sql`(unixepoch() * 1000)`),
@@ -182,3 +191,58 @@ export const characterItems = sqliteTable('character_items', {
 
 export type CharacterItem = typeof characterItems.$inferSelect
 export type NewCharacterItem = typeof characterItems.$inferInsert
+
+// Phase 5 (COMB-02): combatants — initiative tracker rows per campaign/session.
+export const combatants = sqliteTable('combatants', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  // nullable FK — combat may begin outside a tracked session
+  sessionId: text('session_id').references(() => sessions.id),
+  name: text('name').notNull(),
+  hpCurrent: integer('hp_current').notNull(),
+  hpMax: integer('hp_max').notNull(),
+  ac: integer('ac').notNull().default(10),
+  initiative: integer('initiative').notNull().default(0),
+  initiativeOrder: integer('initiative_order').notNull().default(0),
+  // JSON array of active condition strings
+  conditions: text('conditions').notNull().default('[]'),
+  isPlayer: integer('is_player', { mode: 'boolean' }).notNull().default(false),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+})
+
+export type Combatant = typeof combatants.$inferSelect
+export type NewCombatant = typeof combatants.$inferInsert
+
+// Phase 5 (STATE-05): campaign_events — append-only mechanical event log.
+export const campaignEvents = sqliteTable('campaign_events', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  // nullable FK — events may occur outside a tracked session
+  sessionId: text('session_id').references(() => sessions.id),
+  eventType: text('event_type').notNull(),
+  payload: text('payload').notNull().default('{}'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+})
+
+export type CampaignEvent = typeof campaignEvents.$inferSelect
+export type NewCampaignEvent = typeof campaignEvents.$inferInsert
+
+// Phase 5 (CHAR-08): character_spells — per-character known/prepared spell list.
+export const characterSpells = sqliteTable('character_spells', {
+  id: text('id').primaryKey(),
+  characterId: text('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  spellName: text('spell_name').notNull(),
+  spellLevel: integer('spell_level').notNull().default(0),
+  isPrepared: integer('is_prepared', { mode: 'boolean' }).notNull().default(true),
+})
+
+export type CharacterSpell = typeof characterSpells.$inferSelect
+export type NewCharacterSpell = typeof characterSpells.$inferInsert

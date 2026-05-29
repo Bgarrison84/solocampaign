@@ -39,6 +39,7 @@ export default defineConfig({
         // path from project root matching tsconfig baseUrl). Add an explicit Rollup alias so the
         // production build resolves the same path that tsconfig's baseUrl="." resolves at typecheck.
         'src/renderer/src': resolve('src/renderer/src'),
+        '@': resolve('src/renderer/src'),
       },
     },
 

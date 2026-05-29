@@ -455,4 +455,78 @@ export const charactersRepo = {
       .where(eq(characters.id, characterId))
       .run()
   },
+
+  /**
+   * Level up a character: increment level (capped at 20), increase hpMax and hpCurrent
+   * by hpGain, and merge the provided newSlotMax into the spellSlots JSON (preserving
+   * existing `used` counts, defaulting `used` to 0 for newly added slot levels).
+   * (D-31, D-32, T-05-06-01)
+   */
+  levelUp(characterId: string, hpGain: number, newSlotMax: Record<string, number>): void {
+    const db = getDb()
+    const now = new Date(Date.now())
+
+    db.transaction((tx) => {
+      // Increment level, capped at 20
+      tx.update(characters)
+        .set({ level: sql`MIN(20, level + 1)`, updatedAt: now })
+        .where(eq(characters.id, characterId))
+        .run()
+
+      // Increase HP
+      tx.update(characterResources)
+        .set({
+          hpMax: sql`hp_max + ${hpGain}`,
+          hpCurrent: sql`hp_current + ${hpGain}`,
+          updatedAt: now,
+        })
+        .where(eq(characterResources.characterId, characterId))
+        .run()
+
+      // Merge spell slot max changes (preserves used counts)
+      if (Object.keys(newSlotMax).length > 0) {
+        const res = tx
+          .select({ spellSlots: characterResources.spellSlots })
+          .from(characterResources)
+          .where(eq(characterResources.characterId, characterId))
+          .get()
+
+        if (res) {
+          const slots = JSON.parse(res.spellSlots) as SpellSlotMap
+          for (const [level, max] of Object.entries(newSlotMax)) {
+            const existing = slots[level]
+            if (existing) {
+              // Preserve used count, update max
+              slots[level] = { used: existing.used, max }
+            } else {
+              // New slot level — default used to 0
+              slots[level] = { used: 0, max }
+            }
+          }
+          tx.update(characterResources)
+            .set({ spellSlots: JSON.stringify(slots), updatedAt: now })
+            .where(eq(characterResources.characterId, characterId))
+            .run()
+        }
+      }
+    })
+  },
+
+  /**
+   * Apply short-rest HP recovery: increase hpCurrent (clamped to hpMax) and
+   * decrement hitDiceCurrent by the dice spent (clamped at 0).
+   * (D-36, T-05-06-01)
+   */
+  applyShortRestHp(characterId: string, hpRecovered: number, diceSpent: number): void {
+    const db = getDb()
+    const now = new Date(Date.now())
+    db.update(characterResources)
+      .set({
+        hpCurrent: sql`MIN(hp_max, hp_current + ${hpRecovered})`,
+        hitDiceCurrent: sql`MAX(0, COALESCE(hit_dice_current, 0) - ${diceSpent})`,
+        updatedAt: now,
+      })
+      .where(eq(characterResources.characterId, characterId))
+      .run()
+  },
 }

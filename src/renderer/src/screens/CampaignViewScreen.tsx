@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Camera, ChevronLeft, Play, SlidersHorizontal, Square, Swords, Trash2 } from 'lucide-react'
+import { Camera, ChevronLeft, Moon, Play, SlidersHorizontal, Square, Swords, Trash2 } from 'lucide-react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import { Button } from '../components/ui/button'
@@ -31,6 +31,8 @@ import { ChatInputArea } from '../components/ChatInputArea'
 import { AiSettingsModal } from '../components/AiSettingsModal'
 import { SessionStartModal } from '../components/SessionStartModal'
 import { EndSessionModal } from '../components/EndSessionModal'
+import { RestPickerDialog } from '../components/RestPickerDialog'
+import { ShortRestHitDiceModal } from '../components/ShortRestHitDiceModal'
 import { useAiStream } from '../hooks/useAiStream'
 
 export function CampaignViewScreen() {
@@ -56,6 +58,10 @@ export function CampaignViewScreen() {
   const activeTab = useCombatStore((s) => s.activeTab)
   const setActiveTab = useCombatStore((s) => s.setActiveTab)
   const isCombatActive = useCombatStore((s) => s.isCombatActive)
+
+  // Rest system state — plan 05-06 (D-34, PROG-02)
+  const [showRestPicker, setShowRestPicker] = useState(false)
+  const [showShortRest, setShowShortRest] = useState(false)
 
   // Ref to imperatively scroll the story scroll to bottom after player sends a message
   const scrollToBottomRef = useRef<(() => void) | null>(null)
@@ -97,6 +103,13 @@ export function CampaignViewScreen() {
     staleTime: Infinity,
   })
 
+  // Character query for ShortRestHitDiceModal (needs hitDice + CON data)
+  const characterQuery = useQuery({
+    queryKey: ['characters', 'getByCampaignId', id],
+    queryFn: () => trpc.characters.getByCampaignId.query({ campaignId: id! }),
+    enabled: !!id,
+  })
+
   const coverMutation = useMutation({
     mutationFn: () => trpc.campaigns.importCoverImage.mutate({ campaignId: id! }),
     onSuccess: () => {
@@ -136,6 +149,23 @@ export function CampaignViewScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
+  /**
+   * handleRest — send the context message to the AI and close the picker (D-34, PROG-02).
+   * Does NOT pre-apply recovery (D-35 — only the AI's processRest grants it).
+   * Exact copywriting per UI-SPEC §S8a: "[Player requests a short rest]" / "[Player requests a long rest]"
+   */
+  const handleRest = useCallback(
+    (type: 'short' | 'long') => {
+      const content =
+        type === 'short'
+          ? '[Player requests a short rest]'
+          : '[Player requests a long rest]'
+      aiStream.send(content)
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [aiStream],
+  )
+
   // Set campaign name in title bar when data loads; clear on unmount (D-13)
   useEffect(() => {
     if (campaignQuery.data?.name) {
@@ -173,6 +203,27 @@ export function CampaignViewScreen() {
     window.aiStream.onFinish(handler)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  /**
+   * processRest short-rest modal hook (PROG-02, D-35, D-36, UI-SPEC §S8b).
+   *
+   * Wired path: main emits 'ai:mutations-applied' when processRest tool call is applied.
+   * If any chip has type='rest' and label='Short rest taken', the ShortRestHitDiceModal opens.
+   * Long rest needs no modal — recovery is auto-applied by 05-02 (applyRest).
+   */
+  useEffect(() => {
+    window.aiStream.onMutationsApplied((payload) => {
+      if (!id || payload.campaignId !== id) return
+      const hasShortRest = payload.chips.some(
+        (c) => c.type === 'rest' && c.label === 'Short rest taken',
+      )
+      if (hasShortRest) {
+        setShowShortRest(true)
+      }
+    })
+    // Cleanup via removeAllListeners on unmount (called by useAiStream effect cleanup above)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
 
   // D-04: When isSessionActive transitions to true and no messages exist for this campaign yet,
   // auto-send a trigger prompt so the AI narrates the session opening without the player typing.
@@ -311,6 +362,24 @@ export function CampaignViewScreen() {
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        {/* Rest button — opens Short/Long rest picker (D-34, PROG-02, UI-SPEC §S1) */}
+        <TooltipProvider>
+          <Tooltip delayDuration={600}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setShowRestPicker(true)}
+              >
+                <Moon className="h-4 w-4" />
+                Rest
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Take a short or long rest</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
         <TooltipProvider>
           <Tooltip delayDuration={600}>
             <TooltipTrigger asChild>
@@ -520,6 +589,24 @@ export function CampaignViewScreen() {
         campaignId={id}
         sessionId={sessionStore.activeSessionId}
         sessionNumber={sessionStore.sessionNumber}
+      />
+    )}
+
+    {/* Rest picker — Short/Long rest selector (D-34, PROG-02) */}
+    {id && (
+      <RestPickerDialog
+        open={showRestPicker}
+        onClose={() => setShowRestPicker(false)}
+        onSelectRest={handleRest}
+      />
+    )}
+
+    {/* Short Rest Hit Dice modal — opens when AI grants short rest (D-36, PROG-02) */}
+    {id && characterQuery.data && (
+      <ShortRestHitDiceModal
+        open={showShortRest}
+        onClose={() => setShowShortRest(false)}
+        character={characterQuery.data}
       />
     )}
 

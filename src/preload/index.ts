@@ -70,6 +70,22 @@ contextBridge.exposeInMainWorld('aiStream', {
     ipcRenderer.removeAllListeners('ai:token')
     ipcRenderer.removeAllListeners('ai:finish')
     ipcRenderer.removeAllListeners('ai:error')
+    ipcRenderer.removeAllListeners('ai:mutations-applied')
+  },
+
+  /**
+   * Register a callback fired when the main process finishes applying mutation tool calls.
+   * Payload includes campaignId and the array of mutation chips (one per tool call applied).
+   * Used by the rest system (PROG-02, D-35): detect 'Short rest taken' chip to open
+   * ShortRestHitDiceModal automatically after the AI grants the processRest short call.
+   */
+  onMutationsApplied: (
+    cb: (payload: {
+      campaignId: string
+      chips: Array<{ id: string; label: string; type: string }>
+    }) => void,
+  ) => {
+    ipcRenderer.on('ai:mutations-applied', (_, payload) => cb(payload))
   },
 })
 

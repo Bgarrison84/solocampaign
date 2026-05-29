@@ -48,10 +48,23 @@ declare global {
       onError(cb: (err: { message: string }) => void): void
 
       /**
-       * Remove all listeners for ai:token, ai:finish, ai:error.
+       * Remove all listeners for ai:token, ai:finish, ai:error, ai:mutations-applied.
        * MUST be called in React useEffect cleanup to prevent listener stacking.
        */
       removeAllListeners(): void
+
+      /**
+       * Register a callback fired when the main process applies mutation tool calls.
+       * Payload: { campaignId, chips[] }. Used to detect short-rest grants (PROG-02, D-35):
+       * a chip with type 'rest' and label 'Short rest taken' means processRest was called
+       * with type 'short' and the renderer should open ShortRestHitDiceModal.
+       */
+      onMutationsApplied(
+        cb: (payload: {
+          campaignId: string
+          chips: Array<{ id: string; label: string; type: string }>
+        }) => void,
+      ): void
     }
 
     /**

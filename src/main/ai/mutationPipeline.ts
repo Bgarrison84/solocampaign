@@ -501,6 +501,9 @@ export async function applyMutationBatch(
   const acc: Accumulators = { chips: [], diceRolls: [], combatantHpOverrides: new Map() }
   const db = getDb()
 
+  // WR-07: better-sqlite3 transaction callbacks MUST remain synchronous.
+  // Do NOT add await inside this callback — db.transaction() does not return a Promise.
+  // applyOneTool and all its callees must stay synchronous forever.
   db.transaction(() => {
     for (const call of toolCalls) {
       try {

@@ -11,6 +11,8 @@ import { campaignsRepo } from './db/campaignsRepo'
 import { messagesRepo } from './db/messagesRepo'
 import { buildContext } from './ai/contextBuilder'
 import { streamChat } from './ai/llmProvider'
+import { PHASE5_TOOLS } from './ai/toolSchemas'
+import { applyMutationBatch, stripAndParseJsonTail } from './ai/mutationPipeline'
 import { withRetry } from './ai/retryHandler'
 import { sessionFallbackMap, sessionAbortMap, sessionActiveMap } from './ai/aiSessionState'
 import type { LLMProviderConfig } from './ai/llmProvider'
@@ -301,6 +303,9 @@ if (!gotLock) {
       let firstTokenMs: number | null = null
       let tokenCount = 0
       let assistantBuffer = ''
+      // Phase 5 (D-02): track whether native tool calls fired this attempt so the
+      // JSON-tail fallback is applied ONLY when no native calls were received.
+      let nativeToolCallsApplied = false
 
       try {
         await withRetry(
@@ -308,6 +313,7 @@ if (!gotLock) {
             // CR-05: reset buffer and token count at the start of each attempt
             assistantBuffer = ''
             tokenCount = 0
+            nativeToolCallsApplied = false
             return streamChat(providerConfig, messages, systemPrompt, {
               onToken: (chunk) => {
                 if (firstTokenMs === null) {
@@ -320,13 +326,33 @@ if (!gotLock) {
                 safeSend('ai:token', chunk)
               },
               onFinish: () => {
-                // Persist assistant message, including session FK if a session is active (D-20)
+                // Phase 5 (D-02): strip the JSON-tail fenced block before display.
+                const { cleanText, mutations: tailMutations } =
+                  stripAndParseJsonTail(assistantBuffer)
+                // Persist the CLEAN assistant text (no tail), with session FK (D-20).
                 messagesRepo.insert({
                   campaignId,
                   role: 'assistant',
-                  content: assistantBuffer,
+                  content: cleanText,
                   sessionId: activeSessionId,
                 })
+                // JSON-tail is a fallback only — skip it if native tool calls already
+                // applied this turn's mutations (D-02), so they never double-apply.
+                if (!nativeToolCallsApplied && tailMutations && tailMutations.length > 0) {
+                  void applyMutationBatch(tailMutations, campaignId, activeSessionId).then(
+                    ({ chips, diceRolls }) => {
+                      for (const d of diceRolls) {
+                        messagesRepo.insert({
+                          campaignId,
+                          role: 'dice_roll',
+                          content: JSON.stringify(d),
+                          sessionId: activeSessionId,
+                        })
+                      }
+                      safeSend('ai:mutations-applied', { campaignId, chips })
+                    },
+                  )
+                }
                 // AI-SPEC §7 metric: ai.stream.total_tokens_received
                 logTokensReceived(tokenCount)
                 sessionAbortMap.clearAbortController(campaignId)
@@ -337,7 +363,29 @@ if (!gotLock) {
                 // Re-throw so withRetry can catch and retry
                 throw err
               },
-            }, { abortSignal: abortController.signal })
+            }, {
+              abortSignal: abortController.signal,
+              tools: PHASE5_TOOLS,
+              onToolCallsFinish: async (toolCalls) => {
+                if (toolCalls.length === 0) return
+                // Native tool calls take priority over the JSON-tail fallback (D-02).
+                nativeToolCallsApplied = true
+                const { chips, diceRolls } = await applyMutationBatch(
+                  toolCalls,
+                  campaignId,
+                  activeSessionId,
+                )
+                for (const d of diceRolls) {
+                  messagesRepo.insert({
+                    campaignId,
+                    role: 'dice_roll',
+                    content: JSON.stringify(d),
+                    sessionId: activeSessionId,
+                  })
+                }
+                safeSend('ai:mutations-applied', { campaignId, chips })
+              },
+            })
           },
           { maxAttempts: 3, baseDelayMs: 1000 },
         )

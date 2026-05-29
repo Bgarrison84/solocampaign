@@ -131,8 +131,44 @@ function formatCharacterSummary(char: CharacterWithResources): string {
   if (spellSlotsLine) lines.push(spellSlotsLine)
   lines.push(conditionsLine, inspirationLine)
 
+  // Phase 5: concentration (D-25, Pitfall 8) — informs the AI it's already concentrating.
+  if (resources.concentratingOn) {
+    lines.push(`Concentrating on: ${resources.concentratingOn}`)
+  }
+  // Phase 5: hit dice remaining (D-38) — for short-rest decisions.
+  if (resources.hitDiceCurrent != null && resources.hitDiceTotal != null) {
+    lines.push(`Hit Dice: ${resources.hitDiceCurrent}/${resources.hitDiceTotal}`)
+  }
+
   return lines.join('\n')
 }
+
+// ─── Phase 5: Tool-usage system prompt block (D-02, D-08) ─────────────────────
+
+/**
+ * Natural-language description of the game-mechanics tools the AI controls, plus
+ * the JSON-tail fallback format (D-02) so providers WITHOUT native tool calling
+ * can still drive mutations by appending a fenced block at the very end of the
+ * message. The fenced block must be the last thing in the message.
+ */
+const toolDescriptionsBlock = `
+Game mechanics you control (use these tool calls during play):
+- Use \`updateHp\` when a creature takes damage or is healed. Delta is negative for damage, positive for healing.
+- Use \`applyCondition\`/\`removeCondition\` for status effects (Poisoned, Stunned, Blinded, etc.)
+- Use \`showDiceRoll\` whenever you make an attack, saving throw, or skill check — always show your dice so the player can see. Call it for every roll.
+- Use \`addCombatant\` at the start of combat to add enemies to the initiative tracker. Include their HP, AC, and initiative order.
+- Use \`endCombat\` when all enemies are defeated or the encounter ends.
+- Use \`awardXp\` after encounters. Typical encounter = 50-500 XP depending on difficulty.
+- Use \`deductSpellSlot\` when the player casts a leveled spell.
+- Use \`updateCurrency\` when the party finds loot or spends money. Values are deltas (positive = gain).
+- Use \`processRest\` to grant the player's rest request if narratively appropriate.
+
+If your provider does not support native tool calls, append a single fenced block at the VERY END of your message (after all narration), in this exact form:
+\`\`\`json
+{"mutations":[{"toolName":"updateHp","args":{"delta":-6,"source":"Goblin"}}]}
+\`\`\`
+Only include the block when there are mutations to apply, and never place it mid-message.
+`.trim()
 
 // ─── ContextBuilder v2 ────────────────────────────────────────────────────────
 
@@ -239,12 +275,13 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
   }
 
   // --- Assemble system prompt (D-17 order) ---
-  // preamble + strictness + personality + character, then referenceDocBlock,
-  // then l3Block, then l2Block, then sessionContextBlock
+  // preamble + strictness + personality + character, then the Phase 5 tool block,
+  // then referenceDocBlock, then l3Block, then l2Block, then sessionContextBlock
   const systemPrompt =
     [preamble, strictnessDirective, personality, characterSummaryBlock]
       .filter((part) => part.length > 0)
       .join('\n\n')
+    + '\n\n' + toolDescriptionsBlock
     + referenceDocBlock
     + l3Block
     + l2Block

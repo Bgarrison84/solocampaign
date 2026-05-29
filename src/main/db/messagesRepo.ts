@@ -13,7 +13,9 @@ import type { Message } from './schema'
 
 export interface InsertMessageInput {
   campaignId: string
-  role: 'user' | 'assistant'
+  // Phase 5: 'dice_roll' chips (D-22) and 'system' events (D-32) are persisted as
+  // message rows so the story scroll can render them inline alongside chat.
+  role: 'user' | 'assistant' | 'dice_roll' | 'system'
   content: string
   // D-20: optional session FK — set from main-process sessionActiveMap only
   sessionId?: string | null

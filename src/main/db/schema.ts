@@ -27,27 +27,34 @@ export type Campaign = typeof campaigns.$inferSelect
 export type NewCampaign = typeof campaigns.$inferInsert
 
 // D-19: Sessions table — one row per play session per campaign
-export const sessions = sqliteTable('sessions', {
-  id: text('id').primaryKey(),
-  campaignId: text('campaign_id')
-    .notNull()
-    .references(() => campaigns.id, { onDelete: 'cascade' }),
-  sessionNumber: integer('session_number').notNull(),
-  startedAt: integer('started_at', { mode: 'timestamp_ms' })
-    .notNull()
-    .default(sql`(unixepoch() * 1000)`),
-  // nullable — null while session is active
-  endedAt: integer('ended_at', { mode: 'timestamp_ms' }),
-  // Session start context fields (all optional)
-  location: text('location'),
-  goal: text('goal'),
-  contextNotes: text('context_notes'),
-  // End-of-session content
-  aiRecap: text('ai_recap'),
-  playerNotes: text('player_notes'),
-  // D-19: set true when Layer 3 rolling summary has incorporated this session
-  isSummarized: integer('is_summarized', { mode: 'boolean' }).notNull().default(false),
-})
+export const sessions = sqliteTable(
+  'sessions',
+  {
+    id: text('id').primaryKey(),
+    campaignId: text('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    sessionNumber: integer('session_number').notNull(),
+    startedAt: integer('started_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+    // nullable — null while session is active
+    endedAt: integer('ended_at', { mode: 'timestamp_ms' }),
+    // Session start context fields (all optional)
+    location: text('location'),
+    goal: text('goal'),
+    contextNotes: text('context_notes'),
+    // End-of-session content
+    aiRecap: text('ai_recap'),
+    playerNotes: text('player_notes'),
+    // D-19: set true when Layer 3 rolling summary has incorporated this session
+    isSummarized: integer('is_summarized', { mode: 'boolean' }).notNull().default(false),
+  },
+  (table) => ({
+    // WR-04: enforce uniqueness at DB level so duplicate session numbers cannot be written
+    uniqueCampaignSession: unique().on(table.campaignId, table.sessionNumber),
+  }),
+)
 
 export type Session = typeof sessions.$inferSelect
 export type NewSession = typeof sessions.$inferInsert

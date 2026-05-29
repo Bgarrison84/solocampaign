@@ -49,7 +49,7 @@ describe('charactersRepo.levelUp + applyShortRestHp', () => {
   })
 
   async function getRepo() {
-    const { db } = makeInMemoryDb()
+    const { db, sqlite } = makeInMemoryDb()
 
     vi.doMock('electron', () => ({
       app: { getPath: vi.fn(() => testDir), isPackaged: false },
@@ -92,7 +92,7 @@ describe('charactersRepo.levelUp + applyShortRestHp', () => {
       weaponProficiencies: ['daggers', 'quarterstaff'],
     })
 
-    return { db, campaignsRepo, charactersRepo, campaign, character }
+    return { db, sqlite, campaignsRepo, charactersRepo, campaign, character }
   }
 
   // ─── levelUp tests ──────────────────────────────────────────────────────────
@@ -119,10 +119,10 @@ describe('charactersRepo.levelUp + applyShortRestHp', () => {
   })
 
   it('levelUp caps level at 20 (calling on a level-20 character does not exceed 20)', async () => {
-    const { charactersRepo, character, db } = await getRepo()
+    const { charactersRepo, character, sqlite } = await getRepo()
 
     // Manually set level to 20 in DB
-    db.run('UPDATE characters SET level = 20 WHERE id = ?', [character.id])
+    sqlite.prepare('UPDATE characters SET level = 20 WHERE id = ?').run(character.id)
 
     charactersRepo.levelUp(character.id, 3, {})
     const updated = charactersRepo.getWithResources(character.id)!
@@ -161,13 +161,10 @@ describe('charactersRepo.levelUp + applyShortRestHp', () => {
   // ─── applyShortRestHp tests ──────────────────────────────────────────────────
 
   it('applyShortRestHp increases hpCurrent by hpRecovered', async () => {
-    const { charactersRepo, character, db } = await getRepo()
+    const { charactersRepo, character, sqlite } = await getRepo()
 
     // Reduce HP first so there is room to heal
-    db.run(
-      'UPDATE character_resources SET hp_current = 3 WHERE character_id = ?',
-      [character.id],
-    )
+    sqlite.prepare('UPDATE character_resources SET hp_current = 3 WHERE character_id = ?').run(character.id)
 
     charactersRepo.applyShortRestHp(character.id, 5, 1)
     const updated = charactersRepo.getWithResources(character.id)!
@@ -176,13 +173,10 @@ describe('charactersRepo.levelUp + applyShortRestHp', () => {
   })
 
   it('applyShortRestHp clamps hpCurrent to hpMax', async () => {
-    const { charactersRepo, character, db } = await getRepo()
+    const { charactersRepo, character, sqlite } = await getRepo()
 
     // Set HP to almost max
-    db.run(
-      'UPDATE character_resources SET hp_current = 6 WHERE character_id = ?',
-      [character.id],
-    )
+    sqlite.prepare('UPDATE character_resources SET hp_current = 6 WHERE character_id = ?').run(character.id)
 
     // hpMax = 8; recovering 10 should clamp to 8
     charactersRepo.applyShortRestHp(character.id, 10, 1)
@@ -192,17 +186,11 @@ describe('charactersRepo.levelUp + applyShortRestHp', () => {
   })
 
   it('applyShortRestHp decrements hitDiceCurrent by diceSpent', async () => {
-    const { charactersRepo, character, db } = await getRepo()
+    const { charactersRepo, character, sqlite } = await getRepo()
 
     // Set hitDiceCurrent to 4
-    db.run(
-      'UPDATE character_resources SET hit_dice_current = 4, hit_dice_total = 4 WHERE character_id = ?',
-      [character.id],
-    )
-    db.run(
-      'UPDATE character_resources SET hp_current = 3 WHERE character_id = ?',
-      [character.id],
-    )
+    sqlite.prepare('UPDATE character_resources SET hit_dice_current = 4, hit_dice_total = 4 WHERE character_id = ?').run(character.id)
+    sqlite.prepare('UPDATE character_resources SET hp_current = 3 WHERE character_id = ?').run(character.id)
 
     charactersRepo.applyShortRestHp(character.id, 5, 2)
     const updated = charactersRepo.getWithResources(character.id)!
@@ -211,17 +199,11 @@ describe('charactersRepo.levelUp + applyShortRestHp', () => {
   })
 
   it('applyShortRestHp clamps hitDiceCurrent at 0 (never negative)', async () => {
-    const { charactersRepo, character, db } = await getRepo()
+    const { charactersRepo, character, sqlite } = await getRepo()
 
     // Set hitDiceCurrent to 1
-    db.run(
-      'UPDATE character_resources SET hit_dice_current = 1, hit_dice_total = 1 WHERE character_id = ?',
-      [character.id],
-    )
-    db.run(
-      'UPDATE character_resources SET hp_current = 3 WHERE character_id = ?',
-      [character.id],
-    )
+    sqlite.prepare('UPDATE character_resources SET hit_dice_current = 1, hit_dice_total = 1 WHERE character_id = ?').run(character.id)
+    sqlite.prepare('UPDATE character_resources SET hp_current = 3 WHERE character_id = ?').run(character.id)
 
     // Spending 5 dice when only 1 available — should clamp at 0
     charactersRepo.applyShortRestHp(character.id, 5, 5)

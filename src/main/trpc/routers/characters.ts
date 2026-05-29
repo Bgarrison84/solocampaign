@@ -12,6 +12,7 @@ import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { t } from '../_base'
 import { charactersRepo } from '../../db/charactersRepo'
+import { messagesRepo } from '../../db/messagesRepo'
 import { loadContent } from '../../db/contentLoader'
 import {
   calcHP,
@@ -385,5 +386,65 @@ export const charactersRouter = t.router({
     .input(z.object({ itemId: z.string().uuid() }))
     .mutation(({ input }) => {
       charactersRepo.toggleItemAttuned(input.itemId)
+    }),
+
+  /**
+   * Level up a character: increment level (capped at 20), add hpGain to hpMax/hpCurrent,
+   * and merge new slot maxes (preserving used counts).
+   * Zod bounds: hpGain 1–50 (T-05-06-01); newSlotMax values 0–9.
+   * (D-31, PROG-01)
+   */
+  levelUp: t.procedure
+    .input(
+      z.object({
+        characterId: characterIdSchema,
+        hpGain: z.number().int().min(1).max(50),
+        newSlotMax: z.record(z.string(), z.number().int().min(0).max(9)),
+      }),
+    )
+    .mutation(({ input }) => {
+      charactersRepo.levelUp(input.characterId, input.hpGain, input.newSlotMax)
+      return { leveled: true }
+    }),
+
+  /**
+   * Record a system message in the story scroll (role 'system').
+   * Content bounded to 500 chars to prevent XSS-equivalent rendering exploits (T-05-06-02).
+   * (D-32, PROG-01)
+   */
+  recordSystemMessage: t.procedure
+    .input(
+      z.object({
+        campaignId: campaignIdSchema,
+        content: z.string().min(1).max(500),
+        sessionId: z.string().optional(),
+      }),
+    )
+    .mutation(({ input }) => {
+      messagesRepo.insert({
+        campaignId: input.campaignId,
+        role: 'system',
+        content: input.content,
+        sessionId: input.sessionId ?? null,
+      })
+      return { recorded: true }
+    }),
+
+  /**
+   * Apply short-rest HP recovery: increase hpCurrent (clamped to hpMax) and decrement
+   * hitDiceCurrent by diceSpent (clamped at 0).
+   * Zod bounds: hpRecovered 0–9999, diceSpent 0–20 (T-05-06-01, D-36).
+   */
+  applyShortRestHp: t.procedure
+    .input(
+      z.object({
+        characterId: characterIdSchema,
+        hpRecovered: z.number().int().min(0).max(9999),
+        diceSpent: z.number().int().min(0).max(20),
+      }),
+    )
+    .mutation(({ input }) => {
+      charactersRepo.applyShortRestHp(input.characterId, input.hpRecovered, input.diceSpent)
+      return { applied: true }
     }),
 })

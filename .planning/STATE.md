@@ -19,7 +19,7 @@ progress:
 **Project:** SoloCampaign
 **Mode:** mvp
 **Core Value:** A player with no group and no DM can sit down, load SoloCampaign, and play a full D&D 5e campaign — from character creation to level 20+ — with a competent AI DM that remembers everything, follows the rules (or bends them on command), and keeps the world alive.
-**Current Focus:** Phase 5 — Rules Engine, Dice & Combat
+**Current Focus:** Phase 5 — Rules Engine, Dice & Combat (Planned — 7 plans ready)
 
 ---
 
@@ -128,7 +128,7 @@ Phase 5 context gathered. Ready for planning.
 
 ### Next Session
 
-**Suggested action:** `/gsd:plan-phase 5` — Rules Engine, Dice & Combat.
+**Suggested action:** `/gsd:execute-phase 5` — 7 plans across 6 waves, ready to execute.
 
 **Phase 5 goal:** In-app dice roller, combat tracker, AI-managed initiative/enemy turns, conditions applied by player or AI. Context captured 2026-05-28.
 

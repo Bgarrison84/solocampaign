@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Camera, ChevronLeft, Play, SlidersHorizontal, Square, Trash2 } from 'lucide-react'
+import { Camera, ChevronLeft, Play, SlidersHorizontal, Square, Swords, Trash2 } from 'lucide-react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import { Button } from '../components/ui/button'
@@ -22,7 +22,9 @@ import { trpc } from '../lib/trpc'
 import { usePanelSizeStore } from '../stores/panelSizeStore'
 import { useWindowStore } from '../stores/windowStore'
 import { useSessionStore } from '../stores/sessionStore'
+import { useCombatStore } from '../stores/combatStore'
 import { CharacterSheetTab } from '../components/CharacterSheetTab'
+import { CombatTrackerTab } from '../components/CombatTrackerTab'
 import { SessionJournalTab } from '../components/SessionJournalTab'
 import { StoryScrollPanel } from '../components/StoryScrollPanel'
 import { ChatInputArea } from '../components/ChatInputArea'
@@ -48,6 +50,12 @@ export function CampaignViewScreen() {
   const sessionStore = useSessionStore()
   const [showSessionStart, setShowSessionStart] = useState(false)
   const [showEndSession, setShowEndSession] = useState(false)
+
+  // Combat state — plan 05-03. activeTab lives in the store so handleStartCombat can
+  // auto-switch the right panel to the Combat tab (D-17); the <Tabs> below is controlled.
+  const activeTab = useCombatStore((s) => s.activeTab)
+  const setActiveTab = useCombatStore((s) => s.setActiveTab)
+  const isCombatActive = useCombatStore((s) => s.isCombatActive)
 
   // Ref to imperatively scroll the story scroll to bottom after player sends a message
   const scrollToBottomRef = useRef<(() => void) | null>(null)
@@ -104,6 +112,29 @@ export function CampaignViewScreen() {
       navigate('/')
     },
   })
+
+  // Combat start/end mutations — plan 05-03
+  const startCombatMutation = useMutation({
+    mutationFn: () => trpc.combat.startCombat.mutate({ campaignId: id! }),
+  })
+  const endCombatMutation = useMutation({
+    mutationFn: () => trpc.combat.endCombat.mutate({ campaignId: id! }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['combat', 'listActive', id] })
+    },
+  })
+
+  // startCombat (store action) sets activeTab='combat-tracker' to auto-switch the panel (D-17)
+  const handleStartCombat = useCallback(() => {
+    useCombatStore.getState().startCombat(id!)
+    startCombatMutation.mutate()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
+  const handleEndCombat = useCallback(() => {
+    useCombatStore.getState().endCombat()
+    endCombatMutation.mutate()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
 
   // Set campaign name in title bar when data loads; clear on unmount (D-13)
   useEffect(() => {
@@ -253,6 +284,36 @@ export function CampaignViewScreen() {
         <TooltipProvider>
           <Tooltip delayDuration={600}>
             <TooltipTrigger asChild>
+              {!isCombatActive ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleStartCombat}
+                  className="gap-2"
+                >
+                  <Swords className="h-4 w-4" />
+                  Start Combat
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEndCombat}
+                  className="gap-2 border-destructive/60 text-destructive hover:bg-destructive/10 hover:border-destructive"
+                >
+                  <Swords className="h-4 w-4" />
+                  End Combat
+                </Button>
+              )}
+            </TooltipTrigger>
+            <TooltipContent>
+              {!isCombatActive ? 'Begin a combat encounter' : 'End the current encounter'}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip delayDuration={600}>
+            <TooltipTrigger asChild>
               {!sessionStore.isSessionActive ? (
                 <Button
                   variant="outline"
@@ -351,7 +412,7 @@ export function CampaignViewScreen() {
         {/* Right panel — 5-tab shell */}
         <Panel defaultSize={store.sizes.rightSize} minSize={25}>
           <div className="flex flex-col h-full bg-background">
-            <Tabs defaultValue="character-sheet" className="flex flex-col h-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
               <TabsList className="w-full justify-start rounded-none border-b border-border bg-card h-auto px-0">
                 <TabsTrigger
                   value="character-sheet"
@@ -401,13 +462,8 @@ export function CampaignViewScreen() {
                 <CharacterSheetTab campaignId={id} />
               </TabsContent>
 
-              <TabsContent value="combat-tracker" className="flex-1 overflow-auto p-6">
-                <div className="flex flex-col items-center max-w-[400px] mx-auto" style={{ paddingTop: '30%' }}>
-                  <h2 className="text-xl font-semibold text-foreground mb-2">Combat Tracker</h2>
-                  <p className="text-sm text-muted-foreground text-center">
-                    Initiative, HP, and conditions will appear here once combat lands in Phase 5.
-                  </p>
-                </div>
+              <TabsContent value="combat-tracker" className="flex-1 overflow-hidden p-0">
+                <CombatTrackerTab campaignId={id} />
               </TabsContent>
 
               <TabsContent value="npc-tracker" className="flex-1 overflow-auto p-6">

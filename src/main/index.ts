@@ -459,11 +459,14 @@ if (!gotLock) {
       }
 
       // ── Step 4: Load session messages — map to ModelMessage shape ────────────
+      // CR-06: filter to only user/assistant — dice_roll/system roles cause 400 errors
       const rawMessages = messagesRepo.getBySessionId(sessionId)
-      const sessionMessages: import('ai').ModelMessage[] = rawMessages.map((m) => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content,
-      }))
+      const sessionMessages: import('ai').ModelMessage[] = rawMessages
+        .filter((m) => m.role === 'user' || m.role === 'assistant')
+        .map((m) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        }))
 
       // ── Step 5: safeSend helper (guard against destroyed WebContents) ─────────
       const safeSend = (channel: string, ...args: unknown[]): void => {

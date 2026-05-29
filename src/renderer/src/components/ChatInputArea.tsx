@@ -12,11 +12,13 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Loader2, Play } from 'lucide-react'
+import { Dice6, Loader2, Play } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { Button } from './ui/button'
 import { Textarea } from './ui/textarea'
 import { Label } from './ui/label'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
+import { DiceRollerPopover } from './DiceRollerPopover'
 import { cn } from '../lib/utils'
 
 export interface ChatInputAreaProps {
@@ -47,6 +49,8 @@ export function ChatInputArea({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   // Track empty state to reactively disable Send button
   const [isEmpty, setIsEmpty] = useState(true)
+  // Dice roller popover open state (UI-SPEC §S3)
+  const [dicePopoverOpen, setDicePopoverOpen] = useState(false)
 
   // When isSessionActive transitions to true, autofocus the textarea
   useEffect(() => {
@@ -93,7 +97,23 @@ export function ChatInputArea({
     setIsEmpty(!textarea.value.trim())
   }, [])
 
+  // Prepend a dice-roll prefix to the textarea, replacing any prior roll prefix
+  // (UI-SPEC §S3 / D-19). Refreshes height + isEmpty via handleInput, then focuses.
+  const handleRoll = useCallback(
+    (prefix: string) => {
+      const ta = textareaRef.current
+      if (!ta) return
+      const existing = ta.value
+      const stripped = existing.replace(/^\[[\w\d+\-*/]+: \d+\] /, '')
+      ta.value = prefix + stripped
+      handleInput()
+      ta.focus()
+    },
+    [handleInput],
+  )
+
   const sendDisabled = isStreaming || disabled || isEmpty
+  const diceDisabled = disabled || isStreaming
 
   // Locked state: no active session — show banner instead of input
   if (!isSessionActive) {
@@ -129,6 +149,30 @@ export function ChatInputArea({
           )}
           aria-label="Send a message to the AI Dungeon Master"
         />
+
+        {/* Dice roller (UI-SPEC §S3) — between Textarea and Send.
+            Both PopoverTrigger (inside DiceRollerPopover) and TooltipTrigger
+            compose onto the same Button via nested `asChild`. */}
+        <Tooltip delayDuration={600}>
+          <DiceRollerPopover
+            open={dicePopoverOpen}
+            onOpenChange={setDicePopoverOpen}
+            onRoll={handleRoll}
+          >
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 w-9 shrink-0 p-0"
+                aria-label="Open dice roller"
+                disabled={diceDisabled}
+              >
+                <Dice6 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+          </DiceRollerPopover>
+          <TooltipContent>Roll dice</TooltipContent>
+        </Tooltip>
 
         <Button
           variant="default"

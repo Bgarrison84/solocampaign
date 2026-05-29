@@ -58,6 +58,8 @@ export interface MutationToolCall {
 interface Accumulators {
   chips: MutationChip[]
   diceRolls: ShowDiceRollData[]
+  // CR-05: track combatant HP deltas applied this batch so subsequent calls see current values
+  combatantHpOverrides: Map<string, number>
 }
 
 // ─── JSON-tail Fallback Parser (D-02, Pitfall 3) ──────────────────────────────
@@ -135,12 +137,17 @@ function applyOneTool(
       }
       const { characterId, combatantId, delta, source } = r.data
       if (combatantId) {
-        // Clamp 0..hpMax for the targeted combatant.
+        // CR-05: Clamp 0..hpMax using in-batch override if available, so multiple
+        // HP updates for the same combatant in one batch compound correctly.
         const combatant = combatantsRepo
           .listActive(campaignId)
           .find((c) => c.id === combatantId)
         if (!combatant) return
-        const next = Math.max(0, Math.min(combatant.hpMax, combatant.hpCurrent + delta))
+        const currentHp = acc.combatantHpOverrides.has(combatantId)
+          ? acc.combatantHpOverrides.get(combatantId)!
+          : combatant.hpCurrent
+        const next = Math.max(0, Math.min(combatant.hpMax, currentHp + delta))
+        acc.combatantHpOverrides.set(combatantId, next)
         combatantsRepo.updateHp(combatantId, next)
       } else {
         const charId = characterId ?? resolvePlayerCharacterId(campaignId)
@@ -491,7 +498,7 @@ export async function applyMutationBatch(
   campaignId: string,
   sessionId: string | null,
 ): Promise<{ chips: MutationChip[]; diceRolls: ShowDiceRollData[] }> {
-  const acc: Accumulators = { chips: [], diceRolls: [] }
+  const acc: Accumulators = { chips: [], diceRolls: [], combatantHpOverrides: new Map() }
   const db = getDb()
 
   db.transaction(() => {

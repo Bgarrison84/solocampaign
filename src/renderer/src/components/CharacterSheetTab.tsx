@@ -10,6 +10,7 @@ import { CombatStatsSection } from './sheet/CombatStatsSection'
 import { ResourcesSection } from './sheet/ResourcesSection'
 import { CurrencySection } from './sheet/CurrencySection'
 import { EquipmentSection } from './sheet/EquipmentSection'
+import { SpellListSection } from './sheet/SpellListSection'
 import { ProficienciesSection } from './sheet/ProficienciesSection'
 import { TraitsSection } from './sheet/TraitsSection'
 
@@ -56,6 +57,12 @@ export function CharacterSheetTab({ campaignId }: CharacterSheetTabProps) {
       <SkillsSection character={character} />
       <CombatStatsSection character={character} />
       <ResourcesSection character={character} />
+      <SpellListSection
+        character={character}
+        onCastPrefix={(prefix) =>
+          window.dispatchEvent(new CustomEvent('campaign:chat-prefix', { detail: prefix }))
+        }
+      />
       <CurrencySection character={character} />
       <EquipmentSection character={character} />
       <ProficienciesSection character={character} />

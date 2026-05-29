@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-last_updated: "2026-05-28T19:18:00.260Z"
+status: executing
+last_updated: "2026-05-29T13:01:29.621Z"
 progress:
   total_phases: 9
   completed_phases: 4
-  total_plans: 26
+  total_plans: 33
   completed_plans: 26
   percent: 44
 ---
@@ -19,16 +19,17 @@ progress:
 **Project:** SoloCampaign
 **Mode:** mvp
 **Core Value:** A player with no group and no DM can sit down, load SoloCampaign, and play a full D&D 5e campaign — from character creation to level 20+ — with a competent AI DM that remembers everything, follows the rules (or bends them on command), and keeps the world alive.
-**Current Focus:** Phase 5 — Rules Engine, Dice & Combat (Planned — 7 plans ready)
+**Current Focus:** Phase 05 — rules-engine-dice-combat
 
 ---
 
 ## Current Position
 
-Phase: 4 (Long-Campaign Memory & Session Flow) — COMPLETE (6/6 plans)
+Phase: 05 (rules-engine-dice-combat) — EXECUTING
+Plan: 1 of 7
 **Milestone:** v1
 **Phase:** Phase 5 — Rules Engine, Dice & Combat (next)
-**Status:** Phase 4 complete. UAT passed 12/12. Two bugs found and fixed during UAT: scroll-area.tsx bad import path; useRecapStream listener race condition.
+**Status:** Executing Phase 05
 
 **Progress:** [████████░░░░░░░░░░░░] 44% (4/9 phases complete)
 

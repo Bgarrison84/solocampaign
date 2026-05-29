@@ -104,7 +104,8 @@ export function ChatInputArea({
       const ta = textareaRef.current
       if (!ta) return
       const existing = ta.value
-      const stripped = existing.replace(/^\[[\w\d+\-*/]+: \d+\] /, '')
+      // WR-06: generalized regex strips any [...]<space> prefix (dice or spell cast prefixes).
+      const stripped = existing.replace(/^\[[^\]]+\] /, '')
       ta.value = prefix + stripped
       handleInput()
       ta.focus()

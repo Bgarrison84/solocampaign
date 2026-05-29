@@ -112,6 +112,17 @@ export function ChatInputArea({
     [handleInput],
   )
 
+  // Listen for spell cast prefixes dispatched by SpellListSection (05-05).
+  // Reuses handleRoll so cast and dice prefixes share the same prepend/replace logic.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const prefix = (e as CustomEvent<string>).detail
+      if (prefix) handleRoll(prefix)
+    }
+    window.addEventListener('campaign:chat-prefix', handler)
+    return () => window.removeEventListener('campaign:chat-prefix', handler)
+  }, [handleRoll])
+
   const sendDisabled = isStreaming || disabled || isEmpty
   const diceDisabled = disabled || isStreaming
 

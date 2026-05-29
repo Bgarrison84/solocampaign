@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from './ui/dialog'
 import { Button } from './ui/button'
+import { Checkbox } from './ui/checkbox'
 import { Label } from './ui/label'
 import {
   Select,
@@ -66,6 +67,9 @@ export function AiSettingsModal({ campaignId, open, onClose }: AiSettingsModalPr
   const [dmPersonality, setDmPersonality] = useState('')
   const [strictness, setStrictness] = useState<Strictness>('balanced')
 
+  // PROG-04: permadeath toggle
+  const [permadeath, setPermadeath] = useState(false)
+
   // Pre-fill when campaign data loads
   useEffect(() => {
     if (!open) return
@@ -101,6 +105,7 @@ export function AiSettingsModal({ campaignId, open, onClose }: AiSettingsModalPr
         ? campaign.strictness
         : 'balanced',
     )
+    setPermadeath(campaign.permadeathMode ?? false)
     setProviderErrors({})
   }, [open, campaign])
 
@@ -114,6 +119,11 @@ export function AiSettingsModal({ campaignId, open, onClose }: AiSettingsModalPr
     },
   })
 
+  const setPermadeathMutation = useMutation({
+    mutationFn: (data: { campaignId: string; permadeathMode: boolean }) =>
+      trpc.campaigns.setPermadeath.mutate(data),
+  })
+
   function handleSave() {
     const errors = validateAiProviderFields(aiProvider)
     if (Object.keys(errors).length > 0) {
@@ -121,6 +131,9 @@ export function AiSettingsModal({ campaignId, open, onClose }: AiSettingsModalPr
       return
     }
     setProviderErrors({})
+
+    // Persist permadeath toggle (PROG-04) alongside the main config save
+    setPermadeathMutation.mutate({ campaignId, permadeathMode: permadeath })
 
     updateAiConfigMutation.mutate({
       campaignId,
@@ -138,7 +151,7 @@ export function AiSettingsModal({ campaignId, open, onClose }: AiSettingsModalPr
     })
   }
 
-  const isSaving = updateAiConfigMutation.isPending
+  const isSaving = updateAiConfigMutation.isPending || setPermadeathMutation.isPending
   const isValid = isAiProviderFieldsValid(aiProvider)
 
   return (
@@ -225,6 +238,27 @@ export function AiSettingsModal({ campaignId, open, onClose }: AiSettingsModalPr
                 <p className="text-sm text-muted-foreground mt-1 p-3 bg-card rounded-md border border-border">
                   {STRICTNESS_DESCRIPTIONS[strictness]}
                 </p>
+              </div>
+
+              {/* Permadeath toggle (PROG-04) */}
+              <div className="flex flex-col gap-1.5">
+                <p className="text-sm font-semibold">Gameplay Options</p>
+                <div className="flex items-start gap-3 p-3 bg-card rounded-md border border-border">
+                  <Checkbox
+                    id="settings-permadeath"
+                    checked={permadeath}
+                    onCheckedChange={(v) => setPermadeath(!!v)}
+                    className="mt-0.5"
+                  />
+                  <div className="flex flex-col gap-0.5">
+                    <Label htmlFor="settings-permadeath" className="text-sm font-semibold cursor-pointer">
+                      Permadeath mode
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      When enabled, a character that dies cannot be revived.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {updateAiConfigMutation.error && (

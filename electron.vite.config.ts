@@ -33,6 +33,15 @@ export default defineConfig({
 
     plugins: [tailwindcss(), reactPlugin()],
 
+    resolve: {
+      alias: {
+        // shadcn/ui components use `import { cn } from "src/renderer/src/lib/utils"` (absolute
+        // path from project root matching tsconfig baseUrl). Add an explicit Rollup alias so the
+        // production build resolves the same path that tsconfig's baseUrl="." resolves at typecheck.
+        'src/renderer/src': resolve('src/renderer/src'),
+      },
+    },
+
     server: {
       port: 5173,
     },

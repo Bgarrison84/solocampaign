@@ -95,6 +95,18 @@ export const campaignsRepo = {
       .run()
   },
 
+  /**
+   * Persist the permadeath mode flag for a campaign (PROG-04).
+   * When true, character death at 0 HP is final and cannot be reversed.
+   */
+  setPermadeath(campaignId: string, value: boolean): void {
+    const db = getDb()
+    db.update(campaigns)
+      .set({ permadeathMode: value })
+      .where(eq(campaigns.id, campaignId))
+      .run()
+  },
+
   delete(id: string): void {
     const db = getDb()
     db.delete(campaigns).where(eq(campaigns.id, id)).run()

@@ -56,6 +56,19 @@ export const campaignsRouter = t.router({
     }),
 
   /**
+   * Persist the permadeath mode toggle for a campaign (PROG-04).
+   *
+   * Security (T-05-07-01): campaignId validated as UUID; permadeathMode as boolean.
+   * Writes only the permadeath_mode column — no other state is affected.
+   */
+  setPermadeath: t.procedure
+    .input(z.object({ campaignId: campaignIdSchema, permadeathMode: z.boolean() }))
+    .mutation(({ input }) => {
+      campaignsRepo.setPermadeath(input.campaignId, input.permadeathMode)
+      return { updated: true }
+    }),
+
+  /**
    * Persist AI provider config for a campaign.
    *
    * Security contract (D-07, D-08, D-23):

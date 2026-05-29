@@ -30,6 +30,14 @@ import { cn } from '../lib/utils'
 import { ChatErrorBlock } from './ChatErrorBlock'
 import type { AiStreamError } from '../hooks/useAiStream'
 
+/**
+ * Render a dice-roll breakdown array as a readable bracketed string
+ * (UI-SPEC §S4). e.g. [11, 3] → "[11+3]".
+ */
+function formatBreakdown(breakdown: number[]): string {
+  return `[${breakdown.join('+')}]`
+}
+
 export interface StoryScrollPanelProps {
   campaignId: string
   isStreaming: boolean
@@ -164,6 +172,66 @@ export function StoryScrollPanel({
 
           {/* Completed message history */}
           {messages.map((msg) => {
+            // AI showDiceRoll chip (COMB-03 / UI-SPEC §S4) — persisted as a
+            // dice_roll message in 05-02 with content = JSON.stringify(
+            // { label, expression, result, breakdown }).
+            if (msg.role === 'dice_roll') {
+              // T-05-04-01: parse defensively — a malformed/oversized content
+              // string must not crash the story panel. Skip the row on failure.
+              let data: {
+                label?: string
+                expression?: string
+                result?: number | string
+                breakdown?: number[]
+              }
+              try {
+                data = JSON.parse(msg.content)
+              } catch {
+                return null
+              }
+              const breakdown = Array.isArray(data.breakdown) ? data.breakdown : []
+              return (
+                <div
+                  key={msg.id}
+                  className="bg-amber-950/40 border border-amber-800/50 rounded-md px-3 py-2 mb-4 flex items-start gap-2 text-sm"
+                  role="note"
+                  aria-label={`Dice roll: ${data.label ?? 'roll'}`}
+                >
+                  <span aria-hidden="true" className="text-amber-400 shrink-0">
+                    🎲
+                  </span>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-foreground">
+                      <span className="font-semibold">{data.label}</span>
+                      {' — '}
+                      <span className="font-mono">{data.expression}</span>
+                      {' = '}
+                      <span className="font-mono font-semibold text-amber-300">{data.result}</span>
+                    </span>
+                    {breakdown.length > 0 && (
+                      <span className="text-xs font-mono text-muted-foreground">
+                        ({formatBreakdown(breakdown)})
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )
+            }
+
+            // Level-up / rest system event (D-32 / UI-SPEC §S7b) — persisted as a
+            // system message in 05-06. Rendered as an italic amber system line.
+            if (msg.role === 'system') {
+              return (
+                <div
+                  key={msg.id}
+                  className="text-sm italic text-amber-400 mb-4 px-2 py-1 bg-amber-950/20 rounded"
+                  role="status"
+                >
+                  {msg.content}
+                </div>
+              )
+            }
+
             if (msg.role === 'assistant') {
               return (
                 <div key={msg.id} className="mb-4">

@@ -27,7 +27,7 @@ import { z } from 'zod'
 export const updateHpSchema = z.object({
   characterId: z.string().optional(),
   combatantId: z.string().optional(),
-  delta: z.number().int(),
+  delta: z.number().int().min(-9999).max(9999),
   source: z.string().max(100).optional(),
 })
 

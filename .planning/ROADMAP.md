@@ -161,7 +161,7 @@ Plans:
   4. User can cast a spell from their spell list — the slot deducts automatically, concentration tracks, and the AI is aware the spell was cast
   5. After an encounter the AI awards XP, the app totals it, and the user is auto-prompted to level up at the threshold; short/long rests restore appropriate resources after AI narration
   6. Currency (CP/SP/EP/GP/PP) auto-updates from loot and purchases via AI tool calls
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans executed
 Plans:
 - [x] 05-01-PLAN.md — Wave 0 foundation: rpg-dice-roller + dice.ts, schema + migration 0004, spells.json, combatants/campaignEvents/characterSpells repos, Wave 0 test stubs
 - [x] 05-02-PLAN.md — Wave 1 AI mutation contract: 12 tool schemas, mutationPipeline (batch + JSON-tail), llmProvider/contextBuilder/index.ts wiring
@@ -169,14 +169,14 @@ Plans:
 - [x] 05-04-PLAN.md — Dice roller popover + chat-input prefix + StoryScrollPanel dice_roll chip + system-event rendering (COMB-01, COMB-03)
 - [x] 05-05-PLAN.md — Spell system: spells router + SpellListSection (cast/upcast/concentration) + CharacterSheetTab wiring (CHAR-08)
 - [x] 05-06-PLAN.md — Level-up banner/modal + rest picker + short-rest hit-dice modal + charactersRepo.levelUp (PROG-01, PROG-02)
-- [ ] 05-07-PLAN.md — MutationChipStack toast system + ai:mutations-applied cache invalidation + permadeath toggle (PROG-04, STATE-05 UI)
+- [x] 05-07-PLAN.md — MutationChipStack toast system + ai:mutations-applied cache invalidation + permadeath toggle (PROG-04, STATE-05 UI)
 **Wave structure:**
   - Wave 0: 05-01 (foundation — dice, migration 0004, repos, test stubs) ✓
   - Wave 1: 05-02 (AI mutation contract: tools + mutationPipeline + wiring; depends on 05-01) ✓
   - Wave 2: 05-03 + 05-04 in parallel (combat tracker; dice roller + showDiceRoll/system rendering — no shared files)
   - Wave 3: 05-05 (spell system; depends on 05-03 for shared router.ts registration) ✓
   - Wave 4: 05-06 (level-up + rest; depends on 05-05 for shared CharacterSheetTab, 05-03 for shared CampaignViewScreen) ✓
-  - Wave 5: 05-07 (toast chips + cache invalidation + permadeath; depends on 05-06 for shared CampaignViewScreen)
+  - Wave 5: 05-07 (toast chips + cache invalidation + permadeath; depends on 05-06 for shared CampaignViewScreen) ✓
 **Notes:**
   - This phase locks in the structured AI-mutation contract (tool calls + JSON-tail fallback); retrofitting it later is a near-rewrite
   - Test tool-calling reliability against LM Studio + Jan AI + Ollama before exit

@@ -107,6 +107,15 @@ export function ShortRestHitDiceModal({
         </DialogHeader>
 
         <div className="p-6 flex flex-col gap-4 overflow-y-auto flex-1">
+          {hitDiceCurrent <= 0 ? (
+            /* WR-05: guard against hitDiceCurrent=0 — Stepper min(1) > max(0) is invalid */
+            <p className="text-sm text-muted-foreground">
+              No hit dice remaining. You have spent all{' '}
+              <span className="font-semibold">{hitDiceTotal}</span> hit dice.
+              Take a long rest to recover them.
+            </p>
+          ) : (
+          <>
           {/* Info text */}
           <p className="text-sm text-foreground">
             You have{' '}
@@ -167,6 +176,8 @@ export function ShortRestHitDiceModal({
                 </span>
               </div>
             </div>
+          )}
+          </>
           )}
         </div>
 

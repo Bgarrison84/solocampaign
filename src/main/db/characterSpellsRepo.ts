@@ -20,18 +20,20 @@ export const characterSpellsRepo = {
     spells: Array<{ spellName: string; spellLevel: number; isPrepared: boolean }>,
   ): void {
     const db = getDb()
-    db.delete(characterSpells).where(eq(characterSpells.characterId, characterId)).run()
-    for (const spell of spells) {
-      db.insert(characterSpells)
-        .values({
-          id: randomUUID(),
-          characterId,
-          spellName: spell.spellName,
-          spellLevel: spell.spellLevel,
-          isPrepared: spell.isPrepared,
-        })
-        .run()
-    }
+    db.transaction(() => {
+      db.delete(characterSpells).where(eq(characterSpells.characterId, characterId)).run()
+      for (const spell of spells) {
+        db.insert(characterSpells)
+          .values({
+            id: randomUUID(),
+            characterId,
+            spellName: spell.spellName,
+            spellLevel: spell.spellLevel,
+            isPrepared: spell.isPrepared,
+          })
+          .run()
+      }
+    })
   },
 
   /**

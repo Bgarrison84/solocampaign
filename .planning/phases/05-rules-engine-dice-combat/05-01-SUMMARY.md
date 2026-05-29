@@ -165,3 +165,9 @@ None - no external service configuration required.
 ---
 *Phase: 05-rules-engine-dice-combat*
 *Completed: 2026-05-29*
+
+## Self-Check: PASSED
+
+- All 13 created files verified present on disk.
+- All 6 commits (a2bee37, b3a54c7, 351a6fe, 374c359, b0189dd, b5477f1) verified in git log.
+- No accidental file deletions; no untracked files left behind.

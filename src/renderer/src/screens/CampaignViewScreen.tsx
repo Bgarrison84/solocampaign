@@ -24,6 +24,7 @@ import { useWindowStore } from '../stores/windowStore'
 import { useSessionStore } from '../stores/sessionStore'
 import { useCombatStore } from '../stores/combatStore'
 import { CharacterSheetTab } from '../components/CharacterSheetTab'
+import { MutationChipStack } from '../components/MutationChipStack'
 import { CombatTrackerTab } from '../components/CombatTrackerTab'
 import { SessionJournalTab } from '../components/SessionJournalTab'
 import { StoryScrollPanel } from '../components/StoryScrollPanel'
@@ -222,6 +223,25 @@ export function CampaignViewScreen() {
       }
     })
     // Cleanup via removeAllListeners on unmount (called by useAiStream effect cleanup above)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
+
+  /**
+   * ai:mutations-applied cache invalidation (05-07).
+   *
+   * When the AI applies mutations, the combat tracker, character sheet, and message list
+   * need to refetch so all prior-wave UIs reflect the new state without manual refresh.
+   * MutationChipStack (Task 1) owns chip display — this effect owns cache invalidation.
+   * Both listen to the same event, which is fine (ipcRenderer.on appends listeners).
+   */
+  useEffect(() => {
+    window.aiStream.onMutationsApplied((payload) => {
+      if (!id || payload.campaignId !== id) return
+      queryClient.invalidateQueries({ queryKey: ['combat', 'listActive', id] })
+      queryClient.invalidateQueries({ queryKey: ['characters', 'getByCampaignId', id] })
+      queryClient.invalidateQueries({ queryKey: ['ai', 'getMessages', id] })
+    })
+    // Cleanup via removeAllListeners called by useAiStream effect cleanup
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
@@ -481,7 +501,7 @@ export function CampaignViewScreen() {
         {/* Right panel — 5-tab shell */}
         <Panel defaultSize={store.sizes.rightSize} minSize={25}>
           <div className="flex flex-col h-full bg-background">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full relative">
               <TabsList className="w-full justify-start rounded-none border-b border-border bg-card h-auto px-0">
                 <TabsTrigger
                   value="character-sheet"
@@ -526,6 +546,9 @@ export function CampaignViewScreen() {
                   </Button>
                 </div>
               </TabsList>
+
+              {/* Mutation chip stack — anchored absolute top-0 of the Tabs container (UI-SPEC §S6) */}
+              <MutationChipStack />
 
               <TabsContent value="character-sheet" className="flex-1 overflow-hidden p-0">
                 <CharacterSheetTab campaignId={id} />

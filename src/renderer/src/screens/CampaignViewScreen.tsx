@@ -213,7 +213,7 @@ export function CampaignViewScreen() {
    * Long rest needs no modal — recovery is auto-applied by 05-02 (applyRest).
    */
   useEffect(() => {
-    window.aiStream.onMutationsApplied((payload) => {
+    const shortRestHandler = (payload: Parameters<typeof window.aiStream.onMutationsApplied>[0]) => {
       if (!id || payload.campaignId !== id) return
       const hasShortRest = payload.chips.some(
         (c) => c.type === 'rest' && c.label === 'Short rest taken',
@@ -221,8 +221,12 @@ export function CampaignViewScreen() {
       if (hasShortRest) {
         setShowShortRest(true)
       }
-    })
-    // Cleanup via removeAllListeners on unmount (called by useAiStream effect cleanup above)
+    }
+    window.aiStream.onMutationsApplied(shortRestHandler)
+    // WR-02: remove listener on cleanup so it does not accumulate across id changes.
+    return () => {
+      window.aiStream.removeOnMutationsApplied()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
@@ -235,13 +239,17 @@ export function CampaignViewScreen() {
    * Both listen to the same event, which is fine (ipcRenderer.on appends listeners).
    */
   useEffect(() => {
-    window.aiStream.onMutationsApplied((payload) => {
+    const cacheInvalidationHandler = (payload: Parameters<typeof window.aiStream.onMutationsApplied>[0]) => {
       if (!id || payload.campaignId !== id) return
       queryClient.invalidateQueries({ queryKey: ['combat', 'listActive', id] })
       queryClient.invalidateQueries({ queryKey: ['characters', 'getByCampaignId', id] })
       queryClient.invalidateQueries({ queryKey: ['ai', 'getMessages', id] })
-    })
-    // Cleanup via removeAllListeners called by useAiStream effect cleanup
+    }
+    window.aiStream.onMutationsApplied(cacheInvalidationHandler)
+    // WR-02: remove listener on cleanup so it does not accumulate across id changes.
+    return () => {
+      window.aiStream.removeOnMutationsApplied()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 

@@ -45,6 +45,7 @@ vi.mock('../../db/sessionsRepo', () => ({
     list: vi.fn().mockReturnValue([]),
     end: vi.fn(),
     saveRecap: vi.fn(),
+    endAndSaveRecap: vi.fn(),
     updatePlayerNotes: vi.fn(),
     markSummarized: vi.fn(),
     getLastLocation: vi.fn().mockReturnValue(null),
@@ -205,7 +206,7 @@ describe('sessions tRPC router', () => {
     it('persists aiRecap and playerNotes to the session row', async () => {
       const sessionId = TEST_SESSION_ID
       const campaignId = TEST_CAMPAIGN_ID
-      vi.mocked(sessionsRepo.saveRecap).mockReturnValue({ ...mockSession, aiRecap: 'recap', playerNotes: 'notes' })
+      vi.mocked(sessionsRepo.endAndSaveRecap).mockReturnValue({ ...mockSession, aiRecap: 'recap', playerNotes: 'notes' })
 
       const caller = sessionsRouter.createCaller({})
       await caller.saveRecap({
@@ -215,7 +216,7 @@ describe('sessions tRPC router', () => {
         playerNotes: 'Need to remember the secret door.',
       })
 
-      expect(sessionsRepo.saveRecap).toHaveBeenCalledWith(
+      expect(sessionsRepo.endAndSaveRecap).toHaveBeenCalledWith(
         sessionId,
         'The party defeated the goblin king.',
         'Need to remember the secret door.',
@@ -225,7 +226,7 @@ describe('sessions tRPC router', () => {
     it('clears the active session from sessionActiveMap', async () => {
       const sessionId = TEST_SESSION_ID
       const campaignId = TEST_CAMPAIGN_ID
-      vi.mocked(sessionsRepo.saveRecap).mockReturnValue({ ...mockSession })
+      vi.mocked(sessionsRepo.endAndSaveRecap).mockReturnValue({ ...mockSession })
 
       const caller = sessionsRouter.createCaller({})
       await caller.saveRecap({ sessionId, campaignId, aiRecap: 'Recap.' })
@@ -236,7 +237,7 @@ describe('sessions tRPC router', () => {
     it('returns { saved: true }', async () => {
       const sessionId = TEST_SESSION_ID
       const campaignId = TEST_CAMPAIGN_ID
-      vi.mocked(sessionsRepo.saveRecap).mockReturnValue({ ...mockSession })
+      vi.mocked(sessionsRepo.endAndSaveRecap).mockReturnValue({ ...mockSession })
 
       const caller = sessionsRouter.createCaller({})
       const result = await caller.saveRecap({ sessionId, campaignId, aiRecap: 'Recap text.' })

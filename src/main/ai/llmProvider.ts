@@ -9,7 +9,7 @@
  */
 
 import { streamText } from 'ai'
-import type { ModelMessage } from 'ai'
+import type { ModelMessage, ToolSet } from 'ai'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import log from 'electron-log'
@@ -29,6 +29,15 @@ export interface StreamCallbacks {
 
 export interface StreamOptions {
   abortSignal?: AbortSignal
+  // Phase 5 — tool set passed directly to streamText({ tools }) (D-08).
+  tools?: ToolSet
+  // Phase 5 — invoked from onFinish with the native tool calls + final text (D-04).
+  // toolCalls are normalized to { toolName, args } so the mutation pipeline can
+  // consume native calls and JSON-tail calls through the same shape.
+  onToolCallsFinish?: (
+    toolCalls: Array<{ toolName: string; args: unknown }>,
+    text: string,
+  ) => Promise<void>
 }
 
 /**
@@ -90,6 +99,8 @@ export async function streamChat(
       model,
       system: systemPrompt,
       messages,
+      tools: options?.tools,
+      toolChoice: options?.tools ? 'auto' : undefined,
       temperature: 0.8,
       abortSignal: options?.abortSignal,
     })
@@ -159,6 +170,19 @@ export async function streamChat(
     }
 
     if (!streamAborted) {
+      // Phase 5 (D-04): surface native tool calls BEFORE onFinish so the IPC
+      // handler can decide whether to skip the JSON-tail fallback (D-02). Awaiting
+      // result.toolCalls here guarantees deterministic ordering: native calls are
+      // applied first, then onFinish runs the tail-fallback decision.
+      if (options?.onToolCallsFinish) {
+        const [toolCalls, text] = await Promise.all([result.toolCalls, result.text])
+        const normalized = (toolCalls ?? []).map((tc) => ({
+          toolName: tc.toolName as string,
+          args: (tc as { input?: unknown }).input,
+        }))
+        await options.onToolCallsFinish(normalized, text ?? '')
+      }
+
       log.debug('[llmProvider] streamChat finished')
       callbacks.onFinish()
     }

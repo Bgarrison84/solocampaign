@@ -38,7 +38,7 @@ Phase 1: Foundation & Secure Shell              [COMPLETE — 7/7 plans, 2026-05
 Phase 2: Character Domain & Live Sheet          [COMPLETE — 7/7 plans, 2026-05-25]
 Phase 3: AI Engine & Provider Abstraction       [COMPLETE — 6/6 plans, 2026-05-26]
 Phase 4: Long-Campaign Memory & Session Flow    [COMPLETE — 6/6 plans, 2026-05-28]
-Phase 5: Rules Engine, Dice & Combat            [Not started]
+Phase 5: Rules Engine, Dice & Combat            [Human UAT pending — 7/7 plans, 2026-05-29]
 Phase 6: Quests, NPCs & World State             [Not started]
 Phase 7: Content Depth & Advanced Character     [Not started]
 Phase 8: Polish, Export & Accessibility         [Not started]

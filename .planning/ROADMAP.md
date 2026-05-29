@@ -161,7 +161,7 @@ Plans:
   4. User can cast a spell from their spell list — the slot deducts automatically, concentration tracks, and the AI is aware the spell was cast
   5. After an encounter the AI awards XP, the app totals it, and the user is auto-prompted to level up at the threshold; short/long rests restore appropriate resources after AI narration
   6. Currency (CP/SP/EP/GP/PP) auto-updates from loot and purchases via AI tool calls
-**Plans:** 7/7 plans executed
+**Plans:** 7/7 plans complete
 Plans:
 - [x] 05-01-PLAN.md — Wave 0 foundation: rpg-dice-roller + dice.ts, schema + migration 0004, spells.json, combatants/campaignEvents/characterSpells repos, Wave 0 test stubs
 - [x] 05-02-PLAN.md — Wave 1 AI mutation contract: 12 tool schemas, mutationPipeline (batch + JSON-tail), llmProvider/contextBuilder/index.ts wiring
@@ -257,7 +257,7 @@ Plans:
 | 2. Character Domain & Live Sheet | 7/7 | Complete   | 2026-05-25 |
 | 3. AI Engine & Provider Abstraction | 0/6 | Planned | - |
 | 4. Long-Campaign Memory & Session Flow | 0/0 | Not started | - |
-| 5. Rules Engine, Dice & Combat | 4/7 | In Progress|  |
+| 5. Rules Engine, Dice & Combat | 7/7 | Human UAT pending | - |
 | 6. Quests, NPCs & World State | 0/0 | Not started | - |
 | 7. Content Depth & Advanced Character | 0/0 | Not started | - |
 | 8. Polish, Export & Accessibility | 0/0 | Not started | - |

@@ -178,7 +178,7 @@ export async function streamChat(
         const [toolCalls, text] = await Promise.all([result.toolCalls, result.text])
         const normalized = (toolCalls ?? []).map((tc) => ({
           toolName: tc.toolName as string,
-          args: (tc as { input?: unknown }).input,
+          args: tc.args,
         }))
         await options.onToolCallsFinish(normalized, text ?? '')
       }

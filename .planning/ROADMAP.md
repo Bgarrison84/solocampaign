@@ -195,7 +195,22 @@ Plans:
   4. UI displays current time of day, days elapsed, and season; values update as the AI narrates time passing
   5. UI shows a location breadcrumb (e.g. "Forest > Ancient Ruins > Crypt Level 2") that updates as the party moves
   6. AI awards Inspiration to the user's character when it detects exceptional roleplay; the inspiration token appears on the sheet
-**Plans:** TBD
+**Plans:** 7 plans
+Plans:
+- [ ] 06-01-PLAN.md - Migration 0006 + quests/npcs/factions tables + world-state columns + 3 repos + test stubs
+- [ ] 06-02-PLAN.md - 8 Phase 6 tool schemas + PHASE6_TOOLS/ALL_TOOLS + 8 mutationPipeline cases + campaignsRepo world writes + quests/npcs/worldState/factions tRPC routers + ALL_TOOLS in streamText
+- [ ] 06-03-PLAN.md - ContextBuilder formatWorldStateSummary + toolDescriptionsBlock extension (JSON-tail fallback)
+- [ ] 06-04-PLAN.md - QuestsTab (new 6th tab, read-only quest log)
+- [ ] 06-05-PLAN.md - NpcTrackerTab (NPC list + collapsible Factions section) + MutationChipStack 4 new chip types
+- [ ] 06-06-PLAN.md - CampaignViewScreen wiring: 6th tab + NpcTrackerTab mount + WorldStateBar + Phase 6 cache invalidation
+- [ ] 06-07-PLAN.md - Full-suite run + pitfall sweep + end-to-end human-verify checkpoint
+**Wave structure:**
+  - Wave 1: 06-01 (foundation - schema, migration, repos, test stubs)
+  - Wave 2: 06-02 (tRPC routers + AI tool pipeline + ALL_TOOLS; depends on 06-01)
+  - Wave 3: 06-03 (ContextBuilder world-state injection; depends on 06-02)
+  - Wave 4: 06-04 + 06-05 in parallel (QuestsTab; NpcTrackerTab + chip stack - no shared files; depend on 06-02)
+  - Wave 5: 06-06 (CampaignViewScreen integration; depends on 06-04 + 06-05)
+  - Wave 6: 06-07 (full suite + pitfall review + human-verify; depends on 06-03 + 06-06)
 **UI hint:** yes
 
 ### Phase 7: Content Depth & Advanced Character
@@ -258,7 +273,7 @@ Plans:
 | 3. AI Engine & Provider Abstraction | 0/6 | Planned | - |
 | 4. Long-Campaign Memory & Session Flow | 0/0 | Not started | - |
 | 5. Rules Engine, Dice & Combat | 7/7 | Human UAT pending | - |
-| 6. Quests, NPCs & World State | 0/0 | Not started | - |
+| 6. Quests, NPCs & World State | 0/7 | Planned | - |
 | 7. Content Depth & Advanced Character | 0/0 | Not started | - |
 | 8. Polish, Export & Accessibility | 0/0 | Not started | - |
 | 9. Distribution & Update Notifications | 0/0 | Not started | - |

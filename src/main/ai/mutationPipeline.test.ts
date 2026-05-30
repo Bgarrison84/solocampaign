@@ -241,5 +241,222 @@ describe('mutationPipeline', () => {
       expect(diceRolls[0]).toMatchObject({ label: 'Attack', result: 14 })
       expect(countEvents(db, campaign.id, 'dice_roll')).toBe(1)
     })
+
+    // ─── Phase 6 mutations (STATE-01..04, WORLD-03, PARTY-03) ──────────────────
+
+    it('addQuest creates an Active quest row and pushes a quest chip', async () => {
+      const { db, campaign, applyMutationBatch } = await setup()
+
+      const { chips } = await applyMutationBatch(
+        [{ toolName: 'addQuest', args: { name: 'Find the amulet', description: 'Lost in the crypt' } }],
+        campaign.id,
+        null,
+      )
+
+      const rows = db
+        .select()
+        .from(schema.quests)
+        .where(eq(schema.quests.campaignId, campaign.id))
+        .all()
+      expect(rows).toHaveLength(1)
+      expect(rows[0].name).toBe('Find the amulet')
+      expect(rows[0].status).toBe('Active')
+      expect(chips.some((c) => c.type === 'quest')).toBe(true)
+      expect(countEvents(db, campaign.id, 'quest_added')).toBe(1)
+    })
+
+    it('updateQuestStatus Completed pushes a quest_complete chip; Failed is silent (D-05)', async () => {
+      const { db, campaign, applyMutationBatch } = await setup()
+
+      // Seed two quests via the pipeline, then read back their ids.
+      await applyMutationBatch(
+        [
+          { toolName: 'addQuest', args: { name: 'A', description: '' } },
+          { toolName: 'addQuest', args: { name: 'B', description: '' } },
+        ],
+        campaign.id,
+        null,
+      )
+      const quests = questsList(db, campaign.id)
+      expect(quests).toHaveLength(2)
+
+      const completed = await applyMutationBatch(
+        [{ toolName: 'updateQuestStatus', args: { questId: quests[0].id, status: 'Completed' } }],
+        campaign.id,
+        null,
+      )
+      expect(completed.chips.some((c) => c.type === 'quest_complete')).toBe(true)
+
+      const failed = await applyMutationBatch(
+        [{ toolName: 'updateQuestStatus', args: { questId: quests[1].id, status: 'Failed' } }],
+        campaign.id,
+        null,
+      )
+      expect(failed.chips).toHaveLength(0)
+
+      const after = questsList(db, campaign.id)
+      expect(after.find((q) => q.id === quests[0].id)?.status).toBe('Completed')
+      expect(after.find((q) => q.id === quests[1].id)?.status).toBe('Failed')
+    })
+
+    it('addNpc creates an npc row + npc chip; updateNpc patches and is silent (D-10)', async () => {
+      const { db, campaign, applyMutationBatch } = await setup()
+
+      const added = await applyMutationBatch(
+        [
+          {
+            toolName: 'addNpc',
+            args: { name: 'Borin', description: 'Blacksmith', relationship: 'Neutral' },
+          },
+        ],
+        campaign.id,
+        null,
+      )
+      expect(added.chips.some((c) => c.type === 'npc')).toBe(true)
+
+      const npcRows = db
+        .select()
+        .from(schema.npcs)
+        .where(eq(schema.npcs.campaignId, campaign.id))
+        .all()
+      expect(npcRows).toHaveLength(1)
+      const npcId = npcRows[0].id
+
+      const patched = await applyMutationBatch(
+        [{ toolName: 'updateNpc', args: { npcId, relationship: 'Hostile' } }],
+        campaign.id,
+        null,
+      )
+      // updateNpc is silent — no chip.
+      expect(patched.chips).toHaveLength(0)
+
+      const afterRow = db
+        .select()
+        .from(schema.npcs)
+        .where(eq(schema.npcs.id, npcId))
+        .get()
+      expect(afterRow!.relationship).toBe('Hostile')
+      // description left untouched by the partial patch.
+      expect(afterRow!.description).toBe('Blacksmith')
+    })
+
+    it('updateFaction upserts a faction and is silent (D-16)', async () => {
+      const { db, campaign, applyMutationBatch } = await setup()
+
+      const first = await applyMutationBatch(
+        [{ toolName: 'updateFaction', args: { factionName: 'City Watch', tier: 'Neutral' } }],
+        campaign.id,
+        null,
+      )
+      expect(first.chips).toHaveLength(0)
+
+      // Second call on the same name updates the tier (upsert, not duplicate).
+      await applyMutationBatch(
+        [{ toolName: 'updateFaction', args: { factionName: 'City Watch', tier: 'Allied' } }],
+        campaign.id,
+        null,
+      )
+
+      const rows = db
+        .select()
+        .from(schema.factions)
+        .where(eq(schema.factions.campaignId, campaign.id))
+        .all()
+      expect(rows).toHaveLength(1)
+      expect(rows[0].tier).toBe('Allied')
+      expect(countEvents(db, campaign.id, 'faction_updated')).toBe(2)
+    })
+
+    it('updateWorldTime writes the world clock columns on campaigns (no chip)', async () => {
+      const { db, campaign, applyMutationBatch } = await setup()
+
+      const { chips } = await applyMutationBatch(
+        [
+          {
+            toolName: 'updateWorldTime',
+            args: { timeOfDay: 'Evening', dayNumber: 14, season: 'Autumn' },
+          },
+        ],
+        campaign.id,
+        null,
+      )
+      expect(chips).toHaveLength(0)
+
+      const row = db
+        .select()
+        .from(schema.campaigns)
+        .where(eq(schema.campaigns.id, campaign.id))
+        .get()
+      expect(row!.worldTimeOfDay).toBe('Evening')
+      expect(row!.worldDayNumber).toBe(14)
+      expect(row!.worldSeason).toBe('Autumn')
+    })
+
+    it('updateLocation stores the path as JSON text on campaigns (no chip)', async () => {
+      const { db, campaign, applyMutationBatch } = await setup()
+
+      const { chips } = await applyMutationBatch(
+        [{ toolName: 'updateLocation', args: { path: ['Forest', 'Ancient Ruins', 'Crypt Level 2'] } }],
+        campaign.id,
+        null,
+      )
+      expect(chips).toHaveLength(0)
+
+      const row = db
+        .select()
+        .from(schema.campaigns)
+        .where(eq(schema.campaigns.id, campaign.id))
+        .get()
+      expect(JSON.parse(row!.worldLocationPath!)).toEqual([
+        'Forest',
+        'Ancient Ruins',
+        'Crypt Level 2',
+      ])
+    })
+
+    it('awardInspiration flips hasInspiration true and pushes an inspiration chip', async () => {
+      const { db, campaign, character, applyMutationBatch } = await setup()
+
+      const { chips } = await applyMutationBatch(
+        [{ toolName: 'awardInspiration', args: { characterId: character.id } }],
+        campaign.id,
+        null,
+      )
+      expect(chips.some((c) => c.type === 'inspiration')).toBe(true)
+
+      const row = db
+        .select()
+        .from(schema.characterResources)
+        .where(eq(schema.characterResources.characterId, character.id))
+        .get()
+      expect(row!.hasInspiration).toBe(true)
+      expect(countEvents(db, campaign.id, 'inspiration_awarded')).toBe(1)
+    })
+
+    it('awardInspiration falls back to the player character on an unknown characterId (Pitfall 7)', async () => {
+      const { db, campaign, character, applyMutationBatch } = await setup()
+
+      await applyMutationBatch(
+        [{ toolName: 'awardInspiration', args: { characterId: 'not-a-real-id' } }],
+        campaign.id,
+        null,
+      )
+
+      const row = db
+        .select()
+        .from(schema.characterResources)
+        .where(eq(schema.characterResources.characterId, character.id))
+        .get()
+      // Fell back to resolvePlayerCharacterId — the real player's flag flipped.
+      expect(row!.hasInspiration).toBe(true)
+    })
   })
+
+  function questsList(db: ReturnType<typeof drizzle>, campaignId: string) {
+    return db
+      .select()
+      .from(schema.quests)
+      .where(eq(schema.quests.campaignId, campaignId))
+      .all()
+  }
 })

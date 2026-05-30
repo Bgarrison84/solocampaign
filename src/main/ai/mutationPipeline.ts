@@ -19,6 +19,10 @@ import { characterResources } from '../db/schema'
 import { charactersRepo } from '../db/charactersRepo'
 import { combatantsRepo } from '../db/combatantsRepo'
 import { campaignEventsRepo } from '../db/campaignEventsRepo'
+import { questsRepo } from '../db/questsRepo'
+import { npcsRepo } from '../db/npcsRepo'
+import { factionsRepo } from '../db/factionsRepo'
+import { campaignsRepo } from '../db/campaignsRepo'
 import type { SpellSlotMap } from '../db/contentTypes'
 import {
   updateHpSchema,
@@ -33,6 +37,14 @@ import {
   endCombatSchema,
   processRestSchema,
   showDiceRollSchema,
+  addQuestSchema,
+  updateQuestStatusSchema,
+  addNpcSchema,
+  updateNpcSchema,
+  updateFactionSchema,
+  updateWorldTimeSchema,
+  updateLocationSchema,
+  awardInspirationSchema,
 } from './toolSchemas'
 
 // ─── Public Types ─────────────────────────────────────────────────────────────
@@ -40,7 +52,19 @@ import {
 export interface MutationChip {
   id: string
   label: string
-  type: 'hp' | 'xp' | 'condition' | 'slot' | 'currency' | 'combat' | 'rest'
+  type:
+    | 'hp'
+    | 'xp'
+    | 'condition'
+    | 'slot'
+    | 'currency'
+    | 'combat'
+    | 'rest'
+    // Phase 6 additions (D-16)
+    | 'quest'
+    | 'quest_complete'
+    | 'npc'
+    | 'inspiration'
 }
 
 export interface ShowDiceRollData {
@@ -372,6 +396,149 @@ function applyOneTool(
         result: r.data.result,
         breakdown: r.data.breakdown,
       })
+      return
+    }
+
+    // ─── Phase 6: world-state mutations (D-14, D-16) ──────────────────────────
+
+    case 'addQuest': {
+      const r = addQuestSchema.safeParse(args)
+      if (!r.success) {
+        log.warn('[mutationPipeline] invalid addQuest args')
+        return
+      }
+      const quest = questsRepo.create({
+        campaignId,
+        name: r.data.name,
+        description: r.data.description,
+      })
+      acc.chips.push({ id: chipId(), label: `Quest: ${r.data.name}`, type: 'quest' })
+      logEvent(campaignId, sessionId, 'quest_added', { questId: quest.id, name: r.data.name })
+      return
+    }
+
+    case 'updateQuestStatus': {
+      const r = updateQuestStatusSchema.safeParse(args)
+      if (!r.success) {
+        log.warn('[mutationPipeline] invalid updateQuestStatus args')
+        return
+      }
+      questsRepo.updateStatus(r.data.questId, r.data.status)
+      // D-05/D-16: only 'Completed' chips. 'Failed' and 'Active' are silent.
+      if (r.data.status === 'Completed') {
+        acc.chips.push({ id: chipId(), label: 'Quest complete!', type: 'quest_complete' })
+      }
+      logEvent(campaignId, sessionId, 'quest_status_changed', {
+        questId: r.data.questId,
+        status: r.data.status,
+      })
+      return
+    }
+
+    case 'addNpc': {
+      const r = addNpcSchema.safeParse(args)
+      if (!r.success) {
+        log.warn('[mutationPipeline] invalid addNpc args')
+        return
+      }
+      const npc = npcsRepo.create({
+        campaignId,
+        name: r.data.name,
+        description: r.data.description,
+        relationship: r.data.relationship,
+        factionName: r.data.factionName ?? null,
+      })
+      acc.chips.push({ id: chipId(), label: `${r.data.name} encountered`, type: 'npc' })
+      logEvent(campaignId, sessionId, 'npc_added', { npcId: npc.id, name: r.data.name })
+      return
+    }
+
+    case 'updateNpc': {
+      const r = updateNpcSchema.safeParse(args)
+      if (!r.success) {
+        log.warn('[mutationPipeline] invalid updateNpc args')
+        return
+      }
+      // D-10/D-16: NPC updates are silent (no chip).
+      npcsRepo.patch(r.data.npcId, {
+        description: r.data.description,
+        relationship: r.data.relationship,
+        factionName: r.data.factionName,
+      })
+      logEvent(campaignId, sessionId, 'npc_updated', { npcId: r.data.npcId })
+      return
+    }
+
+    case 'updateFaction': {
+      const r = updateFactionSchema.safeParse(args)
+      if (!r.success) {
+        log.warn('[mutationPipeline] invalid updateFaction args')
+        return
+      }
+      // D-16: silent (no chip). Upsert keyed on (campaignId, name) — Pitfall 5.
+      factionsRepo.upsert({ campaignId, name: r.data.factionName, tier: r.data.tier })
+      logEvent(campaignId, sessionId, 'faction_updated', {
+        factionName: r.data.factionName,
+        tier: r.data.tier,
+      })
+      return
+    }
+
+    case 'updateWorldTime': {
+      const r = updateWorldTimeSchema.safeParse(args)
+      if (!r.success) {
+        log.warn('[mutationPipeline] invalid updateWorldTime args')
+        return
+      }
+      // D-16: silent (no chip).
+      campaignsRepo.updateWorldTime(campaignId, {
+        timeOfDay: r.data.timeOfDay,
+        dayNumber: r.data.dayNumber,
+        season: r.data.season,
+      })
+      logEvent(campaignId, sessionId, 'world_time_updated', {
+        timeOfDay: r.data.timeOfDay,
+        dayNumber: r.data.dayNumber,
+        season: r.data.season,
+      })
+      return
+    }
+
+    case 'updateLocation': {
+      const r = updateLocationSchema.safeParse(args)
+      if (!r.success) {
+        log.warn('[mutationPipeline] invalid updateLocation args')
+        return
+      }
+      // D-16: silent (no chip). Stored as JSON text (Pitfall 4).
+      campaignsRepo.updateLocation(campaignId, r.data.path)
+      logEvent(campaignId, sessionId, 'location_updated', { path: r.data.path })
+      return
+    }
+
+    case 'awardInspiration': {
+      const r = awardInspirationSchema.safeParse(args)
+      if (!r.success) {
+        log.warn('[mutationPipeline] invalid awardInspiration args')
+        return
+      }
+      const db = getDb()
+      // Pitfall 7: the AI may echo a characterId that has no resources row. Verify
+      // the supplied id maps to a characterResources row; if not, fall back to the
+      // campaign's player character so the flag still flips.
+      const exists = db
+        .select({ characterId: characterResources.characterId })
+        .from(characterResources)
+        .where(eq(characterResources.characterId, r.data.characterId))
+        .get()
+      const charId = exists?.characterId ?? resolvePlayerCharacterId(campaignId)
+      if (!charId) return
+      db.update(characterResources)
+        .set({ hasInspiration: true })
+        .where(eq(characterResources.characterId, charId))
+        .run()
+      acc.chips.push({ id: chipId(), label: 'Inspiration awarded!', type: 'inspiration' })
+      logEvent(campaignId, sessionId, 'inspiration_awarded', { characterId: charId })
       return
     }
 

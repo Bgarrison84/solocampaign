@@ -201,3 +201,136 @@ export const PHASE5_TOOLS = {
   processRest: processRestTool,
   showDiceRoll: showDiceRollTool,
 } as const satisfies ToolSet
+
+// ─── Phase 6 Zod Schemas (D-14, bounded — T-06-02-01) ─────────────────────────
+//
+// World-state mutation surface: quests, NPCs, factions, in-world time/location,
+// and Inspiration. Same conventions as Phase 5 — every string is `.max()`-bounded
+// and every enum is closed. IDs (questId/npcId/characterId) are `z.string()` (NOT
+// `.uuid()`): repos store randomUUID text, but the AI echoes IDs from the injected
+// world-state summary, and a strict uuid guard would silently drop otherwise-valid
+// references (safeParse failure is silent — D-06). This matches the Phase 5
+// convention where characterId is `z.string()`.
+
+/** addQuest: create a new quest in the log as it emerges (status defaults to 'Active'). */
+export const addQuestSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().max(500),
+})
+
+/** updateQuestStatus: move a quest between Active / Completed / Failed (D-05 — Failed is silent). */
+export const updateQuestStatusSchema = z.object({
+  questId: z.string(),
+  status: z.enum(['Active', 'Completed', 'Failed']),
+})
+
+/** addNpc: record a newly encountered NPC with a relationship and optional faction. */
+export const addNpcSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(300),
+  relationship: z.enum(['Friendly', 'Neutral', 'Hostile', 'Unknown']),
+  factionName: z.string().max(100).optional(),
+})
+
+/** updateNpc: patch only the provided fields of an existing NPC (D-15). */
+export const updateNpcSchema = z.object({
+  npcId: z.string(),
+  description: z.string().max(300).optional(),
+  relationship: z.enum(['Friendly', 'Neutral', 'Hostile', 'Unknown']).optional(),
+  factionName: z.string().max(100).optional(),
+})
+
+/** updateFaction: upsert a faction's reputation tier (absolute value, not a delta). */
+export const updateFactionSchema = z.object({
+  factionName: z.string().min(1).max(100),
+  tier: z.enum(['Hostile', 'Unfriendly', 'Neutral', 'Friendly', 'Allied']),
+})
+
+/** updateWorldTime: set the in-world clock (absolute values each call) — D-12. */
+export const updateWorldTimeSchema = z.object({
+  timeOfDay: z.enum(['Morning', 'Afternoon', 'Evening', 'Night']),
+  dayNumber: z.number().int().min(1).max(99999),
+  season: z.enum(['Spring', 'Summer', 'Autumn', 'Winter']),
+})
+
+/** updateLocation: set the current location breadcrumb path (1-10 segments) — D-13. */
+export const updateLocationSchema = z.object({
+  path: z.array(z.string().max(100)).min(1).max(10),
+})
+
+/** awardInspiration: flip the player's hasInspiration flag for exceptional roleplay (PARTY-03). */
+export const awardInspirationSchema = z.object({
+  characterId: z.string(),
+})
+
+// ─── Phase 6 tool() Registrations (NO execute — D-04, Pitfall 1) ──────────────
+
+export const addQuestTool = tool({
+  description:
+    'Add a new quest to the quest log as it emerges in the story. New quests start Active.',
+  inputSchema: addQuestSchema,
+})
+
+export const updateQuestStatusTool = tool({
+  description:
+    "Update a quest's status when it is resolved. Use 'Completed' when the player succeeds, 'Failed' when it is lost. Pass the quest's id from the world-state summary.",
+  inputSchema: updateQuestStatusSchema,
+})
+
+export const addNpcTool = tool({
+  description:
+    'Record a newly encountered NPC, including a one-line description and the relationship toward the player (Friendly, Neutral, Hostile, or Unknown).',
+  inputSchema: addNpcSchema,
+})
+
+export const updateNpcTool = tool({
+  description:
+    "Update an existing NPC's description, relationship, or faction as the story develops. Pass the npc's id from the world-state summary; only include fields that change.",
+  inputSchema: updateNpcSchema,
+})
+
+export const updateFactionTool = tool({
+  description:
+    "Set a faction's reputation tier toward the player (Hostile, Unfriendly, Neutral, Friendly, or Allied). Creates the faction if it does not exist yet.",
+  inputSchema: updateFactionSchema,
+})
+
+export const updateWorldTimeTool = tool({
+  description:
+    'Advance the in-world clock. Provide the absolute time of day, day number, and season each time it changes.',
+  inputSchema: updateWorldTimeSchema,
+})
+
+export const updateLocationTool = tool({
+  description:
+    "Set the party's current location as a breadcrumb path from broadest to most specific, e.g. ['Forest', 'Ancient Ruins', 'Crypt Level 2'].",
+  inputSchema: updateLocationSchema,
+})
+
+export const awardInspirationTool = tool({
+  description:
+    "Award Inspiration to the player's character for exceptional roleplay. Pass the character's id from the world-state summary.",
+  inputSchema: awardInspirationSchema,
+})
+
+/**
+ * The 8 Phase 6 world-state tools. Combined with PHASE5_TOOLS into ALL_TOOLS —
+ * never passed to streamText on its own (Phase 5 tools must remain available).
+ */
+export const PHASE6_TOOLS = {
+  addQuest: addQuestTool,
+  updateQuestStatus: updateQuestStatusTool,
+  addNpc: addNpcTool,
+  updateNpc: updateNpcTool,
+  updateFaction: updateFactionTool,
+  updateWorldTime: updateWorldTimeTool,
+  updateLocation: updateLocationTool,
+  awardInspiration: awardInspirationTool,
+} as const satisfies ToolSet
+
+/**
+ * The full tool set passed to streamText({ tools }) from Phase 6 onward.
+ * Exactly 20 tools (12 Phase 5 + 8 Phase 6), none with an execute property (D-04).
+ * Phase 6 MUST extend, not replace, the Phase 5 surface (Pitfall 2).
+ */
+export const ALL_TOOLS = { ...PHASE5_TOOLS, ...PHASE6_TOOLS } as const satisfies ToolSet

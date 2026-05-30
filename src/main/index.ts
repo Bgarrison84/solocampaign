@@ -11,7 +11,7 @@ import { campaignsRepo } from './db/campaignsRepo'
 import { messagesRepo } from './db/messagesRepo'
 import { buildContext } from './ai/contextBuilder'
 import { streamChat } from './ai/llmProvider'
-import { PHASE5_TOOLS } from './ai/toolSchemas'
+import { ALL_TOOLS } from './ai/toolSchemas'
 import { applyMutationBatch, stripAndParseJsonTail } from './ai/mutationPipeline'
 import { withRetry } from './ai/retryHandler'
 import { sessionFallbackMap, sessionAbortMap, sessionActiveMap } from './ai/aiSessionState'
@@ -365,7 +365,7 @@ if (!gotLock) {
               },
             }, {
               abortSignal: abortController.signal,
-              tools: PHASE5_TOOLS,
+              tools: ALL_TOOLS,
               onToolCallsFinish: async (toolCalls) => {
                 if (toolCalls.length === 0) return
                 // Native tool calls take priority over the JSON-tail fallback (D-02).

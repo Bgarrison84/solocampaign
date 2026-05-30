@@ -107,6 +107,65 @@ export const campaignsRepo = {
       .run()
   },
 
+  /**
+   * Persist the in-world clock (STATE-04). Absolute values each call (D-14 #6).
+   * Writes worldTimeOfDay/worldDayNumber/worldSeason on the campaigns row.
+   */
+  updateWorldTime(
+    campaignId: string,
+    input: { timeOfDay: string; dayNumber: number; season: string },
+  ): void {
+    const db = getDb()
+    db.update(campaigns)
+      .set({
+        worldTimeOfDay: input.timeOfDay,
+        worldDayNumber: input.dayNumber,
+        worldSeason: input.season,
+      })
+      .where(eq(campaigns.id, campaignId))
+      .run()
+  },
+
+  /**
+   * Persist the current location breadcrumb (WORLD-03). The path array is stored
+   * as a JSON string (Pitfall 4 — consumers guard JSON.parse with a try/catch).
+   */
+  updateLocation(campaignId: string, path: string[]): void {
+    const db = getDb()
+    db.update(campaigns)
+      .set({ worldLocationPath: JSON.stringify(path) })
+      .where(eq(campaigns.id, campaignId))
+      .run()
+  },
+
+  /**
+   * Read the four world-state columns for a campaign. Used by the worldState tRPC
+   * router (renderer header) and the Wave 2 contextBuilder world-state injection.
+   * Returns undefined if the campaign does not exist.
+   */
+  getWorldState(
+    campaignId: string,
+  ):
+    | {
+        worldTimeOfDay: string | null
+        worldDayNumber: number | null
+        worldSeason: string | null
+        worldLocationPath: string | null
+      }
+    | undefined {
+    const db = getDb()
+    return db
+      .select({
+        worldTimeOfDay: campaigns.worldTimeOfDay,
+        worldDayNumber: campaigns.worldDayNumber,
+        worldSeason: campaigns.worldSeason,
+        worldLocationPath: campaigns.worldLocationPath,
+      })
+      .from(campaigns)
+      .where(eq(campaigns.id, campaignId))
+      .get()
+  },
+
   delete(id: string): void {
     const db = getDb()
     db.delete(campaigns).where(eq(campaigns.id, id)).run()

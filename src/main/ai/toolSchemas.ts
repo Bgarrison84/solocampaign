@@ -246,12 +246,17 @@ export const updateFactionSchema = z.object({
   tier: z.enum(['Hostile', 'Unfriendly', 'Neutral', 'Friendly', 'Allied']),
 })
 
-/** updateWorldTime: set the in-world clock (absolute values each call) — D-12. */
-export const updateWorldTimeSchema = z.object({
-  timeOfDay: z.enum(['Morning', 'Afternoon', 'Evening', 'Night']),
-  dayNumber: z.number().int().min(1).max(99999),
-  season: z.enum(['Spring', 'Summer', 'Autumn', 'Winter']),
-})
+/** updateWorldTime: set the in-world clock — at least one field required (D-12). */
+export const updateWorldTimeSchema = z
+  .object({
+    timeOfDay: z.enum(['Morning', 'Afternoon', 'Evening', 'Night']).optional(),
+    dayNumber: z.number().int().min(1).max(99999).optional(),
+    season: z.enum(['Spring', 'Summer', 'Autumn', 'Winter']).optional(),
+  })
+  .refine(
+    (d) => d.timeOfDay !== undefined || d.dayNumber !== undefined || d.season !== undefined,
+    { message: 'At least one time field must be provided' },
+  )
 
 /** updateLocation: set the current location breadcrumb path (1-10 segments) — D-13. */
 export const updateLocationSchema = z.object({

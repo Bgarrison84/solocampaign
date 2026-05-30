@@ -168,7 +168,7 @@ function stripNewlines(value: string): string {
  * (T-06-03-02). worldLocationPath JSON is parsed under a try/catch with a []
  * fallback (T-06-03-03).
  */
-function formatWorldStateSummary(campaignId: string): string {
+function formatWorldStateSummary(campaignId: string, playerCharacterId?: string): string {
   const quests = questsRepo.list(campaignId)
   const npcs = npcsRepo.list(campaignId)
   const factions = factionsRepo.list(campaignId)
@@ -177,9 +177,9 @@ function formatWorldStateSummary(campaignId: string): string {
   const lines: string[] = ['Current world state:']
 
   // Player character ID (Pitfall 7) — gives awardInspiration a reliable target.
-  const playerCharacterId = charactersRepo.getByCampaignId(campaignId)?.id
-  if (playerCharacterId) {
-    lines.push(`- Player character ID: ${playerCharacterId}`)
+  const charId = playerCharacterId ?? charactersRepo.getByCampaignId(campaignId)?.id
+  if (charId) {
+    lines.push(`- Player character ID: ${charId}`)
   }
 
   // Time
@@ -374,7 +374,7 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
   }
 
   // --- Phase 6: world-state summary (D-18) — injected after the tool block ---
-  const worldStateSummary = formatWorldStateSummary(campaignId)
+  const worldStateSummary = formatWorldStateSummary(campaignId, character?.id)
 
   // --- Assemble system prompt (D-17 order) ---
   // preamble + strictness + personality + character, then the Phase 5/6 tool block,

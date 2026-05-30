@@ -108,22 +108,20 @@ export const campaignsRepo = {
   },
 
   /**
-   * Persist the in-world clock (STATE-04). Absolute values each call (D-14 #6).
-   * Writes worldTimeOfDay/worldDayNumber/worldSeason on the campaigns row.
+   * Persist the in-world clock (STATE-04). At least one field must be provided.
+   * Only the supplied fields are written; others remain unchanged.
    */
   updateWorldTime(
     campaignId: string,
-    input: { timeOfDay: string; dayNumber: number; season: string },
+    input: { timeOfDay?: string; dayNumber?: number; season?: string },
   ): void {
     const db = getDb()
-    db.update(campaigns)
-      .set({
-        worldTimeOfDay: input.timeOfDay,
-        worldDayNumber: input.dayNumber,
-        worldSeason: input.season,
-      })
-      .where(eq(campaigns.id, campaignId))
-      .run()
+    const set: Partial<typeof campaigns.$inferInsert> = {}
+    if (input.timeOfDay !== undefined) set.worldTimeOfDay = input.timeOfDay
+    if (input.dayNumber !== undefined) set.worldDayNumber = input.dayNumber
+    if (input.season !== undefined) set.worldSeason = input.season
+    if (Object.keys(set).length === 0) return
+    db.update(campaigns).set(set).where(eq(campaigns.id, campaignId)).run()
   },
 
   /**

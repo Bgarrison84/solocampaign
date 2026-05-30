@@ -195,13 +195,13 @@ Plans:
   4. UI displays current time of day, days elapsed, and season; values update as the AI narrates time passing
   5. UI shows a location breadcrumb (e.g. "Forest > Ancient Ruins > Crypt Level 2") that updates as the party moves
   6. AI awards Inspiration to the user's character when it detects exceptional roleplay; the inspiration token appears on the sheet
-**Plans:** 2/7 plans executed
+**Plans:** 5/7 plans executed
 Plans:
 - [x] 06-01-PLAN.md - Migration 0006 + quests/npcs/factions tables + world-state columns + 3 repos + test stubs
 - [x] 06-02-PLAN.md - 8 Phase 6 tool schemas + PHASE6_TOOLS/ALL_TOOLS + 8 mutationPipeline cases + campaignsRepo world writes + quests/npcs/worldState/factions tRPC routers + ALL_TOOLS in streamText
-- [ ] 06-03-PLAN.md - ContextBuilder formatWorldStateSummary + toolDescriptionsBlock extension (JSON-tail fallback)
-- [ ] 06-04-PLAN.md - QuestsTab (new 6th tab, read-only quest log)
-- [ ] 06-05-PLAN.md - NpcTrackerTab (NPC list + collapsible Factions section) + MutationChipStack 4 new chip types
+- [x] 06-03-PLAN.md - ContextBuilder formatWorldStateSummary + toolDescriptionsBlock extension (JSON-tail fallback)
+- [x] 06-04-PLAN.md - QuestsTab (new 6th tab, read-only quest log)
+- [x] 06-05-PLAN.md - NpcTrackerTab (NPC list + collapsible Factions section) + MutationChipStack 4 new chip types
 - [ ] 06-06-PLAN.md - CampaignViewScreen wiring: 6th tab + NpcTrackerTab mount + WorldStateBar + Phase 6 cache invalidation
 - [ ] 06-07-PLAN.md - Full-suite run + pitfall sweep + end-to-end human-verify checkpoint
 **Wave structure:**
@@ -273,7 +273,7 @@ Plans:
 | 3. AI Engine & Provider Abstraction | 0/6 | Planned | - |
 | 4. Long-Campaign Memory & Session Flow | 0/0 | Not started | - |
 | 5. Rules Engine, Dice & Combat | 7/7 | Human UAT pending | - |
-| 6. Quests, NPCs & World State | 2/7 | In Progress|  |
+| 6. Quests, NPCs & World State | 5/7 | In Progress|  |
 | 7. Content Depth & Advanced Character | 0/0 | Not started | - |
 | 8. Polish, Export & Accessibility | 0/0 | Not started | - |
 | 9. Distribution & Update Notifications | 0/0 | Not started | - |

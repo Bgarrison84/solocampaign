@@ -25,6 +25,7 @@
   --input: oklch(0.28 0.008 260);
   --ring: oklch(0.78 0.10 78);
   --radius: 0.5rem;
+  --accent-gold: oklch(0.80 0.18 75);
 }
 
 .dark {
@@ -48,6 +49,7 @@
   --input: oklch(0.28 0.008 260);
   --ring: oklch(0.78 0.10 78);
   --radius: 0.5rem;
+  --accent-gold: oklch(0.80 0.18 75);
 }
 
 @theme inline {
@@ -70,6 +72,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-accent-gold: oklch(0.80 0.18 75);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

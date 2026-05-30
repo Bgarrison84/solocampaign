@@ -10,11 +10,21 @@
 import { describe, it, expect } from 'vitest'
 import {
   PHASE5_TOOLS,
+  PHASE6_TOOLS,
+  ALL_TOOLS,
   updateHpSchema,
   addCombatantSchema,
   awardXpSchema,
   deductSpellSlotSchema,
   showDiceRollSchema,
+  addQuestSchema,
+  updateQuestStatusSchema,
+  addNpcSchema,
+  updateNpcSchema,
+  updateFactionSchema,
+  updateWorldTimeSchema,
+  updateLocationSchema,
+  awardInspirationSchema,
 } from './toolSchemas'
 
 describe('toolSchemas', () => {
@@ -91,6 +101,154 @@ describe('toolSchemas', () => {
       ]
       for (const tool of expected) {
         expect(keys).toContain(tool)
+      }
+    })
+  })
+
+  // ─── Phase 6 schemas (STATE-01..04, WORLD-03, PARTY-03) ──────────────────────
+
+  describe('addQuestSchema', () => {
+    it('accepts a quest with a name and description', () => {
+      expect(
+        addQuestSchema.safeParse({ name: 'Find the amulet', description: 'A relic lost in the crypt' })
+          .success,
+      ).toBe(true)
+    })
+
+    it('rejects an empty name', () => {
+      expect(addQuestSchema.safeParse({ name: '', description: 'x' }).success).toBe(false)
+    })
+  })
+
+  describe('updateQuestStatusSchema', () => {
+    it('accepts a valid status', () => {
+      expect(
+        updateQuestStatusSchema.safeParse({ questId: 'q1', status: 'Completed' }).success,
+      ).toBe(true)
+    })
+
+    it('rejects an invalid status enum', () => {
+      expect(
+        updateQuestStatusSchema.safeParse({ questId: 'q1', status: 'Abandoned' }).success,
+      ).toBe(false)
+    })
+  })
+
+  describe('addNpcSchema', () => {
+    it('accepts an NPC with a relationship and optional faction', () => {
+      const r = addNpcSchema.safeParse({
+        name: 'Borin',
+        description: 'The blacksmith of Redpine',
+        relationship: 'Friendly',
+        factionName: 'Redpine Guild',
+      })
+      expect(r.success).toBe(true)
+    })
+
+    it('rejects an invalid relationship enum', () => {
+      expect(
+        addNpcSchema.safeParse({ name: 'X', description: '', relationship: 'Enemy' }).success,
+      ).toBe(false)
+    })
+  })
+
+  describe('updateNpcSchema', () => {
+    it('accepts a partial patch with only npcId', () => {
+      expect(updateNpcSchema.safeParse({ npcId: 'n1' }).success).toBe(true)
+    })
+
+    it('accepts a patch updating relationship only', () => {
+      expect(
+        updateNpcSchema.safeParse({ npcId: 'n1', relationship: 'Hostile' }).success,
+      ).toBe(true)
+    })
+  })
+
+  describe('updateFactionSchema', () => {
+    it('accepts a valid tier', () => {
+      expect(
+        updateFactionSchema.safeParse({ factionName: 'City Watch', tier: 'Allied' }).success,
+      ).toBe(true)
+    })
+
+    it('rejects an invalid tier enum', () => {
+      expect(
+        updateFactionSchema.safeParse({ factionName: 'City Watch', tier: 'Loved' }).success,
+      ).toBe(false)
+    })
+  })
+
+  describe('updateWorldTimeSchema', () => {
+    it('accepts a valid world-time payload', () => {
+      expect(
+        updateWorldTimeSchema.safeParse({ timeOfDay: 'Evening', dayNumber: 14, season: 'Autumn' })
+          .success,
+      ).toBe(true)
+    })
+
+    it('rejects dayNumber 0', () => {
+      expect(
+        updateWorldTimeSchema.safeParse({ timeOfDay: 'Morning', dayNumber: 0, season: 'Spring' })
+          .success,
+      ).toBe(false)
+    })
+  })
+
+  describe('updateLocationSchema', () => {
+    it('accepts a 1-10 segment path', () => {
+      expect(
+        updateLocationSchema.safeParse({ path: ['Forest', 'Ancient Ruins', 'Crypt Level 2'] }).success,
+      ).toBe(true)
+    })
+
+    it('rejects an empty path', () => {
+      expect(updateLocationSchema.safeParse({ path: [] }).success).toBe(false)
+    })
+  })
+
+  describe('awardInspirationSchema', () => {
+    it('accepts a characterId', () => {
+      expect(awardInspirationSchema.safeParse({ characterId: 'char-1' }).success).toBe(true)
+    })
+
+    it('rejects a missing characterId', () => {
+      expect(awardInspirationSchema.safeParse({}).success).toBe(false)
+    })
+  })
+
+  describe('PHASE6_TOOLS', () => {
+    it('has exactly 8 Phase 6 tools', () => {
+      const keys = Object.keys(PHASE6_TOOLS)
+      expect(keys).toHaveLength(8)
+      const expected = [
+        'addQuest',
+        'updateQuestStatus',
+        'addNpc',
+        'updateNpc',
+        'updateFaction',
+        'updateWorldTime',
+        'updateLocation',
+        'awardInspiration',
+      ]
+      for (const tool of expected) {
+        expect(keys).toContain(tool)
+      }
+    })
+  })
+
+  describe('ALL_TOOLS', () => {
+    it('combines all 20 tools (12 Phase 5 + 8 Phase 6)', () => {
+      expect(Object.keys(ALL_TOOLS)).toHaveLength(20)
+    })
+
+    it('includes every Phase 5 and Phase 6 tool', () => {
+      for (const key of Object.keys(PHASE5_TOOLS)) expect(ALL_TOOLS).toHaveProperty(key)
+      for (const key of Object.keys(PHASE6_TOOLS)) expect(ALL_TOOLS).toHaveProperty(key)
+    })
+
+    it('has no tool with an execute property (D-04, Pitfall 1)', () => {
+      for (const value of Object.values(ALL_TOOLS)) {
+        expect(value).not.toHaveProperty('execute')
       }
     })
   })

@@ -27,6 +27,8 @@ import { CharacterSheetTab } from '../components/CharacterSheetTab'
 import { MutationChipStack } from '../components/MutationChipStack'
 import { CombatTrackerTab } from '../components/CombatTrackerTab'
 import { SessionJournalTab } from '../components/SessionJournalTab'
+import { QuestsTab } from '../components/QuestsTab'
+import { NpcTrackerTab } from '../components/NpcTrackerTab'
 import { StoryScrollPanel } from '../components/StoryScrollPanel'
 import { ChatInputArea } from '../components/ChatInputArea'
 import { AiSettingsModal } from '../components/AiSettingsModal'
@@ -35,6 +37,39 @@ import { EndSessionModal } from '../components/EndSessionModal'
 import { RestPickerDialog } from '../components/RestPickerDialog'
 import { ShortRestHitDiceModal } from '../components/ShortRestHitDiceModal'
 import { useAiStream } from '../hooks/useAiStream'
+
+// ─── WorldStateBar helpers (UI-SPEC §S1) ─────────────────────────────────────
+
+/** Time-of-day glyph for the WorldStateBar calendar (aria-hidden visual only). */
+function timeOfDayIcon(timeOfDay: string): string {
+  switch (timeOfDay) {
+    case 'Morning':
+      return '☀️'
+    case 'Afternoon':
+      return '🌤'
+    case 'Evening':
+      return '🌙'
+    case 'Night':
+      return '🌑'
+    default:
+      return '🕐'
+  }
+}
+
+/**
+ * Format the AI-stored location path (a JSON string array) into a " > " breadcrumb.
+ * Guards JSON.parse with try/catch and falls back to the raw string (Pitfall 4,
+ * T-06-06-02). Rendered as a plain React text node — no dangerouslySetInnerHTML.
+ */
+function formatLocationPath(jsonPath: string | null): string {
+  if (!jsonPath) return ''
+  try {
+    const parts = JSON.parse(jsonPath) as string[]
+    return parts.join(' > ')
+  } catch {
+    return jsonPath // fallback if not JSON
+  }
+}
 
 export function CampaignViewScreen() {
   const { id } = useParams<{ id: string }>()
@@ -244,6 +279,11 @@ export function CampaignViewScreen() {
       queryClient.invalidateQueries({ queryKey: ['combat', 'listActive', id] })
       queryClient.invalidateQueries({ queryKey: ['characters', 'getByCampaignId', id] })
       queryClient.invalidateQueries({ queryKey: ['ai', 'getMessages', id] })
+      // Phase 6 (06-06) — refresh quests/NPCs/factions tabs + WorldStateBar after AI mutations (Pitfall 3).
+      queryClient.invalidateQueries({ queryKey: ['quests', 'list', id] })
+      queryClient.invalidateQueries({ queryKey: ['npcs', 'list', id] })
+      queryClient.invalidateQueries({ queryKey: ['factions', 'list', id] })
+      queryClient.invalidateQueries({ queryKey: ['campaigns', 'get', id] }) // world-state columns
     }
     window.aiStream.onMutationsApplied(cacheInvalidationHandler)
     // WR-02: remove listener on cleanup so it does not accumulate across id changes.
@@ -451,6 +491,42 @@ export function CampaignViewScreen() {
         </Button>
       </div>
 
+      {/* World State bar — slim calendar + location breadcrumb below the action bar (UI-SPEC §S1, STATE-04/WORLD-03). */}
+      {/* Rendered only when the AI has set world time or location; each side guards on its own field. */}
+      {(campaignQuery.data.worldTimeOfDay || campaignQuery.data.worldLocationPath) && (
+        <div className="flex items-center gap-4 px-4 py-2 border-b border-border bg-background text-xs text-muted-foreground shrink-0">
+          {/* Left: Calendar */}
+          {campaignQuery.data.worldTimeOfDay && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span aria-hidden="true">{timeOfDayIcon(campaignQuery.data.worldTimeOfDay)}</span>
+              <span>
+                {campaignQuery.data.worldTimeOfDay}
+                {campaignQuery.data.worldDayNumber != null &&
+                  ` • Day ${campaignQuery.data.worldDayNumber}`}
+                {campaignQuery.data.worldSeason && ` • ${campaignQuery.data.worldSeason}`}
+              </span>
+            </div>
+          )}
+          {/* Spacer */}
+          <span className="flex-1" />
+          {/* Right: Location breadcrumb */}
+          {campaignQuery.data.worldLocationPath && (
+            <div className="flex items-center gap-1 min-w-0">
+              <span aria-hidden="true" className="shrink-0 text-muted-foreground/60">
+                📍
+              </span>
+              <span
+                className="truncate max-w-[280px]"
+                title={formatLocationPath(campaignQuery.data.worldLocationPath)}
+                aria-label={`Current location: ${formatLocationPath(campaignQuery.data.worldLocationPath)}`}
+              >
+                {formatLocationPath(campaignQuery.data.worldLocationPath)}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
       <PanelGroup
         direction="horizontal"
         className="flex-1"
@@ -541,6 +617,12 @@ export function CampaignViewScreen() {
                 >
                   Inventory
                 </TabsTrigger>
+                <TabsTrigger
+                  value="quests"
+                  className="px-4 py-2 text-sm font-semibold text-muted-foreground data-[state=active]:text-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+                >
+                  Quests
+                </TabsTrigger>
                 {/* Trailing action — Change Cover Image */}
                 <div className="ml-auto pr-2 flex items-center">
                   <Button
@@ -566,13 +648,8 @@ export function CampaignViewScreen() {
                 <CombatTrackerTab campaignId={id} />
               </TabsContent>
 
-              <TabsContent value="npc-tracker" className="flex-1 overflow-auto p-6">
-                <div className="flex flex-col items-center max-w-[400px] mx-auto" style={{ paddingTop: '30%' }}>
-                  <h2 className="text-xl font-semibold text-foreground mb-2">NPC Tracker</h2>
-                  <p className="text-sm text-muted-foreground text-center">
-                    NPCs you meet will be tracked here once the AI starts populating them in Phase 6.
-                  </p>
-                </div>
+              <TabsContent value="npc-tracker" className="flex-1 overflow-hidden p-0">
+                <NpcTrackerTab campaignId={id} />
               </TabsContent>
 
               <TabsContent value="session-journal" className="flex-1 overflow-hidden p-0">
@@ -586,6 +663,10 @@ export function CampaignViewScreen() {
                     Items, currency, and attunement will appear here once your character has belongings in Phase 2.
                   </p>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="quests" className="flex-1 overflow-hidden p-0">
+                <QuestsTab campaignId={id} />
               </TabsContent>
             </Tabs>
           </div>

@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-05-30T19:02:25.480Z",
+  "phase": "06",
+  "phase_name": "quests-npcs-world-state",
+  "phase_dir": ".planning/phases/06-quests-npcs-world-state",
+  "plan": 7,
+  "task": 2,
+  "total_tasks": 2,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": "06-01", "name": "DB schema — quests/npcs/factions tables + world-state columns", "status": "done", "commit": "344d2d9"},
+    {"id": "06-02", "name": "AI tools, mutation pipeline, tRPC routers", "status": "done", "commit": "0ff7827"},
+    {"id": "06-03", "name": "ContextBuilder world-state summary + Phase 6 tool descriptions", "status": "done", "commit": "10b1284"},
+    {"id": "06-04", "name": "QuestsTab component", "status": "done", "commit": "0169f65"},
+    {"id": "06-05", "name": "NpcTrackerTab + MutationChipStack Phase 6 chips", "status": "done", "commit": "456a131"},
+    {"id": "06-06", "name": "CampaignViewScreen integration — 6th tab + WorldStateBar + cache invalidation", "status": "done", "commit": "a3a96be"},
+    {"id": "06-07-task1", "name": "Integration sweep — typecheck seam fixes + pitfall verification", "status": "done", "commit": "8c22be1"},
+    {"id": "06-07-tooltip", "name": "TooltipProvider crash fix — ChatInputArea blank-screen bug", "status": "done", "commit": "e37d05b"}
+  ],
+  "remaining_tasks": [
+    {
+      "id": "06-07-task2a",
+      "name": "Add hasInspiration display to CharacterSheetTab",
+      "status": "not_started",
+      "detail": "CharacterSheetTab has no renderer for hasInspiration. Add an Inspiration indicator (star icon + 'Inspired' label) to SheetHeader or CombatStatsSection. The DB field exists (character_resources.has_inspiration). Cache invalidation already fires on ['characters','getByCampaignId',id] after awardInspiration."
+    },
+    {
+      "id": "06-07-task2b",
+      "name": "Re-verify items 2 and 4 with user",
+      "status": "not_started",
+      "detail": "Item 2 (NPCs): pipeline code is correct — AI just didn't introduce NPCs in initial test. Try a session that naturally introduces characters. Item 4 (inspiration): needs the display fix above, then re-test by asking the AI to award inspiration."
+    },
+    {
+      "id": "06-07-summary",
+      "name": "Mark plan 06-07 complete + update ROADMAP/STATE",
+      "status": "not_started"
+    },
+    {
+      "id": "phase-close",
+      "name": "Code review gate + phase verification",
+      "status": "not_started",
+      "detail": "Run /gsd:code-review 06, then spawn verifier agent to create VERIFICATION.md"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "better-sqlite3 ABI mismatch: compiled for Electron ABI 145 but vitest uses Node ABI 137. All SQLite-backed tests fail with NODE_MODULE_VERSION error.",
+      "type": "technical",
+      "workaround": "Run 'npm run rebuild:sqlite' before running tests standalone. This is a pre-existing issue documented in .planning/phases/06-quests-npcs-world-state/deferred-items.md. Non-SQLite tests (toolSchemas 28, contextBuilder 33) pass fine."
+    }
+  ],
+  "human_actions_pending": [
+    {
+      "action": "Re-verify inspiration (item 4) after the hasInspiration display fix is applied",
+      "context": "awardInspiration pipeline works but CharacterSheetTab doesn't render the flag — user couldn't see the result",
+      "blocking": true
+    },
+    {
+      "action": "Re-verify NPC tracker (item 2) in a longer session that naturally introduces characters",
+      "context": "Pipeline code is correct; initial test session may not have triggered addNpc",
+      "blocking": false
+    }
+  ],
+  "decisions": [
+    {"decision": "Hoisted TooltipProvider to screen root in CampaignViewScreen instead of wrapping per-button", "rationale": "ChatInputArea's Tooltip was outside all 4 individual providers causing a crash; single root provider is the standard shadcn pattern and covers all children", "phase": "06"},
+    {"decision": "tsc --noEmit exits 0 after 06-07 fixed onMutationsApplied payload type and 'args' in tc narrowing in llmProvider.ts", "rationale": "7 pre-existing errors were actually Phase 6 seam bugs; executor agent identified and fixed them", "phase": "06"},
+    {"decision": "Pre-existing better-sqlite3 ABI mismatch treated as baseline noise for test gate", "rationale": "Same 12 files / 94 tests fail before and after Phase 6 — not introduced by this phase", "phase": "06"}
+  ],
+  "uncommitted_files": [
+    ".planning/STATE.md (modified — needs tracking commit after 06-07 completes)",
+    "src/renderer/src/components/ui/checkbox.tsx (pre-existing uncommitted shadcn modification)",
+    "src/renderer/src/components/ui/textarea.tsx (pre-existing)",
+    "src/renderer/src/components/ui/tooltip.tsx (pre-existing — only import path change)",
+    "tsconfig.json (pre-existing)"
+  ],
+  "next_action": "Add hasInspiration display to CharacterSheetTab: read src/renderer/src/components/sheet/SheetHeader.tsx or CombatStatsSection.tsx, find where character data is rendered, add an Inspiration indicator (star icon, visible when character.resources.hasInspiration is true)",
+  "context_notes": "Phase 6 is 6/7 plans committed and merged. Plan 06-07 is at the human-verify checkpoint. Two UAT items remain: inspiration display (code fix needed) and NPC verification (likely just needs a longer test session). Once both pass, update plan 06-07 ROADMAP entry, commit tracking, then run code review and phase verification to close the phase."
+}

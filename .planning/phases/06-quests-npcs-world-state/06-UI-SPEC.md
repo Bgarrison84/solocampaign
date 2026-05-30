@@ -1,7 +1,8 @@
 ---
 phase: 6
 slug: quests-npcs-world-state
-status: draft
+status: approved
+reviewed_at: 2026-05-29T00:00:00Z
 shadcn_initialized: true
 preset: custom-subtle-fantasy-dark
 created: 2026-05-29

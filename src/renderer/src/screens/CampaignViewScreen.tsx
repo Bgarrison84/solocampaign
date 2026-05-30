@@ -367,7 +367,7 @@ export function CampaignViewScreen() {
   }
 
   return (
-    <>
+    <TooltipProvider>
     <div className="flex flex-col h-full">
       {/* Action bar — back navigation + delete */}
       <div className="flex items-center gap-2 px-2 py-1 border-b border-border bg-card shrink-0">
@@ -381,7 +381,6 @@ export function CampaignViewScreen() {
           Campaigns
         </Button>
         <span className="flex-1" />
-        <TooltipProvider>
           <Tooltip delayDuration={600}>
             <TooltipTrigger asChild>
               <Button
@@ -399,8 +398,6 @@ export function CampaignViewScreen() {
               Configure AI provider, DM personality, and rules
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-        <TooltipProvider>
           <Tooltip delayDuration={600}>
             <TooltipTrigger asChild>
               {!isCombatActive ? (
@@ -429,9 +426,7 @@ export function CampaignViewScreen() {
               {!isCombatActive ? 'Begin a combat encounter' : 'End the current encounter'}
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
         {/* Rest button — opens Short/Long rest picker (D-34, PROG-02, UI-SPEC §S1) */}
-        <TooltipProvider>
           <Tooltip delayDuration={600}>
             <TooltipTrigger asChild>
               <Button
@@ -446,9 +441,7 @@ export function CampaignViewScreen() {
             </TooltipTrigger>
             <TooltipContent>Take a short or long rest</TooltipContent>
           </Tooltip>
-        </TooltipProvider>
 
-        <TooltipProvider>
           <Tooltip delayDuration={600}>
             <TooltipTrigger asChild>
               {!sessionStore.isSessionActive ? (
@@ -479,7 +472,6 @@ export function CampaignViewScreen() {
                 : 'End this session and save a recap'}
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
         <Button
           variant="ghost"
           size="sm"
@@ -753,6 +745,6 @@ export function CampaignViewScreen() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-    </>
+    </TooltipProvider>
   )
 }

@@ -248,7 +248,7 @@ export function CampaignViewScreen() {
    * Long rest needs no modal — recovery is auto-applied by 05-02 (applyRest).
    */
   useEffect(() => {
-    const shortRestHandler = (payload: Parameters<typeof window.aiStream.onMutationsApplied>[0]) => {
+    const shortRestHandler = (payload: MutationsAppliedPayload) => {
       if (!id || payload.campaignId !== id) return
       const hasShortRest = payload.chips.some(
         (c) => c.type === 'rest' && c.label === 'Short rest taken',
@@ -274,7 +274,7 @@ export function CampaignViewScreen() {
    * Both listen to the same event, which is fine (ipcRenderer.on appends listeners).
    */
   useEffect(() => {
-    const cacheInvalidationHandler = (payload: Parameters<typeof window.aiStream.onMutationsApplied>[0]) => {
+    const cacheInvalidationHandler = (payload: MutationsAppliedPayload) => {
       if (!id || payload.campaignId !== id) return
       queryClient.invalidateQueries({ queryKey: ['combat', 'listActive', id] })
       queryClient.invalidateQueries({ queryKey: ['characters', 'getByCampaignId', id] })

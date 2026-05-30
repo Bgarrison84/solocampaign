@@ -178,7 +178,11 @@ export async function streamChat(
         const [toolCalls, text] = await Promise.all([result.toolCalls, result.text])
         const normalized = (toolCalls ?? []).map((tc) => ({
           toolName: tc.toolName as string,
-          args: tc.args,
+          // The AI SDK toolCalls union is TypedToolCall | DynamicToolCall. Static
+          // (ALL_TOOLS) calls expose arguments under `.args`; the DynamicToolCall
+          // branch (never produced here — we register no dynamicTool) lacks `.args`,
+          // so narrow with an `in` check to keep the union type-safe without a cast.
+          args: 'args' in tc ? tc.args : (tc as { input?: unknown }).input,
         }))
         await options.onToolCallsFinish(normalized, text ?? '')
       }

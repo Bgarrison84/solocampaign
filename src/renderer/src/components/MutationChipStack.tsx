@@ -25,9 +25,11 @@ import {
   AlertCircle,
   ArrowDown,
   ArrowUp,
+  Check,
   CheckCircle,
   Coins,
   RotateCcw,
+  ScrollText,
   Shield,
   Star,
   UserPlus,
@@ -35,7 +37,18 @@ import {
 } from 'lucide-react'
 
 /** Discriminated chip type as emitted by mutationPipeline.ts */
-type ChipType = 'hp' | 'xp' | 'condition' | 'slot' | 'currency' | 'combat' | 'rest'
+type ChipType =
+  | 'hp'
+  | 'xp'
+  | 'condition'
+  | 'slot'
+  | 'currency'
+  | 'combat'
+  | 'rest'
+  | 'quest'
+  | 'quest_complete'
+  | 'npc'
+  | 'inspiration'
 
 interface DisplayChip {
   id: string
@@ -88,6 +101,15 @@ function iconFor(type: ChipType, label: string): React.ReactNode {
     }
     case 'rest':
       return <Shield className={`${cls} text-muted-foreground`} />
+    // ─── Phase 6 chip types (UI-SPEC §S4) — strings match the Wave 2 pipeline emit ───
+    case 'quest':
+      return <ScrollText className={`${cls} text-green-400`} />
+    case 'quest_complete':
+      return <Check className={`${cls} text-muted-foreground`} />
+    case 'npc':
+      return <UserPlus className={`${cls} text-muted-foreground`} />
+    case 'inspiration':
+      return <Star className={`${cls} text-amber-400`} />
     default:
       return <Star className={`${cls} text-muted-foreground`} />
   }

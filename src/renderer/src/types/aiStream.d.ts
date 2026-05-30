@@ -13,6 +13,18 @@
 export {}
 
 declare global {
+  /**
+   * Payload delivered to onMutationsApplied callbacks when the main process
+   * applies AI mutation tool calls. Exposed as a named global so renderer
+   * handlers can annotate their `payload` parameter directly rather than
+   * unwrapping `Parameters<typeof window.aiStream.onMutationsApplied>[0]`
+   * (which resolves to the callback type, not the payload — see CampaignViewScreen).
+   */
+  type MutationsAppliedPayload = {
+    campaignId: string
+    chips: Array<{ id: string; label: string; type: string }>
+  }
+
   interface Window {
     /**
      * Narrow IPC surface for AI streaming.
@@ -59,12 +71,7 @@ declare global {
        * a chip with type 'rest' and label 'Short rest taken' means processRest was called
        * with type 'short' and the renderer should open ShortRestHitDiceModal.
        */
-      onMutationsApplied(
-        cb: (payload: {
-          campaignId: string
-          chips: Array<{ id: string; label: string; type: string }>
-        }) => void,
-      ): void
+      onMutationsApplied(cb: (payload: MutationsAppliedPayload) => void): void
 
       /**
        * Remove all listeners for ai:mutations-applied channel only.

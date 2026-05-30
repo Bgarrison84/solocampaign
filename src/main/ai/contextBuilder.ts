@@ -19,6 +19,10 @@ import { charactersRepo } from '../db/charactersRepo'
 import type { CharacterWithResources } from '../db/charactersRepo'
 import { messagesRepo } from '../db/messagesRepo'
 import { sessionsRepo } from '../db/sessionsRepo'
+import { questsRepo } from '../db/questsRepo'
+import { npcsRepo } from '../db/npcsRepo'
+import { factionsRepo } from '../db/factionsRepo'
+import { campaignsRepo } from '../db/campaignsRepo'
 import { readReferenceDocs } from './referenceDocLoader'
 import log from 'electron-log'
 
@@ -143,6 +147,93 @@ function formatCharacterSummary(char: CharacterWithResources): string {
   return lines.join('\n')
 }
 
+// ─── Phase 6: World-state summary block (D-18, RESEARCH § Pattern 4) ───────────
+
+/**
+ * Strip CR/LF from a single string so AI-generated text cannot inject newlines
+ * into the system prompt and forge new directives (T-06-03-01, RESEARCH threat
+ * table). Used on each location-path segment before rendering.
+ */
+function stripNewlines(value: string): string {
+  return value.replace(/[\r\n]+/g, ' ')
+}
+
+/**
+ * Build a compact world-state summary for the system prompt so the AI can
+ * reference the quest/NPC IDs it needs for updateQuestStatus/updateNpc and the
+ * player characterId for awardInspiration (Pitfall 6 / Pitfall 7, D-18).
+ *
+ * Returns '' when there is no world state to report (no quests, NPCs, factions,
+ * time, or location). The NPC list is capped at 20 entries to avoid token bloat
+ * (T-06-03-02). worldLocationPath JSON is parsed under a try/catch with a []
+ * fallback (T-06-03-03).
+ */
+function formatWorldStateSummary(campaignId: string): string {
+  const quests = questsRepo.list(campaignId)
+  const npcs = npcsRepo.list(campaignId)
+  const factions = factionsRepo.list(campaignId)
+  const worldState = campaignsRepo.getWorldState(campaignId)
+
+  const lines: string[] = ['Current world state:']
+
+  // Player character ID (Pitfall 7) — gives awardInspiration a reliable target.
+  const playerCharacterId = charactersRepo.getByCampaignId(campaignId)?.id
+  if (playerCharacterId) {
+    lines.push(`- Player character ID: ${playerCharacterId}`)
+  }
+
+  // Time
+  if (worldState?.worldTimeOfDay || worldState?.worldDayNumber) {
+    lines.push(
+      `- Time: ${worldState.worldTimeOfDay ?? '?'}, Day ${worldState.worldDayNumber ?? '?'}, ${worldState.worldSeason ?? '?'}`,
+    )
+  }
+
+  // Location (JSON array of segments — guarded parse, newline-stripped)
+  if (worldState?.worldLocationPath) {
+    let path: string[] = []
+    try {
+      const parsed = JSON.parse(worldState.worldLocationPath)
+      if (Array.isArray(parsed)) {
+        path = parsed.map((seg) => stripNewlines(String(seg)))
+      }
+    } catch {
+      path = []
+    }
+    if (path.length > 0) {
+      lines.push(`- Location: ${path.join(' > ')}`)
+    }
+  }
+
+  // Active quests (status === 'Active' only; non-active excluded)
+  const activeQuests = quests.filter((q) => q.status === 'Active')
+  if (activeQuests.length > 0) {
+    lines.push('- Active quests:')
+    for (const q of activeQuests) {
+      lines.push(`  * [ID: ${q.id}] ${q.name}`)
+    }
+  }
+
+  // Known NPCs (capped at 20 — T-06-03-02)
+  if (npcs.length > 0) {
+    lines.push('- Known NPCs:')
+    for (const n of npcs.slice(0, 20)) {
+      lines.push(`  * [ID: ${n.id}] ${n.name} (${n.relationship})`)
+    }
+  }
+
+  // Factions
+  if (factions.length > 0) {
+    lines.push('- Factions:')
+    for (const f of factions) {
+      lines.push(`  * ${f.name}: ${f.tier}`)
+    }
+  }
+
+  // Only emit the block if something beyond the header line was added.
+  return lines.length > 1 ? lines.join('\n') : ''
+}
+
 // ─── Phase 5: Tool-usage system prompt block (D-02, D-08) ─────────────────────
 
 /**
@@ -163,10 +254,18 @@ Game mechanics you control (use these tool calls during play):
 - Use \`updateCurrency\` when the party finds loot or spends money. Values are deltas (positive = gain).
 - Use \`processRest\` to grant the player's rest request if narratively appropriate.
 
+World & story tracking:
+- Use \`addQuest\` to add a quest to the log when one emerges. Use \`updateQuestStatus\` to mark it Completed or Failed by its id.
+- Use \`addNpc\` when the player meets someone new; use \`updateNpc\` to update a known NPC by id (relationship, description, or faction).
+- Use \`updateFaction\` to set the player's standing with a faction (Hostile/Unfriendly/Neutral/Friendly/Allied).
+- Use \`updateWorldTime\` as time passes (time of day, day number, season) and \`updateLocation\` as the party moves (a path from broad to specific).
+- Use \`awardInspiration\` with the player's character id for exceptional roleplay.
+
 If your provider does not support native tool calls, append a single fenced block at the VERY END of your message (after all narration), in this exact form:
 \`\`\`json
 {"mutations":[{"toolName":"updateHp","args":{"delta":-6,"source":"Goblin"}}]}
 \`\`\`
+Valid \`toolName\` values include all of the above: updateHp, applyCondition, removeCondition, showDiceRoll, addCombatant, endCombat, awardXp, deductSpellSlot, updateCurrency, processRest, addQuest, updateQuestStatus, addNpc, updateNpc, updateFaction, updateWorldTime, updateLocation, awardInspiration.
 Only include the block when there are mutations to apply, and never place it mid-message.
 `.trim()
 
@@ -274,14 +373,19 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
     }
   }
 
+  // --- Phase 6: world-state summary (D-18) — injected after the tool block ---
+  const worldStateSummary = formatWorldStateSummary(campaignId)
+
   // --- Assemble system prompt (D-17 order) ---
-  // preamble + strictness + personality + character, then the Phase 5 tool block,
-  // then referenceDocBlock, then l3Block, then l2Block, then sessionContextBlock
+  // preamble + strictness + personality + character, then the Phase 5/6 tool block,
+  // then the Phase 6 world-state summary, then referenceDocBlock, l3Block, l2Block,
+  // then sessionContextBlock
   const systemPrompt =
     [preamble, strictnessDirective, personality, characterSummaryBlock]
       .filter((part) => part.length > 0)
       .join('\n\n')
     + '\n\n' + toolDescriptionsBlock
+    + (worldStateSummary ? '\n\n' + worldStateSummary : '')
     + referenceDocBlock
     + l3Block
     + l2Block
@@ -315,4 +419,4 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
 export type CoreMessage = ModelMessage
 
 // Export for testing
-export { STRICTNESS_DIRECTIVES, formatCharacterSummary, abilityMod }
+export { STRICTNESS_DIRECTIVES, formatCharacterSummary, abilityMod, formatWorldStateSummary }

@@ -21,6 +21,11 @@ export const campaigns = sqliteTable('campaigns', {
   rollingSummary: text('rolling_summary'),
   // Phase 5 (PROG-04): permadeath mode — when true, death at 0 HP is final
   permadeathMode: integer('permadeath_mode', { mode: 'boolean' }).notNull().default(false),
+  // Phase 6 (STATE-04, WORLD-03): in-world state columns — all nullable, AI-managed
+  worldTimeOfDay: text('world_time_of_day'),
+  worldDayNumber: integer('world_day_number'),
+  worldSeason: text('world_season'),
+  worldLocationPath: text('world_location_path'),
 })
 
 export type Campaign = typeof campaigns.$inferSelect
@@ -253,3 +258,63 @@ export const characterSpells = sqliteTable('character_spells', {
 
 export type CharacterSpell = typeof characterSpells.$inferSelect
 export type NewCharacterSpell = typeof characterSpells.$inferInsert
+
+// ============ Phase 6: Quests, NPCs, Factions ============
+
+// STATE-01: quests — AI-managed quest log per campaign
+export const quests = sqliteTable('quests', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description').notNull().default(''),
+  status: text('status').notNull().default('Active'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+})
+
+export type Quest = typeof quests.$inferSelect
+export type NewQuest = typeof quests.$inferInsert
+
+// STATE-02: npcs — AI-tracked NPCs per campaign
+export const npcs = sqliteTable('npcs', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description').notNull().default(''),
+  relationship: text('relationship').notNull().default('Unknown'),
+  factionName: text('faction_name'),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+})
+
+export type Npc = typeof npcs.$inferSelect
+export type NewNpc = typeof npcs.$inferInsert
+
+// STATE-03: factions — AI-tracked factions with campaign-scoped unique name
+export const factions = sqliteTable(
+  'factions',
+  {
+    id: text('id').primaryKey(),
+    campaignId: text('campaign_id')
+      .notNull()
+      .references(() => campaigns.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    tier: text('tier').notNull().default('Neutral'),
+    createdAt: integer('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
+  },
+  (table) => ({
+    // Pitfall 5: campaign-scoped unique name prevents duplicate faction rows on repeated upserts
+    uniqueCampaignName: unique('factions_campaign_name_unique').on(table.campaignId, table.name),
+  }),
+)
+
+export type Faction = typeof factions.$inferSelect
+export type NewFaction = typeof factions.$inferInsert

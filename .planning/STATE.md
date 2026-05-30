@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-30T02:05:01.336Z"
+last_updated: "2026-05-30T00:00:00.000Z"
 progress:
   total_phases: 9
   completed_phases: 5
-  total_plans: 33
+  total_plans: 40
   completed_plans: 33
   percent: 56
 ---
@@ -19,17 +19,17 @@ progress:
 **Project:** SoloCampaign
 **Mode:** mvp
 **Core Value:** A player with no group and no DM can sit down, load SoloCampaign, and play a full D&D 5e campaign — from character creation to level 20+ — with a competent AI DM that remembers everything, follows the rules (or bends them on command), and keeps the world alive.
-**Current Focus:** Phase 05 — rules-engine-dice-combat
+**Current Focus:** Phase 06 — quests-npcs-world-state
 
 ---
 
 ## Current Position
 
-Phase: 05 (rules-engine-dice-combat) — EXECUTING
-Plan: 1 of 7
+Phase: 06 (quests-npcs-world-state) — PLANNED
+Plan: 0 of 7
 **Milestone:** v1
-**Phase:** Phase 5 — Rules Engine, Dice & Combat (next)
-**Status:** Executing Phase 05
+**Phase:** Phase 6 — Quests, NPCs & World State (ready to execute)
+**Status:** Phase 06 planned — 7 plans ready
 
 **Progress:** [████████░░░░░░░░░░░░] 44% (4/9 phases complete)
 
@@ -39,7 +39,7 @@ Phase 2: Character Domain & Live Sheet          [COMPLETE — 7/7 plans, 2026-05
 Phase 3: AI Engine & Provider Abstraction       [COMPLETE — 6/6 plans, 2026-05-26]
 Phase 4: Long-Campaign Memory & Session Flow    [COMPLETE — 6/6 plans, 2026-05-28]
 Phase 5: Rules Engine, Dice & Combat            [Human UAT pending — 7/7 plans, 2026-05-29]
-Phase 6: Quests, NPCs & World State             [Not started]
+Phase 6: Quests, NPCs & World State             [Planned — 7 plans, ready to execute]
 Phase 7: Content Depth & Advanced Character     [Not started]
 Phase 8: Polish, Export & Accessibility         [Not started]
 Phase 9: Distribution & Update Notifications    [Not started]
@@ -119,19 +119,19 @@ None.
 
 ### Last Session
 
-**Date:** 2026-05-28
-**Activity:** Phase 5 discuss — 6 areas captured: AI Tool-Call Schema, Combat Tracker, Dice Roller, Spell Casting, Level-Up Flow, Rest System. 40 decisions captured in 05-CONTEXT.md.
-**Outcome:** Phase 5 context ready for planning. Key architectural decision: fine-grained AI tool calls + JSON-tail fallback + campaign_events log locked in.
+**Date:** 2026-05-30
+**Activity:** Phase 6 planning — 7 plans created across 6 waves. Plan checker: 0 blockers, 3 doc-hygiene warnings (non-blocking). All 6 requirements covered (STATE-01..04, WORLD-03, PARTY-03), all 18 CONTEXT.md decisions mapped.
+**Outcome:** Phase 6 fully planned. Key architectural decision: extend Phase 5 ALL_TOOLS (not replace), world-state columns on campaigns table (not separate table), factions upsert with campaign-scoped unique constraint.
 
 ### Stopped At
 
-Phase 5 context gathered. Ready for planning.
+Phase 6 planned. 7 plans ready across 6 waves.
 
 ### Next Session
 
-**Suggested action:** `/gsd:execute-phase 5` — 7 plans across 6 waves, ready to execute.
+**Suggested action:** `/gsd:execute-phase 6` — 7 plans across 6 waves, ready to execute.
 
-**Phase 5 goal:** In-app dice roller, combat tracker, AI-managed initiative/enemy turns, conditions applied by player or AI. Context captured 2026-05-28.
+**Phase 6 goal:** AI auto-populates quest log, NPC tracker, faction reputations, world time, location breadcrumb, and awards Inspiration — all via 8 new structured AI tool calls extending the Phase 5 mutation pipeline.
 
 ---
 

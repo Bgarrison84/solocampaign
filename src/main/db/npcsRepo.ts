@@ -4,8 +4,9 @@
  * following the sessionsRepo pattern.
  */
 
-import { asc, eq } from 'drizzle-orm'
+import { and, asc, eq } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
+import log from 'electron-log/main'
 import { getDb } from './index'
 import { npcs } from './schema'
 import type { Npc } from './schema'
@@ -57,11 +58,12 @@ export const npcsRepo = {
   },
 
   /**
-   * Partially update an NPC. Only the provided fields are written; absent
-   * fields are left untouched. A no-op when no fields are provided.
+   * Partially update an NPC. campaignId is required to prevent cross-campaign writes.
+   * Only the provided fields are written; absent fields are left untouched.
    */
   patch(
     npcId: string,
+    campaignId: string,
     fields: { description?: string; relationship?: string; factionName?: string | null },
   ): void {
     const db = getDb()
@@ -70,6 +72,13 @@ export const npcsRepo = {
     if (fields.relationship !== undefined) set.relationship = fields.relationship
     if (fields.factionName !== undefined) set.factionName = fields.factionName
     if (Object.keys(set).length === 0) return
-    db.update(npcs).set(set).where(eq(npcs.id, npcId)).run()
+    const result = db
+      .update(npcs)
+      .set(set)
+      .where(and(eq(npcs.id, npcId), eq(npcs.campaignId, campaignId)))
+      .run()
+    if (result.changes === 0) {
+      log.warn('[npcsRepo] patch: no NPC matched id/campaignId', npcId, campaignId)
+    }
   },
 }

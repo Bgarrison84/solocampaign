@@ -248,50 +248,28 @@ export function CampaignViewScreen() {
    * Long rest needs no modal — recovery is auto-applied by 05-02 (applyRest).
    */
   useEffect(() => {
-    const shortRestHandler = (payload: MutationsAppliedPayload) => {
+    const handler = (payload: MutationsAppliedPayload) => {
       if (!id || payload.campaignId !== id) return
+      // short-rest detection
       const hasShortRest = payload.chips.some(
         (c) => c.type === 'rest' && c.label === 'Short rest taken',
       )
-      if (hasShortRest) {
-        setShowShortRest(true)
-      }
-    }
-    window.aiStream.onMutationsApplied(shortRestHandler)
-    // WR-02: remove listener on cleanup so it does not accumulate across id changes.
-    return () => {
-      window.aiStream.removeOnMutationsApplied()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
-
-  /**
-   * ai:mutations-applied cache invalidation (05-07).
-   *
-   * When the AI applies mutations, the combat tracker, character sheet, and message list
-   * need to refetch so all prior-wave UIs reflect the new state without manual refresh.
-   * MutationChipStack (Task 1) owns chip display — this effect owns cache invalidation.
-   * Both listen to the same event, which is fine (ipcRenderer.on appends listeners).
-   */
-  useEffect(() => {
-    const cacheInvalidationHandler = (payload: MutationsAppliedPayload) => {
-      if (!id || payload.campaignId !== id) return
+      if (hasShortRest) setShowShortRest(true)
+      // cache invalidation
       queryClient.invalidateQueries({ queryKey: ['combat', 'listActive', id] })
       queryClient.invalidateQueries({ queryKey: ['characters', 'getByCampaignId', id] })
       queryClient.invalidateQueries({ queryKey: ['ai', 'getMessages', id] })
-      // Phase 6 (06-06) — refresh quests/NPCs/factions tabs + WorldStateBar after AI mutations (Pitfall 3).
       queryClient.invalidateQueries({ queryKey: ['quests', 'list', id] })
       queryClient.invalidateQueries({ queryKey: ['npcs', 'list', id] })
       queryClient.invalidateQueries({ queryKey: ['factions', 'list', id] })
-      queryClient.invalidateQueries({ queryKey: ['campaigns', 'get', id] }) // world-state columns
+      queryClient.invalidateQueries({ queryKey: ['campaigns', 'get', id] })
     }
-    window.aiStream.onMutationsApplied(cacheInvalidationHandler)
-    // WR-02: remove listener on cleanup so it does not accumulate across id changes.
+    window.aiStream.onMutationsApplied(handler)
     return () => {
       window.aiStream.removeOnMutationsApplied()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
+  }, [id, queryClient])
 
   // D-04: When isSessionActive transitions to true and no messages exist for this campaign yet,
   // auto-send a trigger prompt so the AI narrates the session opening without the player typing.

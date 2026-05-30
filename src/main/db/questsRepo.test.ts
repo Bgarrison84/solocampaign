@@ -89,7 +89,7 @@ describe('questsRepo', () => {
     const { questsRepo, campaign } = await getRepo()
 
     const quest = questsRepo.create({ campaignId: campaign.id, name: 'Slay the dragon' })
-    questsRepo.updateStatus(quest.id, 'Completed')
+    questsRepo.updateStatus(quest.id, campaign.id, 'Completed')
 
     const list = questsRepo.list(campaign.id)
     expect(list).toHaveLength(1)

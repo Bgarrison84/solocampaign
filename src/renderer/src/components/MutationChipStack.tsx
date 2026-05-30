@@ -59,6 +59,11 @@ interface DisplayChip {
 const MAX_CHIPS = 4
 const CHIP_DURATION_MS = 4000
 
+const VALID_CHIP_TYPES = new Set<ChipType>([
+  'hp', 'xp', 'condition', 'slot', 'currency', 'combat', 'rest',
+  'quest', 'quest_complete', 'npc', 'inspiration',
+])
+
 /**
  * Derive icon and color from chip type + label.
  * The label carries the human-readable delta (e.g. "-6 HP", "+150 XP", "+ Poisoned", "Spell slot used").
@@ -119,11 +124,14 @@ export function MutationChipStack() {
   const [chips, setChips] = useState<DisplayChip[]>([])
 
   useEffect(() => {
+    let active = true
     const handler = (payload: {
       campaignId: string
       chips: Array<{ id: string; label: string; type: string }>
     }) => {
-      const incoming = payload.chips as DisplayChip[]
+      if (!active) return
+      const incoming: DisplayChip[] = payload.chips
+        .filter((c): c is DisplayChip => VALID_CHIP_TYPES.has(c.type as ChipType))
 
       setChips((prev) => {
         // Push all incoming chips; keep only the most recent MAX_CHIPS (FIFO drop oldest)
@@ -142,11 +150,10 @@ export function MutationChipStack() {
     window.aiStream.onMutationsApplied(handler)
 
     return () => {
-      // WR-01: remove the ai:mutations-applied listener so it does not stack on remount.
-      // removeOnMutationsApplied removes all listeners for this channel — safe because
-      // useAiStream re-registers its own cleanup on its next mount.
-      window.aiStream.removeOnMutationsApplied()
+      active = false
       setChips([])
+      // Do NOT call removeOnMutationsApplied() — it removes all channel listeners,
+      // including those registered by CampaignViewScreen.
     }
   }, [])
 

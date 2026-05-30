@@ -423,7 +423,7 @@ function applyOneTool(
         log.warn('[mutationPipeline] invalid updateQuestStatus args')
         return
       }
-      questsRepo.updateStatus(r.data.questId, r.data.status)
+      questsRepo.updateStatus(r.data.questId, campaignId, r.data.status)
       // D-05/D-16: only 'Completed' chips. 'Failed' and 'Active' are silent.
       if (r.data.status === 'Completed') {
         acc.chips.push({ id: chipId(), label: 'Quest complete!', type: 'quest_complete' })
@@ -460,7 +460,7 @@ function applyOneTool(
         return
       }
       // D-10/D-16: NPC updates are silent (no chip).
-      npcsRepo.patch(r.data.npcId, {
+      npcsRepo.patch(r.data.npcId, campaignId, {
         description: r.data.description,
         relationship: r.data.relationship,
         factionName: r.data.factionName,

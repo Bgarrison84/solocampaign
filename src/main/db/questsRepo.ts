@@ -4,8 +4,9 @@
  * following the sessionsRepo pattern.
  */
 
-import { asc, eq } from 'drizzle-orm'
+import { and, asc, eq } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
+import log from 'electron-log/main'
 import { getDb } from './index'
 import { quests } from './schema'
 import type { Quest } from './schema'
@@ -49,10 +50,17 @@ export const questsRepo = {
   },
 
   /**
-   * Update a quest's status (e.g. 'Active' -> 'Completed').
+   * Update a quest's status. campaignId is required to prevent cross-campaign writes.
    */
-  updateStatus(questId: string, status: string): void {
+  updateStatus(questId: string, campaignId: string, status: 'Active' | 'Completed' | 'Failed'): void {
     const db = getDb()
-    db.update(quests).set({ status }).where(eq(quests.id, questId)).run()
+    const result = db
+      .update(quests)
+      .set({ status })
+      .where(and(eq(quests.id, questId), eq(quests.campaignId, campaignId)))
+      .run()
+    if (result.changes === 0) {
+      log.warn('[questsRepo] updateStatus: no quest matched id/campaignId', questId, campaignId)
+    }
   },
 }

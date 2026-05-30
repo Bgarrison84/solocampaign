@@ -103,7 +103,7 @@ describe('npcsRepo', () => {
       relationship: 'Neutral',
     })
 
-    npcsRepo.patch(npc.id, { relationship: 'Hostile' })
+    npcsRepo.patch(npc.id, campaign.id, { relationship: 'Hostile' })
 
     const list = npcsRepo.list(campaign.id)
     expect(list).toHaveLength(1)
@@ -121,7 +121,7 @@ describe('npcsRepo', () => {
       description: 'Shopkeeper',
     })
 
-    npcsRepo.patch(npc.id, {})
+    npcsRepo.patch(npc.id, campaign.id, {})
 
     const list = npcsRepo.list(campaign.id)
     expect(list[0].description).toBe('Shopkeeper')

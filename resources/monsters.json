@@ -1,0 +1,318 @@
+[
+  {
+    "id": "goblin",
+    "name": "Goblin",
+    "type": "Humanoid (goblinoid)",
+    "cr": "1/4",
+    "ac": 15,
+    "hp": 7,
+    "speed": "30 ft.",
+    "abilities": { "STR": 8, "DEX": 14, "CON": 10, "INT": 10, "WIS": 8, "CHA": 8 },
+    "actions": [
+      { "name": "Scimitar", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6+2) slashing damage." },
+      { "name": "Shortbow", "description": "Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target. Hit: 5 (1d6+2) piercing damage." }
+    ]
+  },
+  {
+    "id": "orc",
+    "name": "Orc",
+    "type": "Humanoid (orc)",
+    "cr": "1/2",
+    "ac": 13,
+    "hp": 15,
+    "speed": "30 ft.",
+    "abilities": { "STR": 16, "DEX": 12, "CON": 16, "INT": 7, "WIS": 11, "CHA": 10 },
+    "actions": [
+      { "name": "Greataxe", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 9 (1d12+3) slashing damage." },
+      { "name": "Javelin", "description": "Melee or Ranged Weapon Attack: +5 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 6 (1d6+3) piercing damage." }
+    ]
+  },
+  {
+    "id": "kobold",
+    "name": "Kobold",
+    "type": "Humanoid (kobold)",
+    "cr": "1/8",
+    "ac": 12,
+    "hp": 5,
+    "speed": "30 ft.",
+    "abilities": { "STR": 7, "DEX": 15, "CON": 9, "INT": 8, "WIS": 7, "CHA": 8 },
+    "actions": [
+      { "name": "Dagger", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 4 (1d4+2) piercing damage." },
+      { "name": "Sling", "description": "Ranged Weapon Attack: +4 to hit, range 30/120 ft., one target. Hit: 4 (1d4+2) bludgeoning damage." }
+    ]
+  },
+  {
+    "id": "skeleton",
+    "name": "Skeleton",
+    "type": "Undead",
+    "cr": "1/4",
+    "ac": 13,
+    "hp": 13,
+    "speed": "30 ft.",
+    "abilities": { "STR": 10, "DEX": 14, "CON": 15, "INT": 6, "WIS": 8, "CHA": 5 },
+    "actions": [
+      { "name": "Shortsword", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 5 (1d6+2) piercing damage." },
+      { "name": "Shortbow", "description": "Ranged Weapon Attack: +4 to hit, range 80/320 ft., one target. Hit: 5 (1d6+2) piercing damage." }
+    ]
+  },
+  {
+    "id": "zombie",
+    "name": "Zombie",
+    "type": "Undead",
+    "cr": "1/4",
+    "ac": 8,
+    "hp": 22,
+    "speed": "20 ft.",
+    "abilities": { "STR": 13, "DEX": 6, "CON": 16, "INT": 3, "WIS": 6, "CHA": 5 },
+    "actions": [
+      { "name": "Slam", "description": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 4 (1d6+1) bludgeoning damage." }
+    ]
+  },
+  {
+    "id": "wolf",
+    "name": "Wolf",
+    "type": "Beast",
+    "cr": "1/4",
+    "ac": 13,
+    "hp": 11,
+    "speed": "40 ft.",
+    "abilities": { "STR": 12, "DEX": 15, "CON": 12, "INT": 3, "WIS": 12, "CHA": 6 },
+    "actions": [
+      { "name": "Bite", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (2d4+2) piercing damage. If the target is a creature, it must succeed on a DC 11 Strength saving throw or be knocked prone." }
+    ]
+  },
+  {
+    "id": "giant-spider",
+    "name": "Giant Spider",
+    "type": "Beast",
+    "cr": "1",
+    "ac": 14,
+    "hp": 26,
+    "speed": "30 ft., climb 30 ft.",
+    "abilities": { "STR": 14, "DEX": 16, "CON": 12, "INT": 2, "WIS": 11, "CHA": 4 },
+    "actions": [
+      { "name": "Bite", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one creature. Hit: 7 (1d8+3) piercing damage, and the target must make a DC 11 Constitution saving throw or take 9 (2d8) poison damage, being paralyzed for 1 hour on a failed save." },
+      { "name": "Web", "description": "Ranged Weapon Attack: +5 to hit, range 30/60 ft., one Large or smaller creature. Hit: The target is restrained by webbing (DC 12 Strength check to escape)." }
+    ]
+  },
+  {
+    "id": "ogre",
+    "name": "Ogre",
+    "type": "Giant",
+    "cr": "2",
+    "ac": 11,
+    "hp": 59,
+    "speed": "40 ft.",
+    "abilities": { "STR": 19, "DEX": 8, "CON": 16, "INT": 5, "WIS": 7, "CHA": 7 },
+    "actions": [
+      { "name": "Greatclub", "description": "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 13 (2d8+4) bludgeoning damage." },
+      { "name": "Javelin", "description": "Melee or Ranged Weapon Attack: +6 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 11 (2d6+4) piercing damage." }
+    ]
+  },
+  {
+    "id": "troll",
+    "name": "Troll",
+    "type": "Giant",
+    "cr": "5",
+    "ac": 15,
+    "hp": 84,
+    "speed": "30 ft.",
+    "abilities": { "STR": 18, "DEX": 13, "CON": 20, "INT": 7, "WIS": 9, "CHA": 7 },
+    "actions": [
+      { "name": "Multiattack", "description": "The troll makes three attacks: one with its bite and two with its claws." },
+      { "name": "Bite", "description": "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 7 (1d6+4) piercing damage." },
+      { "name": "Claw", "description": "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6+4) slashing damage." }
+    ]
+  },
+  {
+    "id": "werewolf",
+    "name": "Werewolf",
+    "type": "Humanoid (human, shapechanger)",
+    "cr": "3",
+    "ac": 12,
+    "hp": 58,
+    "speed": "30 ft. (40 ft. in wolf or hybrid form)",
+    "abilities": { "STR": 15, "DEX": 13, "CON": 14, "INT": 10, "WIS": 11, "CHA": 10 },
+    "actions": [
+      { "name": "Multiattack", "description": "In humanoid form, the werewolf makes two longsword attacks or two longbow attacks. In wolf or hybrid form, it makes two attacks: one with its bite and one with its claws or longsword." },
+      { "name": "Bite (Wolf or Hybrid Form Only)", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d8+2) piercing damage. If humanoid, DC 12 Con save or be cursed with lycanthropy." },
+      { "name": "Claws (Hybrid Form Only)", "description": "Melee Weapon Attack: +4 to hit, reach 5 ft., one creature. Hit: 7 (2d4+2) slashing damage." }
+    ]
+  },
+  {
+    "id": "vampire",
+    "name": "Vampire",
+    "type": "Undead (shapechanger)",
+    "cr": "13",
+    "ac": 16,
+    "hp": 144,
+    "speed": "30 ft.",
+    "abilities": { "STR": 18, "DEX": 18, "CON": 18, "INT": 17, "WIS": 15, "CHA": 18 },
+    "actions": [
+      { "name": "Multiattack", "description": "The vampire makes two attacks, only one of which can be a bite attack." },
+      { "name": "Unarmed Strike", "description": "Melee Weapon Attack: +9 to hit, reach 5 ft., one creature. Hit: 8 (1d8+4) bludgeoning damage. Instead of dealing damage, the vampire can grapple the target (escape DC 18)." },
+      { "name": "Bite", "description": "Melee Weapon Attack: +9 to hit, reach 5 ft., one willing creature, or grappled, incapacitated, or restrained creature. Hit: 7 (1d6+4) piercing damage plus 10 (3d6) necrotic damage. Target's HP maximum is reduced by necrotic damage until long rest." }
+    ]
+  },
+  {
+    "id": "young-dragon-red",
+    "name": "Young Red Dragon",
+    "type": "Dragon",
+    "cr": "10",
+    "ac": 18,
+    "hp": 178,
+    "speed": "40 ft., climb 40 ft., fly 80 ft.",
+    "abilities": { "STR": 23, "DEX": 10, "CON": 21, "INT": 14, "WIS": 11, "CHA": 19 },
+    "actions": [
+      { "name": "Multiattack", "description": "The dragon makes three attacks: one with its bite and two with its claws." },
+      { "name": "Bite", "description": "Melee Weapon Attack: +10 to hit, reach 10 ft., one target. Hit: 17 (2d10+6) piercing damage plus 3 (1d6) fire damage." },
+      { "name": "Claw", "description": "Melee Weapon Attack: +10 to hit, reach 5 ft., one target. Hit: 13 (2d6+6) slashing damage." },
+      { "name": "Fire Breath", "description": "Exhales fire in a 30-foot cone. Each creature must make a DC 17 Dex save, taking 56 (16d6) fire damage on a failed save, or half on success. Recharge 5–6." }
+    ]
+  },
+  {
+    "id": "adult-dragon-green",
+    "name": "Adult Green Dragon",
+    "type": "Dragon",
+    "cr": "15",
+    "ac": 19,
+    "hp": 207,
+    "speed": "40 ft., fly 80 ft., swim 40 ft.",
+    "abilities": { "STR": 23, "DEX": 12, "CON": 21, "INT": 18, "WIS": 15, "CHA": 17 },
+    "actions": [
+      { "name": "Multiattack", "description": "The dragon can use its Frightful Presence, then makes three attacks: one bite and two claws." },
+      { "name": "Bite", "description": "Melee Weapon Attack: +11 to hit, reach 10 ft., one target. Hit: 17 (2d10+6) piercing damage plus 7 (2d6) poison damage." },
+      { "name": "Poison Breath", "description": "Exhales poisonous gas in a 60-foot cone. Each creature must make a DC 18 Con save, taking 56 (16d6) poison damage on a fail or half on success. Recharge 5–6." }
+    ]
+  },
+  {
+    "id": "ancient-dragon-blue",
+    "name": "Ancient Blue Dragon",
+    "type": "Dragon",
+    "cr": "23",
+    "ac": 22,
+    "hp": 481,
+    "speed": "40 ft., burrow 40 ft., fly 80 ft.",
+    "abilities": { "STR": 29, "DEX": 10, "CON": 27, "INT": 18, "WIS": 17, "CHA": 21 },
+    "actions": [
+      { "name": "Multiattack", "description": "The dragon can use Frightful Presence, then makes three attacks: one bite and two claws." },
+      { "name": "Bite", "description": "Melee Weapon Attack: +16 to hit, reach 15 ft., one target. Hit: 20 (2d10+9) piercing damage plus 11 (2d10) lightning damage." },
+      { "name": "Lightning Breath", "description": "Exhales lightning in a 120-foot line that is 10 feet wide. Each creature must make a DC 23 Dex save, taking 88 (16d10) lightning damage on a fail or half on success. Recharge 5–6." }
+    ]
+  },
+  {
+    "id": "lich",
+    "name": "Lich",
+    "type": "Undead",
+    "cr": "21",
+    "ac": 17,
+    "hp": 135,
+    "speed": "30 ft.",
+    "abilities": { "STR": 11, "DEX": 16, "CON": 16, "INT": 20, "WIS": 14, "CHA": 16 },
+    "actions": [
+      { "name": "Paralyzing Touch", "description": "Melee Spell Attack: +12 to hit, reach 5 ft., one creature. Hit: 10 (3d6) cold damage. The target must succeed on a DC 18 Con save or be paralyzed for 1 minute." }
+    ]
+  },
+  {
+    "id": "mind-flayer",
+    "name": "Mind Flayer",
+    "type": "Aberration",
+    "cr": "7",
+    "ac": 15,
+    "hp": 71,
+    "speed": "30 ft.",
+    "abilities": { "STR": 11, "DEX": 12, "CON": 12, "INT": 19, "WIS": 17, "CHA": 17 },
+    "actions": [
+      { "name": "Tentacles", "description": "Melee Weapon Attack: +7 to hit, reach 5 ft., one creature. Hit: 15 (2d10+4) psychic damage. If the target is Medium or smaller, it is grappled (escape DC 15) and must succeed on a DC 15 Int save or be stunned until grapple ends." },
+      { "name": "Mind Blast", "description": "The mind flayer magically emits psychic energy in a 60-foot cone. Each creature must make a DC 15 Int save, taking 22 (4d8+4) psychic damage and becoming stunned for 1 minute on a failed save." }
+    ]
+  },
+  {
+    "id": "beholder",
+    "name": "Beholder",
+    "type": "Aberration",
+    "cr": "13",
+    "ac": 18,
+    "hp": 180,
+    "speed": "0 ft., fly 20 ft. (hover)",
+    "abilities": { "STR": 10, "DEX": 14, "CON": 18, "INT": 17, "WIS": 15, "CHA": 17 },
+    "actions": [
+      { "name": "Bite", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 14 (4d6) piercing damage." },
+      { "name": "Eye Rays", "description": "The beholder shoots three of its magical eye rays at random, chosen from its 10 possible rays (Charm, Paralyzing, Fear, Slowing, Enervating, Telekinetic, Sleep, Petrification, Disintegration, Death Ray). Each ray targets a randomly selected creature within 120 feet." }
+    ]
+  },
+  {
+    "id": "bandit",
+    "name": "Bandit",
+    "type": "Humanoid (any race)",
+    "cr": "1/8",
+    "ac": 12,
+    "hp": 11,
+    "speed": "30 ft.",
+    "abilities": { "STR": 11, "DEX": 12, "CON": 12, "INT": 10, "WIS": 10, "CHA": 10 },
+    "actions": [
+      { "name": "Scimitar", "description": "Melee Weapon Attack: +3 to hit, reach 5 ft., one target. Hit: 4 (1d6+1) slashing damage." },
+      { "name": "Light Crossbow", "description": "Ranged Weapon Attack: +3 to hit, range 80/320 ft., one target. Hit: 5 (1d8+1) piercing damage." }
+    ]
+  },
+  {
+    "id": "bandit-captain",
+    "name": "Bandit Captain",
+    "type": "Humanoid (any race)",
+    "cr": "2",
+    "ac": 15,
+    "hp": 65,
+    "speed": "30 ft.",
+    "abilities": { "STR": 15, "DEX": 16, "CON": 14, "INT": 14, "WIS": 11, "CHA": 14 },
+    "actions": [
+      { "name": "Multiattack", "description": "The captain makes three melee attacks: two with its scimitar and one with its dagger. Or the captain makes two ranged attacks with its daggers." },
+      { "name": "Scimitar", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 6 (1d6+3) slashing damage." },
+      { "name": "Dagger", "description": "Melee or Ranged Weapon Attack: +5 to hit, reach 5 ft. or range 20/60 ft., one target. Hit: 5 (1d4+3) piercing damage." }
+    ]
+  },
+  {
+    "id": "wyvern",
+    "name": "Wyvern",
+    "type": "Dragon",
+    "cr": "6",
+    "ac": 13,
+    "hp": 110,
+    "speed": "20 ft., fly 80 ft.",
+    "abilities": { "STR": 19, "DEX": 10, "CON": 16, "INT": 5, "WIS": 12, "CHA": 6 },
+    "actions": [
+      { "name": "Multiattack", "description": "The wyvern makes two attacks: one with its bite and one with its stinger. While flying, it can use its claws in place of one other attack." },
+      { "name": "Bite", "description": "Melee Weapon Attack: +7 to hit, reach 10 ft., one creature. Hit: 11 (2d6+4) piercing damage." },
+      { "name": "Stinger", "description": "Melee Weapon Attack: +7 to hit, reach 10 ft., one creature. Hit: 11 (2d6+4) piercing damage. The target must make a DC 15 Con save, taking 24 (7d6) poison damage on a failed save, or half on a success." }
+    ]
+  },
+  {
+    "id": "owlbear",
+    "name": "Owlbear",
+    "type": "Monstrosity",
+    "cr": "3",
+    "ac": 13,
+    "hp": 59,
+    "speed": "40 ft.",
+    "abilities": { "STR": 20, "DEX": 12, "CON": 17, "INT": 3, "WIS": 12, "CHA": 7 },
+    "actions": [
+      { "name": "Multiattack", "description": "The owlbear makes two attacks: one with its beak and one with its claws." },
+      { "name": "Beak", "description": "Melee Weapon Attack: +7 to hit, reach 5 ft., one creature. Hit: 10 (1d10+5) piercing damage." },
+      { "name": "Claws", "description": "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 14 (2d8+5) slashing damage." }
+    ]
+  },
+  {
+    "id": "manticore",
+    "name": "Manticore",
+    "type": "Monstrosity",
+    "cr": "3",
+    "ac": 14,
+    "hp": 68,
+    "speed": "30 ft., fly 50 ft.",
+    "abilities": { "STR": 17, "DEX": 16, "CON": 17, "INT": 7, "WIS": 12, "CHA": 8 },
+    "actions": [
+      { "name": "Multiattack", "description": "The manticore makes three attacks: one with its bite and two with its claws or three with its tail spikes." },
+      { "name": "Bite", "description": "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 6 (1d6+3) piercing damage." },
+      { "name": "Tail Spike", "description": "Ranged Weapon Attack: +5 to hit, range 100/200 ft., one target. Hit: 7 (1d8+3) piercing damage. The manticore has 24 tail spikes. Used spikes regrow when the manticore finishes a long rest." }
+    ]
+  }
+]

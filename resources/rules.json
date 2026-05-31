@@ -1,0 +1,176 @@
+[
+  {
+    "id": "combat-initiative",
+    "title": "Initiative",
+    "category": "Combat",
+    "content": "At the start of a battle, every participant makes a Dexterity check to determine the order of combatants' turns. The DM makes one roll for an entire group of identical creatures. Each combatant adds their Dexterity modifier to the roll. The DM ranks combatants from highest to lowest, breaking ties by having tied combatants roll again. The result is the initiative order, which persists for the entire battle."
+  },
+  {
+    "id": "combat-surprise",
+    "title": "Surprise",
+    "category": "Combat",
+    "content": "A band of adventurers sneaks up on a bandit camp, or a monster lurks in the shadows. When combat begins, anyone who is unaware is surprised. If you're surprised, you can't move or take an action on your first turn of the combat, and you can't take a reaction until that turn ends. A member of a group can be surprised even if the others aren't."
+  },
+  {
+    "id": "combat-your-turn",
+    "title": "Your Turn",
+    "category": "Combat",
+    "content": "On your turn, you can **move** a distance up to your speed and **take one action**. You can also interact with one object or environmental feature for free. You can also take one **bonus action** if a class feature, spell, or other ability grants one. You can forgo moving, taking an action, or doing anything at all on your turn."
+  },
+  {
+    "id": "combat-actions",
+    "title": "Actions in Combat",
+    "category": "Combat",
+    "content": "When you take your action, you can take one of these options: **Attack** (melee or ranged weapon attack), **Cast a Spell**, **Dash** (double movement this turn), **Disengage** (your movement doesn't provoke opportunity attacks), **Dodge** (attacks against you have disadvantage and you have advantage on Dex saves), **Help** (aid an ally's attack or skill check), **Hide**, **Ready** (prepare an action for a trigger), **Search**, or **Use an Object**."
+  },
+  {
+    "id": "combat-attack-rolls",
+    "title": "Attack Rolls",
+    "category": "Combat",
+    "content": "When you make an attack, your attack roll determines whether the attack hits or misses. Roll a d20, add the relevant ability modifier (Strength for melee, Dexterity for ranged), and add your proficiency bonus if proficient with the weapon. If the total equals or exceeds the target's Armor Class, the attack hits. A roll of 1 always misses; a roll of 20 always hits and is a critical hit (roll all damage dice twice)."
+  },
+  {
+    "id": "combat-damage",
+    "title": "Damage Rolls",
+    "category": "Combat",
+    "content": "Each weapon, spell, and harmful monster ability specifies the damage it deals. You roll the damage die or dice, add any modifiers, and apply the damage to your target's hit points. When attacking with a melee weapon using Strength, add your Strength modifier to damage. For ranged weapons, add your Dexterity modifier. A critical hit doubles the number of damage dice rolled."
+  },
+  {
+    "id": "combat-opportunity-attacks",
+    "title": "Opportunity Attacks",
+    "category": "Combat",
+    "content": "In a fight, everyone is constantly watching for enemies to drop their guard. You can make an opportunity attack when a hostile creature that you can see moves out of your reach. To make the opportunity attack, you use your reaction to make one melee attack against the provoking creature. The attack interrupts the provoking creature's movement, occurring right before the creature leaves your reach."
+  },
+  {
+    "id": "combat-grappling",
+    "title": "Grappling",
+    "category": "Combat",
+    "content": "When you want to grab a creature or wrestle with it, you can use the Attack action to make a special melee attack — a grapple. The target must be no more than one size larger than you and within your reach. You make a Strength (Athletics) check contested by the target's Strength (Athletics) or Dexterity (Acrobatics) check. On a success, the target is grappled. A grappled creature's speed becomes 0. The condition ends if you are incapacitated or if the target is moved beyond your reach."
+  },
+  {
+    "id": "combat-conditions",
+    "title": "Conditions Overview",
+    "category": "Combat",
+    "content": "Conditions alter a creature's capabilities. A condition lasts either until it is countered, or for a duration specified by the effect that imposed the condition. Key conditions include: Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, and Unconscious."
+  },
+  {
+    "id": "combat-cover",
+    "title": "Cover",
+    "category": "Combat",
+    "content": "Walls, trees, creatures, and other obstacles can provide cover during combat, making a target more difficult to harm. A target can benefit from cover only when an attack or other effect originates on the opposite side of the cover. Half cover: +2 bonus to AC and Dex saves. Three-quarters cover: +5 bonus to AC and Dex saves. Total cover: can't be targeted directly."
+  },
+  {
+    "id": "adventuring-movement",
+    "title": "Movement and Position",
+    "category": "Adventuring",
+    "content": "In combat, characters and monsters are in constant motion, often using movement and position to gain the upper hand. On your turn, you can move a distance up to your speed. You can use as much or as little of your speed as you like. Difficult terrain costs double movement. You can break up your movement around your action. Climbing, swimming, and crawling each cost extra movement unless special abilities modify this."
+  },
+  {
+    "id": "adventuring-resting",
+    "title": "Resting",
+    "category": "Adventuring",
+    "content": "Adventurers can take short rests during the day and need long rests to restore their vitality. **Short rest**: 1 hour of downtime. You can spend Hit Dice to recover hit points (roll the die + Con modifier per die). **Long rest**: 8 hours of rest. You regain all hit points, recover half your maximum number of Hit Dice, and regain all spell slots, class features, and other resources limited by long rests."
+  },
+  {
+    "id": "adventuring-light",
+    "title": "Light and Visibility",
+    "category": "Adventuring",
+    "content": "The presence or absence of light in an environment creates three categories of illumination. **Bright light** lets most creatures see normally. **Dim light** creates a lightly obscured area; creatures have disadvantage on Perception checks relying on sight. **Darkness** creates a heavily obscured area; creatures are effectively blinded. Darkvision lets a creature see in dim light as bright light and in darkness as dim light."
+  },
+  {
+    "id": "adventuring-falling",
+    "title": "Falling",
+    "category": "Adventuring",
+    "content": "A fall from a great height is one of the most common hazards facing an adventurer. At the end of a fall, a creature takes 1d6 bludgeoning damage for every 10 feet it fell, to a maximum of 20d6. The creature lands prone unless it avoids taking damage from the fall."
+  },
+  {
+    "id": "adventuring-suffocating",
+    "title": "Suffocating",
+    "category": "Adventuring",
+    "content": "A creature can hold its breath for a number of minutes equal to 1 + its Constitution modifier (minimum 30 seconds). When out of breath, the creature can survive for a number of rounds equal to its Constitution modifier (minimum 1). At the start of its next turn, it drops to 0 hit points and is dying, and it can't regain hit points or be stabilized until it can breathe again."
+  },
+  {
+    "id": "adventuring-food-water",
+    "title": "Food and Water",
+    "category": "Adventuring",
+    "content": "A character needs 1 pound of food per day and 1 gallon of water per day (2 gallons in hot weather or while doing heavy work). A character who goes without food for more than 3 + Constitution modifier days (minimum 1) suffers 1 level of exhaustion each day without food. A character who goes without water for 1 day, or more in hot weather, also suffers exhaustion."
+  },
+  {
+    "id": "adventuring-encumbrance",
+    "title": "Carrying Capacity",
+    "category": "Adventuring",
+    "content": "Your carrying capacity is your Strength score multiplied by 15. This is the weight in pounds that you can carry. You are encumbered if you carry more than 5 × Strength score pounds (speed reduced by 10). You are heavily encumbered at more than 10 × Strength score pounds (speed reduced by 20 and you have disadvantage on Strength, Dexterity, and Constitution checks)."
+  },
+  {
+    "id": "spellcasting-basics",
+    "title": "Spellcasting Basics",
+    "category": "Spellcasting",
+    "content": "Every spell has a level from 0 to 9. Cantrips (0-level spells) can be cast at will. To cast a spell of 1st level or higher, you must expend a spell slot of the spell's level or higher. Spellcasters regain spell slots after a long rest (warlocks recover on a short rest). A spell cast with a higher-level slot may have enhanced effects. Spellcasting ability varies by class: Intelligence for wizards and arcane tricksters; Wisdom for clerics, druids, and rangers; Charisma for bards, paladins, sorcerers, and warlocks."
+  },
+  {
+    "id": "spellcasting-concentration",
+    "title": "Concentration",
+    "category": "Spellcasting",
+    "content": "Some spells require you to maintain concentration to keep their magic active. If you lose concentration, such a spell ends. You lose concentration when: you cast another spell that requires concentration; you take damage and fail a Constitution saving throw (DC = 10 or half the damage taken, whichever is higher); you are incapacitated or killed; the DM decides something disrupts your concentration."
+  },
+  {
+    "id": "spellcasting-components",
+    "title": "Spell Components",
+    "category": "Spellcasting",
+    "content": "Most spells require one or more components: **V** (Verbal) — a specific combination of words; **S** (Somatic) — specific hand movements; **M** (Material) — specific materials listed in the spell, consumed or not. You can use a spellcasting focus in place of non-consumed material components. If a spell's material component has a listed cost, it must be on hand and cannot be replaced by a focus."
+  },
+  {
+    "id": "spellcasting-ritual",
+    "title": "Ritual Casting",
+    "category": "Spellcasting",
+    "content": "Certain spells have a special tag: ritual. Such a spell can be cast following the normal rules for spellcasting, or the spell can be cast as a ritual. The ritual version of a spell takes 10 minutes longer to cast than normal. It also doesn't expend a spell slot. To cast a spell as a ritual, a spellcaster must have a feature that grants the ability to do so."
+  },
+  {
+    "id": "conditions-blinded",
+    "title": "Blinded Condition",
+    "category": "Conditions",
+    "content": "A blinded creature can't see and automatically fails any ability check that requires sight. Attack rolls against the creature have advantage, and the creature's attack rolls have disadvantage."
+  },
+  {
+    "id": "conditions-charmed",
+    "title": "Charmed Condition",
+    "category": "Conditions",
+    "content": "A charmed creature can't attack the charmer or target the charmer with harmful abilities or magical effects. The charmer has advantage on any ability check to interact socially with the creature."
+  },
+  {
+    "id": "conditions-frightened",
+    "title": "Frightened Condition",
+    "category": "Conditions",
+    "content": "A frightened creature has disadvantage on ability checks and attack rolls while the source of its fear is within line of sight. The creature can't willingly move closer to the source of its fear."
+  },
+  {
+    "id": "conditions-poisoned",
+    "title": "Poisoned Condition",
+    "category": "Conditions",
+    "content": "A poisoned creature has disadvantage on attack rolls and ability checks."
+  },
+  {
+    "id": "conditions-prone",
+    "title": "Prone Condition",
+    "category": "Conditions",
+    "content": "A prone creature's only movement option is to crawl (costs double movement) or stand up (costs half speed). The creature has disadvantage on attack rolls. Attack rolls against the creature have advantage if the attacker is within 5 feet, or disadvantage if the attacker is farther away."
+  },
+  {
+    "id": "conditions-stunned",
+    "title": "Stunned Condition",
+    "category": "Conditions",
+    "content": "A stunned creature is incapacitated, can't move, and can speak only falteringly. The creature automatically fails Strength and Dexterity saving throws. Attack rolls against the creature have advantage."
+  },
+  {
+    "id": "conditions-unconscious",
+    "title": "Unconscious Condition",
+    "category": "Conditions",
+    "content": "An unconscious creature is incapacitated, can't move or speak, and is unaware of its surroundings. The creature drops whatever it's holding and falls prone. It automatically fails Strength and Dexterity saving throws. Attack rolls against the creature have advantage. Any attack that hits the creature is a critical hit if the attacker is within 5 feet of the creature."
+  },
+  {
+    "id": "death-dying",
+    "title": "Dropping to 0 Hit Points",
+    "category": "Combat",
+    "content": "When you drop to 0 hit points, you either die outright (massive damage) or fall unconscious. At the start of each of your turns, make a death saving throw (d20 DC 10). Three successes stabilize you; three failures kill you. Rolling a 1 counts as two failures; rolling a 20 lets you regain 1 hit point. A stabilized creature is unconscious but no longer makes death saves. Any damage taken while at 0 HP counts as a failure."
+  }
+]

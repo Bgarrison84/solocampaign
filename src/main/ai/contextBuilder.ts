@@ -23,7 +23,7 @@ import { questsRepo } from '../db/questsRepo'
 import { npcsRepo } from '../db/npcsRepo'
 import { factionsRepo } from '../db/factionsRepo'
 import { campaignsRepo } from '../db/campaignsRepo'
-import { readReferenceDocs } from './referenceDocLoader'
+import { readReferenceDocsForCampaign } from './referenceDocLoader'
 import log from 'electron-log'
 
 // ─── Strictness Directives (AI-SPEC §4b) ──────────────────────────────────────
@@ -423,11 +423,13 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
     ? '\n' + formatCharacterSummary(character, encumbranceEnabled)
     : ''
 
-  // --- Reference documents ---
+  // --- Reference documents (Phase 3 bundled + Phase 7 imported + homebrew) ---
+  // readReferenceDocsForCampaign handles mixed identifiers (relative paths + UUIDs)
+  // and appends homebrew_content automatically (D-37 / RULES-03 / RULES-04).
   const referenceDocs = config.referenceDocs ?? []
   let referenceDocBlock = ''
-  if (referenceDocs.length > 0) {
-    const docs = readReferenceDocs(referenceDocs)
+  {
+    const docs = readReferenceDocsForCampaign(campaignId, referenceDocs)
     if (docs.length > 0) {
       referenceDocBlock =
         '\n' +

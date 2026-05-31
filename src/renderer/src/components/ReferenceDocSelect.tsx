@@ -1,6 +1,6 @@
 import React, { useId } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, User } from 'lucide-react'
 import { trpc } from '../lib/trpc'
 import { Checkbox } from './ui/checkbox'
 import { Button } from './ui/button'
@@ -15,6 +15,16 @@ import {
 interface ReferenceDocSelectProps {
   selected: string[]
   onChange: (next: string[]) => void
+  /** Optional: when provided, merges campaign-imported docs into the list */
+  campaignId?: string
+}
+
+/** Combined doc entry with source discriminator */
+interface DocEntry {
+  id: string           // selection key: relative path for bundled, UUID for imported
+  displayTitle: string
+  isLarge: boolean
+  source: 'bundled' | 'imported'
 }
 
 /**
@@ -45,32 +55,62 @@ function cleanTitle(raw: string): string {
   return title || raw
 }
 
-export function ReferenceDocSelect({ selected, onChange }: ReferenceDocSelectProps) {
+export function ReferenceDocSelect({ selected, onChange, campaignId }: ReferenceDocSelectProps) {
   const instanceId = useId()
 
+  // Bundled reference docs query
   const docsQuery = useQuery({
     queryKey: ['ai', 'listReferenceDocs'],
     queryFn: () => trpc.ai.listReferenceDocs.query(),
     staleTime: 5 * 60 * 1000, // 5 min — reference docs don't change during a session
   })
 
-  const docs = docsQuery.data ?? []
-  const allSelected = docs.length > 0 && docs.every((d) => selected.includes(d.relativePath))
+  // Campaign-imported docs query (only when campaignId is provided)
+  const importedDocsQuery = useQuery({
+    queryKey: ['campaignDocs', 'list', campaignId],
+    queryFn: () => trpc.campaignDocs.list.query({ campaignId: campaignId! }),
+    enabled: !!campaignId,
+    staleTime: 30 * 1000, // 30 sec — imported docs may be added during session
+  })
+
+  // Merge bundled + imported into a unified list
+  const bundledDocs = docsQuery.data ?? []
+  const importedDocs = importedDocsQuery.data ?? []
+
+  const mergedDocs: DocEntry[] = [
+    ...bundledDocs.map((d) => ({
+      id: d.relativePath,
+      displayTitle: cleanTitle(d.title || d.relativePath),
+      isLarge: d.isLarge,
+      source: 'bundled' as const,
+    })),
+    ...importedDocs.map((d) => ({
+      id: d.id,
+      displayTitle: d.filename.replace(/\.[^/.]+$/, '') || d.filename,
+      isLarge: false,
+      source: 'imported' as const,
+    })),
+  ]
+
+  const isLoading = docsQuery.isLoading || (!!campaignId && importedDocsQuery.isLoading)
+  const isError = docsQuery.isError
+
+  const allSelected = mergedDocs.length > 0 && mergedDocs.every((d) => selected.includes(d.id))
   const selectedCount = selected.length
 
   function handleToggleAll() {
     if (allSelected) {
       onChange([])
     } else {
-      onChange(docs.map((d) => d.relativePath))
+      onChange(mergedDocs.map((d) => d.id))
     }
   }
 
-  function handleToggleDoc(relativePath: string) {
-    if (selected.includes(relativePath)) {
-      onChange(selected.filter((p) => p !== relativePath))
+  function handleToggleDoc(id: string) {
+    if (selected.includes(id)) {
+      onChange(selected.filter((p) => p !== id))
     } else {
-      onChange([...selected, relativePath])
+      onChange([...selected, id])
     }
   }
 
@@ -88,7 +128,7 @@ export function ReferenceDocSelect({ selected, onChange }: ReferenceDocSelectPro
             variant="outline"
             size="sm"
             onClick={handleToggleAll}
-            disabled={docs.length === 0}
+            disabled={mergedDocs.length === 0}
           >
             {allSelected ? 'Deselect All' : 'Select All'}
           </Button>
@@ -96,49 +136,59 @@ export function ReferenceDocSelect({ selected, onChange }: ReferenceDocSelectPro
       </div>
 
       <div className="border border-border rounded-md overflow-hidden max-h-[240px] overflow-y-auto bg-card">
-        {docsQuery.isLoading && (
+        {isLoading && (
           <p className="px-3 py-4 text-sm text-muted-foreground text-center">
             Loading reference documents…
           </p>
         )}
-        {docsQuery.isError && (
+        {isError && (
           <p className="px-3 py-4 text-sm text-destructive text-center">
             Failed to load reference documents.
           </p>
         )}
-        {!docsQuery.isLoading && !docsQuery.isError && docs.length === 0 && (
+        {!isLoading && !isError && mergedDocs.length === 0 && (
           <p className="px-3 py-4 text-sm text-muted-foreground text-center">
             No reference documents found.
           </p>
         )}
         <TooltipProvider>
-          {docs.map((doc) => {
-            const checkboxId = `${instanceId}-doc-${doc.relativePath}`
-            const isChecked = selected.includes(doc.relativePath)
-            const displayTitle = cleanTitle(doc.title || doc.relativePath)
+          {mergedDocs.map((doc) => {
+            const checkboxId = `${instanceId}-doc-${doc.id}`
+            const isChecked = selected.includes(doc.id)
 
             return (
               <div
-                key={doc.relativePath}
+                key={doc.id}
                 className="flex items-center gap-3 px-3 py-2 text-sm text-foreground hover:bg-secondary cursor-pointer"
-                onClick={() => handleToggleDoc(doc.relativePath)}
+                onClick={() => handleToggleDoc(doc.id)}
                 role="row"
               >
                 <Checkbox
                   id={checkboxId}
                   checked={isChecked}
-                  onCheckedChange={() => handleToggleDoc(doc.relativePath)}
+                  onCheckedChange={() => handleToggleDoc(doc.id)}
                   onClick={(e) => e.stopPropagation()}
-                  aria-label={displayTitle}
+                  aria-label={doc.displayTitle}
                 />
                 <Label
                   htmlFor={checkboxId}
                   className="flex-1 cursor-pointer font-normal text-sm"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {displayTitle}
+                  {doc.displayTitle}
                 </Label>
-                {doc.isLarge && (
+                {doc.source === 'imported' && (
+                  <Tooltip delayDuration={400}>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <User className="h-3.5 w-3.5 text-muted-foreground ml-auto shrink-0" />
+                        <span className="sr-only">Imported document</span>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>Imported document</TooltipContent>
+                  </Tooltip>
+                )}
+                {doc.source === 'bundled' && doc.isLarge && (
                   <Tooltip delayDuration={400}>
                     <TooltipTrigger asChild>
                       <span>

@@ -58,6 +58,7 @@ vi.mock('../db/campaignsRepo', () => ({
 
 vi.mock('./referenceDocLoader', () => ({
   readReferenceDocs: vi.fn().mockReturnValue([]),
+  readReferenceDocsForCampaign: vi.fn().mockReturnValue([]),
 }))
 
 import {
@@ -75,7 +76,7 @@ import { npcsRepo } from '../db/npcsRepo'
 import { factionsRepo } from '../db/factionsRepo'
 import { campaignsRepo } from '../db/campaignsRepo'
 // Note: getWorldOverview is accessed via campaignsRepo mock (vi.mocked)
-import { readReferenceDocs } from './referenceDocLoader'
+import { readReferenceDocsForCampaign } from './referenceDocLoader'
 import type { CharacterWithResources } from '../db/charactersRepo'
 import type { Session } from '../db/schema'
 
@@ -172,7 +173,7 @@ describe('contextBuilder', () => {
     vi.mocked(messagesRepo.getBySessionId).mockReturnValue([])
     vi.mocked(messagesRepo.getLastNForSession).mockReturnValue([])
     vi.mocked(sessionsRepo.getLastNCompleted).mockReturnValue([])
-    vi.mocked(readReferenceDocs).mockReturnValue([])
+    vi.mocked(readReferenceDocsForCampaign).mockReturnValue([])
     // Phase 6 world-state repos default to empty / unset
     vi.mocked(questsRepo.list).mockReturnValue([])
     vi.mocked(npcsRepo.list).mockReturnValue([])
@@ -291,7 +292,7 @@ describe('contextBuilder', () => {
 
     it('appends reference doc content when docs selected', () => {
       vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
-      vi.mocked(readReferenceDocs).mockReturnValue([
+      vi.mocked(readReferenceDocsForCampaign).mockReturnValue([
         { title: 'SRD v5.1', content: '# SRD Content\nRules here.' },
       ])
 
@@ -306,7 +307,7 @@ describe('contextBuilder', () => {
 
       expect(systemPrompt).toContain('=== SRD v5.1 ===')
       expect(systemPrompt).toContain('# SRD Content')
-      expect(readReferenceDocs).toHaveBeenCalledWith(['SRD v5.1/SRD v5.1.md'])
+      expect(readReferenceDocsForCampaign).toHaveBeenCalledWith('campaign-1', ['SRD v5.1/SRD v5.1.md'])
     })
 
     it('returns session messages for context window when sessionId provided', () => {
@@ -491,7 +492,7 @@ describe('contextBuilder', () => {
 
     it('system prompt injection order matches D-17: preamble > ref docs > L3 > L2 > session start context', () => {
       vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
-      vi.mocked(readReferenceDocs).mockReturnValue([
+      vi.mocked(readReferenceDocsForCampaign).mockReturnValue([
         { title: 'SRD', content: 'Rules content.' },
       ])
       vi.mocked(sessionsRepo.getLastNCompleted).mockReturnValue([
@@ -723,7 +724,7 @@ describe('contextBuilder', () => {
       vi.mocked(questsRepo.list).mockReturnValue([
         makeQuest({ id: 'q1', name: 'Investigate the murders', status: 'Active' }),
       ])
-      vi.mocked(readReferenceDocs).mockReturnValue([{ title: 'SRD', content: 'Rules content.' }])
+      vi.mocked(readReferenceDocsForCampaign).mockReturnValue([{ title: 'SRD', content: 'Rules content.' }])
 
       const { systemPrompt } = buildContext({
         campaignId: 'campaign-1',

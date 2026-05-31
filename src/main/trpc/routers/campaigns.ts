@@ -192,6 +192,39 @@ export const campaignsRouter = t.router({
   }),
 
   /**
+   * Persist free-form homebrew content for a campaign (RULES-03).
+   * Content is capped at 50,000 chars (enforced in campaignsRepo).
+   */
+  updateHomebrew: t.procedure
+    .input(z.object({ campaignId: campaignIdSchema, homebrewContent: z.string() }))
+    .mutation(({ input }) => {
+      campaignsRepo.updateHomebrew(input.campaignId, input.homebrewContent)
+      return { updated: true }
+    }),
+
+  /**
+   * Open an OS file dialog for .txt / .md files and return the text content.
+   * Used by the Homebrew tab "Import file…" button to append file text to the textarea.
+   * Returns null if the user cancels. Throws on file read errors.
+   *
+   * Security: file path comes only from Electron's dialog (not renderer-supplied).
+   * Content is capped at 50,000 chars to prevent DoS (T-07-10-02).
+   */
+  importHomebrewTextWithDialog: t.procedure
+    .input(z.object({ campaignId: campaignIdSchema }))
+    .mutation(async () => {
+      const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: 'Import Homebrew Text',
+        filters: [{ name: 'Text Files', extensions: ['txt', 'md'] }],
+        properties: ['openFile'],
+      })
+      if (canceled || filePaths.length === 0) return null
+
+      const content = await readTextFile(filePaths[0])
+      return content.substring(0, 50_000)
+    }),
+
+  /**
    * Generate a world brief for a campaign via AI (WORLD-01).
    *
    * Produces a 500-800 word world brief describing: setting name, tone, factions,

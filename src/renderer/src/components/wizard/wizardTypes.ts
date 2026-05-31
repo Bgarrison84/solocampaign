@@ -1,4 +1,8 @@
 import type { Race, DndClass, Background, EquipmentPackageOption } from '../../../../main/db/contentTypes'
+import type { NegativeTraits } from '../../lib/pointBuy'
+
+/** The four ability score generation methods available in the wizard. */
+export type AbilityScoreMethod = 'standard-array' | '4d6-roll' | 'point-buy' | 'manual'
 
 /**
  * The full in-progress state of the character creation wizard.
@@ -15,6 +19,8 @@ export interface WizardState {
   selectedClass: DndClass | null
   selectedSubclass: string | null
   // Step 3 — Ability Scores
+  abilityScoreMethod: AbilityScoreMethod
+  negativeTraits: NegativeTraits
   abilityScores: {
     strength: number | null
     dexterity: number | null
@@ -64,6 +70,8 @@ export const initialWizardState: WizardState = {
   selectedSubrace: null,
   selectedClass: null,
   selectedSubclass: null,
+  abilityScoreMethod: 'standard-array',
+  negativeTraits: { presetFlaws: [], freeFormFlaws: ['', ''] },
   abilityScores: {
     strength: null,
     dexterity: null,

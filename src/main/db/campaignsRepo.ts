@@ -165,6 +165,19 @@ export const campaignsRepo = {
   },
 
   /**
+   * Persist free-form homebrew content for a campaign (RULES-03).
+   * Called by campaigns.updateHomebrew tRPC mutation.
+   * Content capped at 50,000 chars to match the campaign_reference_docs cap.
+   */
+  updateHomebrew(campaignId: string, homebrewContent: string): void {
+    const db = getDb()
+    db.update(campaigns)
+      .set({ homebrewContent: homebrewContent.substring(0, 50_000) })
+      .where(eq(campaigns.id, campaignId))
+      .run()
+  },
+
+  /**
    * Persist the AI-generated or player-written world brief for a campaign (WORLD-01).
    * Called by the generateWorldBrief tRPC mutation.
    */

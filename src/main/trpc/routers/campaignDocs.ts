@@ -19,6 +19,7 @@
 import { z } from 'zod'
 import path from 'node:path'
 import { TRPCError } from '@trpc/server'
+import { dialog } from 'electron'
 import { t } from '../_base'
 import { campaignIdSchema } from '../schemas'
 import { campaignReferenceDocsRepo } from '../../db/campaignReferenceDocsRepo'
@@ -107,5 +108,56 @@ export const campaignDocsRouter = t.router({
     .input(z.object({ docId: z.string(), campaignId: campaignIdSchema }))
     .mutation(({ input }) => {
       campaignReferenceDocsRepo.delete(input.docId, input.campaignId)
+    }),
+
+  /**
+   * Open an OS file dialog and import the chosen PDF/text file as a campaign reference doc.
+   * Returns null if the user cancels. Returns the created CampaignReferenceDoc on success.
+   *
+   * Security: file path comes only from Electron's dialog (not renderer-supplied).
+   * Same path-traversal protections as `import` apply (Electron dialog always returns
+   * absolute paths with no traversal sequences).
+   */
+  importWithDialog: t.procedure
+    .input(z.object({ campaignId: campaignIdSchema }))
+    .mutation(async ({ input }) => {
+      const { campaignId } = input
+
+      const { canceled, filePaths } = await dialog.showOpenDialog({
+        title: 'Import Rules Document',
+        filters: [{ name: 'Documents', extensions: ['pdf', 'txt', 'md'] }],
+        properties: ['openFile'],
+      })
+      if (canceled || filePaths.length === 0) return null
+
+      const filePath = filePaths[0]
+
+      // Electron dialog always returns absolute paths — double-check for safety
+      if (!path.isAbsolute(filePath)) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'filePath must be an absolute path' })
+      }
+
+      log.debug('[campaignDocs] importWithDialog importing file', { campaignId, filePath })
+
+      const ext = path.extname(filePath).toLowerCase()
+      let rawContent: string
+      if (ext === '.pdf') {
+        rawContent = await extractTextFromFile(filePath)
+      } else {
+        rawContent = await readTextFile(filePath)
+      }
+
+      const content = rawContent.substring(0, 50_000)
+      const filename = path.basename(filePath)
+
+      const doc = campaignReferenceDocsRepo.create({ campaignId, filename, content })
+
+      log.debug('[campaignDocs] importWithDialog imported doc', {
+        campaignId,
+        filename,
+        contentLength: content.length,
+      })
+
+      return doc
     }),
 })

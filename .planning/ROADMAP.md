@@ -225,7 +225,26 @@ Plans:
   4. User can set up a campaign world by letting the AI generate it, writing a text brief, or importing a PDF/text document — all three modes available per campaign
   5. User can browse the bundled SRD (rules, spells, items, monsters), add custom homebrew via in-app editor or file import, and import their own PDF/text documents as rules reference available to the AI
   6. User can enable encumbrance tracking per campaign and continue progressing characters past level 20 via Epic Boons
-**Plans:** TBD
+**Plans:** 11 plans
+Plans:
+- [ ] 07-01-PLAN.md — Foundation: unpdf install + migration 0007 + point-buy/multiclass calculations + 3 repos + pdfExtractor + Wave 0 tests [BLOCKING migration]
+- [ ] 07-02-PLAN.md — Content JSON: feats, magic-items, rules, monsters, epic-boons + classes.json subclasses
+- [ ] 07-03-PLAN.md — AI layer: library/feats/campaignDocs routers + addCompanion/removeCompanion tools + contextBuilder World Overview + partySize enforcement + generateWorldBrief
+- [ ] 07-04-PLAN.md — Ability score wizard: method selector + point buy + negative traits + per-stat reroll (CHAR-02/03)
+- [ ] 07-05-PLAN.md — LevelUpModal: multiclass + ASI/feat + subclass + Epic Boon + reusable FeatPicker (CHAR-04/05, PROG-03)
+- [ ] 07-06-PLAN.md — CreateCharacterWizard: starting feat step + negative-trait persistence + re-triggerable party members
+- [ ] 07-07-PLAN.md — CreateCampaignModal: party size + encumbrance + World Setup step + AI brief generation
+- [ ] 07-08-PLAN.md — Character Sheet view: party switcher chips + CompanionsSection + multiclass header + encumbrance display
+- [ ] 07-09-PLAN.md — LibraryScreen (/library) + navigation wiring (RULES-01/02)
+- [ ] 07-10-PLAN.md — Homebrew tab + ReferenceDocSelect merge + referenceDocLoader extension (RULES-03/04)
+- [ ] 07-11-PLAN.md — Integration sweep: party-mode Inspiration injection + full suite + e2e human-verify
+**Wave structure:**
+  - Wave 1: 07-01 + 07-02 (foundation; content JSON — no shared files)
+  - Wave 2: 07-03 + 07-04 (AI layer; ability score wizard — independent)
+  - Wave 3: 07-05 + 07-07 + 07-09 + 07-10 (LevelUpModal; campaign modal; library; homebrew — no shared files)
+  - Wave 4: 07-06 (character wizard; depends on 07-05 FeatPicker)
+  - Wave 5: 07-08 (character sheet view; depends on 07-06)
+  - Wave 6: 07-11 (integration sweep; depends on all)
 **Notes:**
   - PDF import (RULES-04, and the PDF world-doc path in WORLD-01) is the highest-complexity content feature — run a library-evaluation spike at the start of the phase before committing to an implementation path; if PDF is infeasible, ship text/markdown import for WORLD-01 and gate RULES-04 accordingly
   - SRD magic items database (RULES-02) bundled here; AI custom-loot path uses the Phase 5 inventory mutation contract
@@ -274,7 +293,7 @@ Plans:
 | 4. Long-Campaign Memory & Session Flow | 0/0 | Not started | - |
 | 5. Rules Engine, Dice & Combat | 7/7 | Human UAT pending | - |
 | 6. Quests, NPCs & World State | 6/7 | In Progress|  |
-| 7. Content Depth & Advanced Character | 0/0 | Not started | - |
+| 7. Content Depth & Advanced Character | 0/11 | Planned | - |
 | 8. Polish, Export & Accessibility | 0/0 | Not started | - |
 | 9. Distribution & Update Notifications | 0/0 | Not started | - |
 

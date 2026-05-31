@@ -500,19 +500,35 @@ export const charactersRepo = {
   },
 
   /**
-   * Level up a character: increment level (capped at 20), increase hpMax and hpCurrent
+   * Level up a character: increment level (uncapped — D-24), increase hpMax and hpCurrent
    * by hpGain, and merge the provided newSlotMax into the spellSlots JSON (preserving
    * existing `used` counts, defaulting `used` to 0 for newly added slot levels).
-   * (D-31, D-32, T-05-06-01)
+   *
+   * Optional `opts.classes` replaces the characters.classes JSON column (multiclass — D-07/D-08).
+   * Optional `opts.subclass` writes characters.subclass (subclass selection — D-15).
+   * When neither is provided, single-class behavior is identical to the Phase 5 path.
+   * (D-24, D-31, D-32, T-05-06-01)
    */
-  levelUp(characterId: string, hpGain: number, newSlotMax: Record<string, number>): void {
+  levelUp(
+    characterId: string,
+    hpGain: number,
+    newSlotMax: Record<string, number>,
+    opts?: { classes?: Array<{ className: string; level: number }>; subclass?: string },
+  ): void {
     const db = getDb()
     const now = new Date(Date.now())
 
     db.transaction((tx) => {
-      // Increment level, capped at 20
+      // Increment level — D-24: no cap; characters can level past 20
+      const extraFields: Record<string, unknown> = { updatedAt: now }
+      if (opts?.classes !== undefined) {
+        extraFields.classes = JSON.stringify(opts.classes)
+      }
+      if (opts?.subclass !== undefined) {
+        extraFields.subclass = opts.subclass
+      }
       tx.update(characters)
-        .set({ level: sql`MIN(20, level + 1)`, updatedAt: now })
+        .set({ level: sql`level + 1`, ...extraFields })
         .where(eq(characters.id, characterId))
         .run()
 

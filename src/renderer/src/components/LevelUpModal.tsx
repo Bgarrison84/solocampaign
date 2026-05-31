@@ -28,12 +28,19 @@ import type { CharacterWithResources } from '../../../main/db/charactersRepo'
 
 // ─── D&D 5e constants ──────────────────────────────────────────────────────────
 
-/** XP required to reach each level (PROG-01, D-30, cited: D&D 5e SRD 5.1) */
+/**
+ * XP required to reach each level (PROG-01, D-30, cited: D&D 5e SRD 5.1).
+ * Levels 21+ extend the curve using the per-level delta from the 17–20 segment
+ * (~40 000–50 000 XP per level). D-24: no hard level-20 cap.
+ */
 export const XP_THRESHOLDS: Record<number, number> = {
   1: 0, 2: 300, 3: 900, 4: 2700, 5: 6500,
   6: 14000, 7: 23000, 8: 34000, 9: 48000, 10: 64000,
   11: 85000, 12: 100000, 13: 120000, 14: 140000, 15: 165000,
   16: 195000, 17: 225000, 18: 265000, 19: 305000, 20: 355000,
+  // D-24: extended past level 20 (50 000 XP per level, matching the late-game delta)
+  21: 405000, 22: 455000, 23: 505000, 24: 555000, 25: 605000,
+  26: 655000, 27: 705000, 28: 755000, 29: 805000, 30: 855000,
 }
 
 /** Hit die by class (verified: resources/classes.json hitDie field) */

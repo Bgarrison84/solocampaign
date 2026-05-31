@@ -5,6 +5,7 @@ import { join, resolve } from 'path'
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
+import { eq } from 'drizzle-orm'
 import * as schema from './schema'
 
 // Must be set before electron mock closes over it
@@ -261,5 +262,78 @@ describe('charactersRepo', () => {
     const result = charactersRepo.getByCampaignId(emptyCampaign.id)
 
     expect(result).toBeUndefined()
+  })
+
+  // ─── Phase 7: partySize enforcement + createCompanion (PARTY-01, PARTY-02) ───
+
+  it('createWithResources throws when campaign already has partySize non-companion characters (PARTY-01)', async () => {
+    const { db, charactersRepo, campaign } = await getRepo()
+
+    // Set partySize to 1 on the campaign row so the limit is 1
+    db.update(schema.campaigns)
+      .set({ partySize: 1 })
+      .where(eq(schema.campaigns.id, campaign.id))
+      .run()
+
+    // First character succeeds
+    charactersRepo.createWithResources({ ...baseInput, campaignId: campaign.id })
+
+    // Second non-companion character must throw (party is full)
+    expect(() =>
+      charactersRepo.createWithResources({ ...baseInput, campaignId: campaign.id }),
+    ).toThrow()
+  })
+
+  it('createCompanion bypasses partySize check (companions do not count toward party limit)', async () => {
+    const { db, charactersRepo, campaign } = await getRepo()
+
+    // Set partySize to 1 — party is full after one player character
+    db.update(schema.campaigns)
+      .set({ partySize: 1 })
+      .where(eq(schema.campaigns.id, campaign.id))
+      .run()
+
+    // Create one player character to fill the slot
+    charactersRepo.createWithResources({ ...baseInput, campaignId: campaign.id })
+
+    // A companion must succeed even though the party is full
+    expect(() =>
+      charactersRepo.createCompanion({
+        campaignId: campaign.id,
+        name: 'Shadowfax',
+        type: 'Animal Companion',
+        hpMax: 25,
+        ac: 13,
+      }),
+    ).not.toThrow()
+  })
+
+  it('createCompanion inserts a characters row with isCompanion=true and a characterResources row', async () => {
+    const { db, charactersRepo, campaign } = await getRepo()
+
+    const companion = charactersRepo.createCompanion({
+      campaignId: campaign.id,
+      name: 'Ember',
+      type: 'Familiar',
+      hpMax: 10,
+      ac: 12,
+    })
+
+    expect(companion.id).toBeDefined()
+    expect(companion.isCompanion).toBe(true)
+    expect(companion.name).toBe('Ember')
+
+    // characterResources row must exist with correct HP
+    const res = db
+      .select()
+      .from(schema.characterResources)
+      .where(eq(schema.characterResources.characterId, companion.id))
+      .get()
+    expect(res).toBeDefined()
+    expect(res!.hpMax).toBe(10)
+    expect(res!.hpCurrent).toBe(10)
+
+    // AC is stored on the characters row (not characterResources)
+    expect(companion.ac).toBe(12)
   })
 })

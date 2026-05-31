@@ -1,0 +1,254 @@
+[
+  {
+    "id": "alert",
+    "name": "Alert",
+    "description": "Always on the lookout for danger, you gain +5 to initiative, cannot be surprised while conscious, and other creatures don't gain advantage on attack rolls against you as a result of being unseen.",
+    "prerequisites": ""
+  },
+  {
+    "id": "athlete",
+    "name": "Athlete",
+    "description": "You have undergone extensive physical training. Increase Strength or Dexterity by 1. When prone, standing up uses only 5 feet of movement. Climbing doesn't cost extra movement, and you can make a running long jump or running high jump after moving only 5 feet.",
+    "prerequisites": ""
+  },
+  {
+    "id": "actor",
+    "name": "Actor",
+    "description": "Skilled at mimicry and dramatics, you increase Charisma by 1, gain advantage on Deception and Performance checks when trying to pass as another person, and can mimic the speech or sounds of another person or creature you have heard for at least 1 minute.",
+    "prerequisites": ""
+  },
+  {
+    "id": "charger",
+    "name": "Charger",
+    "description": "When you use your action to Dash, you can use a bonus action to make one melee weapon attack or to shove a creature. If you move at least 10 feet in a straight line immediately before taking this bonus action, you gain +5 to the attack's damage or push the target up to 10 feet away from you.",
+    "prerequisites": ""
+  },
+  {
+    "id": "crossbow-expert",
+    "name": "Crossbow Expert",
+    "description": "Being well-practiced with crossbows, you ignore the loading property of crossbows you are proficient with, don't have disadvantage from being within 5 feet of a hostile creature, and can make a one-handed crossbow attack as a bonus action when you use the Attack action with a one-handed weapon.",
+    "prerequisites": ""
+  },
+  {
+    "id": "defensive-duelist",
+    "name": "Defensive Duelist",
+    "description": "When you are wielding a finesse weapon you are proficient with and another creature hits you with a melee attack, you can use your reaction to add your proficiency bonus to your AC for that attack, potentially causing it to miss.",
+    "prerequisites": "Dexterity 13 or higher"
+  },
+  {
+    "id": "dual-wielder",
+    "name": "Dual Wielder",
+    "description": "You master fighting with two weapons. You gain +1 to AC while wielding separate melee weapons in each hand, can use two-weapon fighting even when the weapons you wield aren't light, and can draw or stow two weapons when you would normally only be able to do one.",
+    "prerequisites": ""
+  },
+  {
+    "id": "dungeon-delver",
+    "name": "Dungeon Delver",
+    "description": "Alert to hidden traps and secret doors, you gain advantage on Perception and Investigation checks to detect secret doors, advantage on saves against traps, resistance to trap damage, and can search for traps while moving at normal pace.",
+    "prerequisites": ""
+  },
+  {
+    "id": "durable",
+    "name": "Durable",
+    "description": "Hardy and resilient, you increase Constitution by 1. When you roll a Hit Die to regain hit points, the minimum number of hit points you can regain from the roll equals twice your Constitution modifier (minimum of 2).",
+    "prerequisites": ""
+  },
+  {
+    "id": "elemental-adept",
+    "name": "Elemental Adept",
+    "description": "Choose one damage type: acid, cold, fire, lightning, or thunder. Spells you cast ignore resistance to that damage type, and when you roll damage with that type any 1 on a damage die counts as a 2. You can select this feat multiple times for different energy types.",
+    "prerequisites": "Spellcasting or Pact Magic feature"
+  },
+  {
+    "id": "grappler",
+    "name": "Grappler",
+    "description": "You have developed the skills necessary to hold your own in close-quarters grappling. You have advantage on attack rolls against a creature you are grappling, and can use your action to try to pin a restrained grappled creature, restraining both of you until the grapple ends.",
+    "prerequisites": "Strength 13 or higher"
+  },
+  {
+    "id": "great-weapon-master",
+    "name": "Great Weapon Master",
+    "description": "When you score a critical hit or reduce a creature to 0 hit points with a melee weapon attack, you can make one melee weapon attack as a bonus action. Before making an attack with a heavy weapon you are proficient with, you can take a -5 penalty to the attack roll to gain +10 to the damage roll on a hit.",
+    "prerequisites": ""
+  },
+  {
+    "id": "healer",
+    "name": "Healer",
+    "description": "You are an accomplished field medic. When you use a healer's kit to stabilize a dying creature, that creature regains 1 hit point. As an action you can expend one use of a healer's kit to restore 1d6 + 4 hit points plus the creature's maximum number of Hit Dice. That creature cannot benefit from this feat again until it finishes a short or long rest.",
+    "prerequisites": ""
+  },
+  {
+    "id": "heavily-armored",
+    "name": "Heavily Armored",
+    "description": "You have trained to master the use of heavy armor. You increase Strength by 1 and gain proficiency with heavy armor.",
+    "prerequisites": "Proficiency with medium armor"
+  },
+  {
+    "id": "heavy-armor-master",
+    "name": "Heavy Armor Master",
+    "description": "You can use your armor to deflect strikes. You increase Strength by 1. While wearing heavy armor, bludgeoning, piercing, and slashing damage you take from non-magical weapons is reduced by 3.",
+    "prerequisites": "Proficiency with heavy armor"
+  },
+  {
+    "id": "inspiring-leader",
+    "name": "Inspiring Leader",
+    "description": "You can spend 10 minutes inspiring your companions, shoring up their resolve to fight. Choose up to six friendly creatures (including yourself) within 30 feet who can see or hear you. Each creature gains temporary hit points equal to your level + your Charisma modifier. A creature can't benefit from this feat again until it finishes a short or long rest.",
+    "prerequisites": "Charisma 13 or higher"
+  },
+  {
+    "id": "keen-mind",
+    "name": "Keen Mind",
+    "description": "You have a mind that can track time, direction, and detail with uncanny precision. You increase Intelligence by 1, always know which way is north, always know the number of hours left before the next sunrise or sunset, and can accurately recall anything you have seen or heard within the past month.",
+    "prerequisites": ""
+  },
+  {
+    "id": "lightly-armored",
+    "name": "Lightly Armored",
+    "description": "You have trained to master the use of light armor. You increase Strength or Dexterity by 1 and gain proficiency with light armor.",
+    "prerequisites": ""
+  },
+  {
+    "id": "linguist",
+    "name": "Linguist",
+    "description": "You have studied languages and codes. You increase Intelligence by 1, learn three languages of your choice, and can ably create written ciphers that others can't decipher unless you teach them, they succeed on an Intelligence check (DC = your Intelligence score + your proficiency bonus), or they use magic to do so.",
+    "prerequisites": ""
+  },
+  {
+    "id": "lucky",
+    "name": "Lucky",
+    "description": "You have inexplicable luck that seems to kick in at just the right moment. You have 3 luck points. Whenever you make an attack roll, ability check, or saving throw you can spend a luck point to roll an additional d20 and choose which to use. You can also spend luck points to affect rolls made against you. Luck points are replenished after a long rest.",
+    "prerequisites": ""
+  },
+  {
+    "id": "mage-slayer",
+    "name": "Mage Slayer",
+    "description": "You have practiced techniques useful against spellcasters. When a creature within 5 feet casts a spell, you can use your reaction to make a melee weapon attack against it. When you damage a concentrating spellcaster, they have disadvantage on the saving throw to maintain concentration. You have advantage on saving throws against spells cast by creatures within 5 feet of you.",
+    "prerequisites": ""
+  },
+  {
+    "id": "magic-initiate",
+    "name": "Magic Initiate",
+    "description": "Choose a class: bard, cleric, druid, sorcerer, warlock, or wizard. You learn two cantrips of your choice from that class's spell list. You also learn one 1st-level spell from that list, and can cast it once per long rest at its lowest level without expending a spell slot.",
+    "prerequisites": ""
+  },
+  {
+    "id": "martial-adept",
+    "name": "Martial Adept",
+    "description": "You have martial training that allows you to perform special combat maneuvers. You learn two maneuvers of your choice from the Battle Master fighter archetype. You gain one superiority die (d6) which is used to fuel these maneuvers and is replenished on a short or long rest.",
+    "prerequisites": ""
+  },
+  {
+    "id": "medium-armor-master",
+    "name": "Medium Armor Master",
+    "description": "You have practiced moving in medium armor to gain the following benefits: medium armor doesn't impose disadvantage on Stealth checks, and if you wear medium armor your maximum Dexterity bonus to AC increases from +2 to +3.",
+    "prerequisites": "Proficiency with medium armor"
+  },
+  {
+    "id": "mobile",
+    "name": "Mobile",
+    "description": "You are exceptionally speedy and agile. Your speed increases by 10 feet. When you use the Dash action, difficult terrain doesn't cost you extra movement on that turn. When you make a melee attack against a creature, you don't provoke opportunity attacks from that creature for the rest of the turn.",
+    "prerequisites": ""
+  },
+  {
+    "id": "moderately-armored",
+    "name": "Moderately Armored",
+    "description": "You have trained to master the use of medium armor and shields. You increase Strength or Dexterity by 1 and gain proficiency with medium armor and shields.",
+    "prerequisites": "Proficiency with light armor"
+  },
+  {
+    "id": "mounted-combatant",
+    "name": "Mounted Combatant",
+    "description": "You are a dangerous foe to face while mounted. You have advantage on melee attack rolls against any unmounted creature smaller than your mount. You can force an attack targeting your mount to target you instead. If your mount is subjected to an effect that allows a Dexterity saving throw for half damage, the mount takes no damage on a success and half damage on a failure.",
+    "prerequisites": ""
+  },
+  {
+    "id": "observant",
+    "name": "Observant",
+    "description": "Quick to notice details of your environment, you increase Intelligence or Wisdom by 1. If you can see a creature's mouth while it is speaking a language you understand, you can interpret what it's saying by reading its lips. You gain +5 to your passive Wisdom (Perception) and passive Intelligence (Investigation) scores.",
+    "prerequisites": ""
+  },
+  {
+    "id": "polearm-master",
+    "name": "Polearm Master",
+    "description": "You can keep your enemies at bay with reach weapons. When taking the Attack action with a glaive, halberd, pike, or quarterstaff you can use a bonus action to make a melee attack with the weapon's opposite end (1d4 bludgeoning damage). While wielding such a weapon you can use your reaction to make an opportunity attack against creatures that enter your reach.",
+    "prerequisites": ""
+  },
+  {
+    "id": "resilient",
+    "name": "Resilient",
+    "description": "Choose one ability score. Increase that ability score by 1 (maximum 20) and gain proficiency in saving throws using that ability.",
+    "prerequisites": ""
+  },
+  {
+    "id": "ritual-caster",
+    "name": "Ritual Caster",
+    "description": "You have learned a number of spells that you can cast as rituals. Choose a class: bard, cleric, druid, sorcerer, warlock, or wizard. You learn two 1st-level spells with the ritual tag from that class's spell list and record them in a ritual book. You can cast them as rituals and can add more ritual spells to your book when you find them written out.",
+    "prerequisites": "Intelligence or Wisdom 13 or higher"
+  },
+  {
+    "id": "savage-attacker",
+    "name": "Savage Attacker",
+    "description": "Once per turn when you roll damage for a melee weapon attack, you can reroll the weapon's damage dice and use either total.",
+    "prerequisites": ""
+  },
+  {
+    "id": "sentinel",
+    "name": "Sentinel",
+    "description": "You have mastered techniques to take advantage of every drop in any enemy's guard. When you hit a creature with an opportunity attack, the creature's speed becomes 0 for the rest of the turn. Creatures provoke opportunity attacks from you even if they take the Disengage action. When a creature makes an attack against a target other than you and you are within 5 feet, you can use your reaction to make a melee weapon attack against the attacker.",
+    "prerequisites": ""
+  },
+  {
+    "id": "sharpshooter",
+    "name": "Sharpshooter",
+    "description": "You have mastered ranged weapons. Attacking at long range doesn't impose disadvantage on your ranged weapon attack rolls. Ranged attacks ignore half and three-quarters cover. Before making a ranged attack, you can take -5 to the attack roll to gain +10 to the damage roll on a hit.",
+    "prerequisites": ""
+  },
+  {
+    "id": "shield-master",
+    "name": "Shield Master",
+    "description": "You use shields not just for protection but also for offense. If you take the Attack action, you can use a bonus action to shove a creature within 5 feet with your shield. If you are not incapacitated, you can add your shield's AC bonus to Dexterity saves. When targeted by an effect requiring a Dexterity save for half damage, a successful save means you take no damage.",
+    "prerequisites": ""
+  },
+  {
+    "id": "skilled",
+    "name": "Skilled",
+    "description": "You gain proficiency in any combination of three skills or tools of your choice.",
+    "prerequisites": ""
+  },
+  {
+    "id": "skulker",
+    "name": "Skulker",
+    "description": "You are expert at slinking through shadows. You can try to hide when you are lightly obscured from the creature from which you are hiding. When hidden and you miss with a ranged attack, making the attack doesn't reveal your position. Dim light doesn't impose disadvantage on your Perception checks relying on sight.",
+    "prerequisites": "Dexterity 13 or higher"
+  },
+  {
+    "id": "spell-sniper",
+    "name": "Spell Sniper",
+    "description": "You have learned techniques to enhance your attacks with certain kinds of spells. Choose a class: bard, cleric, druid, sorcerer, warlock, or wizard. You learn one cantrip from that list. The range of spells requiring attack rolls is doubled, and ranged spell attacks ignore half and three-quarters cover.",
+    "prerequisites": "Spellcasting or Pact Magic feature"
+  },
+  {
+    "id": "tavern-brawler",
+    "name": "Tavern Brawler",
+    "description": "Accustomed to rough-and-tumble fighting, you increase Strength or Constitution by 1. You are proficient with improvised weapons and unarmed strikes deal 1d4 bludgeoning damage. When you hit a creature with an unarmed strike or improvised weapon on your turn, you can use a bonus action to attempt to grapple the target.",
+    "prerequisites": ""
+  },
+  {
+    "id": "tough",
+    "name": "Tough",
+    "description": "Your hit point maximum increases by an amount equal to twice your level when you gain this feat. Whenever you gain a level thereafter, your hit point maximum increases by an additional 2 hit points.",
+    "prerequisites": ""
+  },
+  {
+    "id": "war-caster",
+    "name": "War Caster",
+    "description": "You have practiced casting spells in the midst of combat. You have advantage on Constitution saves to maintain concentration on a spell when damaged. You can perform somatic components even when wielding weapons or a shield. When an enemy triggers an opportunity attack from you, you can use your reaction to cast a spell targeting that creature instead of making the attack.",
+    "prerequisites": "Spellcasting or Pact Magic feature"
+  },
+  {
+    "id": "weapon-master",
+    "name": "Weapon Master",
+    "description": "You have practiced extensively with a variety of weapons. You increase Strength or Dexterity by 1 and gain proficiency with four weapons of your choice. Each weapon must be simple or martial.",
+    "prerequisites": ""
+  }
+]

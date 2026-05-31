@@ -378,6 +378,20 @@ export function CampaignViewScreen() {
           </Tooltip>
           <Tooltip delayDuration={600}>
             <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/library')}
+                className="text-muted-foreground hover:text-foreground transition-colors duration-200"
+                aria-label="Open SRD Library"
+              >
+                📖
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Browse SRD reference (spells, magic items, rules, monsters)</TooltipContent>
+          </Tooltip>
+          <Tooltip delayDuration={600}>
+            <TooltipTrigger asChild>
               {!isCombatActive ? (
                 <Button
                   variant="outline"

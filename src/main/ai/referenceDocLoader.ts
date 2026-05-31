@@ -1,5 +1,5 @@
 /**
- * Reference document loader for Phase 3.
+ * Reference document loader for Phase 3 + Phase 7 (RULES-03, RULES-04).
  * D-05: Enumerates and reads from Reference Documents/Converted/ for system prompt injection.
  *
  * Path resolution mirrors contentLoader.ts:
@@ -8,11 +8,21 @@
  *
  * Security:
  * - T-03-02-01: Resolved paths must startWith the reference-docs root; rejects traversal (../)
+ * - T-07-10-02: Content injected into AI context is capped + stripped of newline injections
+ * - T-07-10-03: Homebrew text injected as literal reference text (not instructions)
+ *
+ * Phase 7 extension (D-37 / Open Question 3 — mixed-array strategy):
+ * - readReferenceDocsForCampaign accepts a campaignId + mixed identifier array
+ *   (bundled relative paths OR campaign_reference_docs.id UUIDs)
+ * - UUID identifiers → loaded from campaign_reference_docs table
+ * - Homebrew content → appended as a reference-doc entry when non-empty
  */
 
 import path from 'node:path'
 import fs from 'node:fs'
 import log from 'electron-log'
+import { campaignReferenceDocsRepo } from '../db/campaignReferenceDocsRepo'
+import { campaignsRepo } from '../db/campaignsRepo'
 
 // Size threshold for "large file" warning in UI (AI-SPEC §4 Context Window Strategy)
 export const LARGE_FILE_THRESHOLD = 200_000 // bytes
@@ -210,6 +220,92 @@ export function readReferenceDocs(relativePaths: string[]): ReferenceDocContent[
     const title = cleanTitle(folderName)
 
     results.push({ title, content })
+  }
+
+  return results
+}
+
+/**
+ * UUID detection: a 36-character string in UUID v4 format (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).
+ * Used to discriminate imported-doc identifiers from bundled relative paths.
+ */
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * Phase 7 extended reference-doc loader (D-37 / RULES-03 / RULES-04).
+ *
+ * Resolves a mixed array of enabled identifiers (bundled relative paths OR
+ * campaign_reference_docs.id UUIDs) and appends the campaign's homebrew_content
+ * (when non-empty) as a final reference-doc entry.
+ *
+ * Injection priority (lower priority than World Overview per D-37):
+ * 1. Bundled files (existing disk-read path)
+ * 2. Imported campaign docs (UUID → campaign_reference_docs.content)
+ * 3. Homebrew content (appended last)
+ *
+ * Security (T-07-10-02 / T-07-10-03):
+ * - Content is stripped of newline injections via stripNewlinesForContext
+ * - No per-entry content cap here — content was already capped at 50,000 chars at
+ *   storage time in campaignReferenceDocsRepo (Pitfall 7).
+ * - Homebrew is injected as literal text (not instructions) — same treatment as
+ *   bundled reference docs.
+ *
+ * @param campaignId - used to query campaign_reference_docs + homebrew_content
+ * @param identifiers - the campaigns.reference_docs JSON array (mixed paths + UUIDs)
+ */
+export function readReferenceDocsForCampaign(
+  campaignId: string,
+  identifiers: string[],
+): ReferenceDocContent[] {
+  const results: ReferenceDocContent[] = []
+
+  // Partition identifiers into UUIDs and relative paths
+  const uuids: string[] = []
+  const relPaths: string[] = []
+
+  for (const id of identifiers) {
+    if (UUID_REGEX.test(id)) {
+      uuids.push(id)
+    } else {
+      relPaths.push(id)
+    }
+  }
+
+  // 1. Bundled relative-path docs (existing path-traversal-guarded logic)
+  const bundledDocs = readReferenceDocs(relPaths)
+  results.push(...bundledDocs)
+
+  // 2. Imported campaign docs (UUID → campaign_reference_docs row)
+  if (uuids.length > 0) {
+    try {
+      const allImported = campaignReferenceDocsRepo.list(campaignId)
+      const importedById = new Map(allImported.map((d) => [d.id, d]))
+      for (const uuid of uuids) {
+        const doc = importedById.get(uuid)
+        if (!doc) {
+          log.warn('[referenceDocLoader] UUID not found in campaign_reference_docs:', uuid)
+          continue
+        }
+        // Title: derived from filename (strip extension for cleaner display)
+        const titleRaw = doc.filename.replace(/\.[^/.]+$/, '')
+        results.push({ title: cleanTitle(titleRaw), content: doc.content })
+      }
+    } catch (err) {
+      log.error('[referenceDocLoader] Failed to load campaign reference docs:', err)
+    }
+  }
+
+  // 3. Homebrew content (appended last — T-07-10-03: literal reference text)
+  try {
+    const campaign = campaignsRepo.get(campaignId)
+    if (campaign?.homebrewContent?.trim()) {
+      results.push({
+        title: 'Homebrew Rules',
+        content: campaign.homebrewContent.substring(0, 50_000),
+      })
+    }
+  } catch (err) {
+    log.error('[referenceDocLoader] Failed to load homebrew content:', err)
   }
 
   return results

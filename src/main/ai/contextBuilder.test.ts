@@ -50,7 +50,10 @@ vi.mock('../db/factionsRepo', () => ({
 }))
 
 vi.mock('../db/campaignsRepo', () => ({
-  campaignsRepo: { getWorldState: vi.fn().mockReturnValue(undefined) },
+  campaignsRepo: {
+    getWorldState: vi.fn().mockReturnValue(undefined),
+    getWorldOverview: vi.fn().mockReturnValue(undefined),
+  },
 }))
 
 vi.mock('./referenceDocLoader', () => ({
@@ -71,6 +74,7 @@ import { questsRepo } from '../db/questsRepo'
 import { npcsRepo } from '../db/npcsRepo'
 import { factionsRepo } from '../db/factionsRepo'
 import { campaignsRepo } from '../db/campaignsRepo'
+// Note: getWorldOverview is accessed via campaignsRepo mock (vi.mocked)
 import { readReferenceDocs } from './referenceDocLoader'
 import type { CharacterWithResources } from '../db/charactersRepo'
 import type { Session } from '../db/schema'
@@ -174,6 +178,7 @@ describe('contextBuilder', () => {
     vi.mocked(npcsRepo.list).mockReturnValue([])
     vi.mocked(factionsRepo.list).mockReturnValue([])
     vi.mocked(campaignsRepo.getWorldState).mockReturnValue(undefined)
+    vi.mocked(campaignsRepo.getWorldOverview).mockReturnValue(undefined)
   })
 
   describe('abilityMod', () => {
@@ -737,6 +742,131 @@ describe('contextBuilder', () => {
       expect(worldStatePos).toBeLessThan(refDocPos)
       expect(systemPrompt).toContain('[ID: q1] Investigate the murders')
       expect(systemPrompt).toContain('Player character ID: char-abc')
+    })
+
+    // ─── Phase 7: World Overview injection (WORLD-01) ─────────────────────────
+
+    it('buildContext includes "World Overview:" when campaign.worldBrief is set and worldDocument is null', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+      vi.mocked(campaignsRepo.getWorldState).mockReturnValue(undefined)
+      vi.mocked(campaignsRepo.getWorldOverview).mockReturnValue({
+        worldBrief: 'A grim dark fantasy world called Valtara.',
+        worldDocument: null,
+        encumbranceEnabled: false,
+      })
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: { strictness: 'balanced' },
+      })
+
+      expect(systemPrompt).toContain('World Overview:')
+      expect(systemPrompt).toContain('A grim dark fantasy world called Valtara.')
+    })
+
+    it('buildContext includes "World Reference Document:" when worldDocument is set (truncated to 16000)', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+      vi.mocked(campaignsRepo.getWorldState).mockReturnValue(undefined)
+      const longDoc = 'x'.repeat(20000)
+      vi.mocked(campaignsRepo.getWorldOverview).mockReturnValue({
+        worldBrief: null,
+        worldDocument: longDoc,
+        encumbranceEnabled: false,
+      })
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: { strictness: 'balanced' },
+      })
+
+      expect(systemPrompt).toContain('World Reference Document:')
+      // worldDocument truncated to 16,000 chars
+      expect(systemPrompt).not.toContain('x'.repeat(20000))
+      expect(systemPrompt).toContain('x'.repeat(16000))
+    })
+
+    it('buildContext omits the World Overview block when both worldBrief and worldDocument are null', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+      vi.mocked(campaignsRepo.getWorldState).mockReturnValue(undefined)
+      vi.mocked(campaignsRepo.getWorldOverview).mockReturnValue({
+        worldBrief: null,
+        worldDocument: null,
+        encumbranceEnabled: false,
+      })
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: { strictness: 'balanced' },
+      })
+
+      expect(systemPrompt).not.toContain('World Overview:')
+      expect(systemPrompt).not.toContain('World Reference Document:')
+    })
+
+    it('buildContext omits World Overview block when getWorldOverview returns undefined', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+      vi.mocked(campaignsRepo.getWorldState).mockReturnValue(undefined)
+      vi.mocked(campaignsRepo.getWorldOverview).mockReturnValue(undefined)
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: { strictness: 'balanced' },
+      })
+
+      expect(systemPrompt).not.toContain('World Overview:')
+    })
+
+    // ─── Phase 7: extended character summary (CHAR-04, STATE-06) ──────────────
+
+    it('formatCharacterSummary includes "Encumbrance:" only when encumbranceEnabled is true', () => {
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(undefined)
+      vi.mocked(campaignsRepo.getWorldState).mockReturnValue(undefined)
+
+      // encumbranceEnabled = false → no Encumbrance line
+      vi.mocked(campaignsRepo.getWorldOverview).mockReturnValue({
+        worldBrief: null,
+        worldDocument: null,
+        encumbranceEnabled: false,
+      })
+      const charOff = makeCharacter()
+      const summaryOff = formatCharacterSummary(charOff, false)
+      expect(summaryOff).not.toContain('Encumbrance:')
+
+      // encumbranceEnabled = true → Encumbrance line appears
+      const summaryOn = formatCharacterSummary(charOff, true)
+      expect(summaryOn).toContain('Encumbrance:')
+    })
+
+    it('formatCharacterSummary includes feats list when feats are provided', () => {
+      const char = makeCharacter()
+      const summary = formatCharacterSummary(char, false, ['Alert', 'Lucky'])
+      expect(summary).toContain('Feats: Alert, Lucky')
+    })
+
+    it('formatCharacterSummary omits Feats line when no feats', () => {
+      const char = makeCharacter()
+      const summary = formatCharacterSummary(char, false, [])
+      expect(summary).not.toContain('Feats:')
+    })
+
+    it('formatCharacterSummary includes negative traits when negativeTraits JSON is set', () => {
+      const char = makeCharacter({
+        negativeTraits: JSON.stringify({ presetFlaws: ['Greedy'], freeFormFlaws: ['Reckless'] }),
+      })
+      const summary = formatCharacterSummary(char, false)
+      expect(summary).toContain('Negative Traits:')
+    })
+
+    it('formatCharacterSummary includes companions list when companions are provided', () => {
+      const char = makeCharacter()
+      const companions = [{ name: 'Ember', type: 'Familiar', hpCurrent: 8, hpMax: 10 }]
+      const summary = formatCharacterSummary(char, false, [], companions)
+      expect(summary).toContain('Companions:')
+      expect(summary).toContain('Ember')
     })
 
     it('toolDescriptionsBlock describes all 8 Phase 6 tools (Pitfall 6)', () => {

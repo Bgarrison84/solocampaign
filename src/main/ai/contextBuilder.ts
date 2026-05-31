@@ -74,8 +74,18 @@ function abilityMod(score: number): string {
 
 /**
  * Format the D-21 character summary block from CharacterWithResources.
+ *
+ * Phase 7 extended parameters (all optional for backwards compat with existing callers):
+ * @param encumbranceEnabled - if true, appends an Encumbrance line (STATE-06)
+ * @param featNames - list of feat names the character has acquired (CHAR-05)
+ * @param companions - list of companion rows for the campaign (PARTY-02)
  */
-function formatCharacterSummary(char: CharacterWithResources): string {
+export function formatCharacterSummary(
+  char: CharacterWithResources,
+  encumbranceEnabled = false,
+  featNames: string[] = [],
+  companions: Array<{ name: string; type: string; hpCurrent: number; hpMax: number }> = [],
+): string {
   const { resources } = char
 
   // Line 1: Character name, level, race, class (+ subclass if present)
@@ -142,6 +152,46 @@ function formatCharacterSummary(char: CharacterWithResources): string {
   // Phase 5: hit dice remaining (D-38) — for short-rest decisions.
   if (resources.hitDiceCurrent != null && resources.hitDiceTotal != null) {
     lines.push(`Hit Dice: ${resources.hitDiceCurrent}/${resources.hitDiceTotal}`)
+  }
+
+  // Phase 7: Feats (CHAR-05) — list acquired feat names (newline-stripped — T-07-03-02)
+  if (featNames.length > 0) {
+    const safeFeats = featNames.map((f) => stripNewlines(f)).join(', ')
+    lines.push(`Feats: ${safeFeats}`)
+  }
+
+  // Phase 7: Negative Traits (CHAR-03) — parsed from negativeTraits JSON
+  if (char.negativeTraits) {
+    try {
+      const nt = JSON.parse(char.negativeTraits) as {
+        presetFlaws?: string[]
+        freeFormFlaws?: string[]
+      }
+      const all = [...(nt.presetFlaws ?? []), ...(nt.freeFormFlaws ?? [])]
+        .map((f) => stripNewlines(f))
+        .filter(Boolean)
+      if (all.length > 0) {
+        lines.push(`Negative Traits: ${all.join(', ')}`)
+      }
+    } catch {
+      // Malformed JSON — skip the negative traits line
+    }
+  }
+
+  // Phase 7: Companions (PARTY-02)
+  if (companions.length > 0) {
+    const companionList = companions
+      .map((c) => `${stripNewlines(c.name)} (${stripNewlines(c.type)}, HP ${c.hpCurrent}/${c.hpMax})`)
+      .join(', ')
+    lines.push(`Companions: ${companionList}`)
+  }
+
+  // Phase 7: Encumbrance (STATE-06) — only when enabled for this campaign
+  if (encumbranceEnabled) {
+    // Carrying weight: sum of item weights * quantities from the character's inventory
+    const carryingLbs = char.items.reduce((sum, item) => sum + item.weight * item.quantity, 0)
+    const carryCapacity = char.strength * 15 // D&D 5e RAW
+    lines.push(`Encumbrance: Enabled (carrying ${carryingLbs.toFixed(1)}/${carryCapacity} lbs)`)
   }
 
   return lines.join('\n')
@@ -355,9 +405,23 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
     ? `DM style: ${config.dmPersonality.trim()}`
     : 'DM style: Classic adventure DM — balanced tone, fair challenges, memorable moments.'
 
+  // --- Phase 7: World Overview (WORLD-01) ---
+  const worldOverview = campaignsRepo.getWorldOverview(campaignId)
+  let worldOverviewBlock = ''
+  if (worldOverview?.worldDocument) {
+    // worldDocument takes precedence — truncate to 16,000 chars (T-07-03-05)
+    const docContent = worldOverview.worldDocument.substring(0, 16_000)
+    worldOverviewBlock = '\nWorld Reference Document:\n' + docContent
+  } else if (worldOverview?.worldBrief) {
+    worldOverviewBlock = '\nWorld Overview:\n' + stripNewlines(worldOverview.worldBrief)
+  }
+
   // --- Character summary ---
   const character = charactersRepo.getByCampaignId(campaignId)
-  const characterSummaryBlock = character ? '\n' + formatCharacterSummary(character) : ''
+  const encumbranceEnabled = worldOverview?.encumbranceEnabled ?? false
+  const characterSummaryBlock = character
+    ? '\n' + formatCharacterSummary(character, encumbranceEnabled)
+    : ''
 
   // --- Reference documents ---
   const referenceDocs = config.referenceDocs ?? []
@@ -377,13 +441,15 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
   const worldStateSummary = formatWorldStateSummary(campaignId, character?.id)
 
   // --- Assemble system prompt (D-17 order) ---
-  // preamble + strictness + personality + character, then the Phase 5/6 tool block,
+  // preamble + strictness + personality + character + World Overview (Phase 7),
+  // then the Phase 5/6 tool block,
   // then the Phase 6 world-state summary, then referenceDocBlock, l3Block, l2Block,
   // then sessionContextBlock
   const systemPrompt =
     [preamble, strictnessDirective, personality, characterSummaryBlock]
       .filter((part) => part.length > 0)
       .join('\n\n')
+    + (worldOverviewBlock ? '\n\n' + worldOverviewBlock : '')
     + '\n\n' + toolDescriptionsBlock
     + (worldStateSummary ? '\n\n' + worldStateSummary : '')
     + referenceDocBlock
@@ -419,4 +485,4 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
 export type CoreMessage = ModelMessage
 
 // Export for testing
-export { STRICTNESS_DIRECTIVES, formatCharacterSummary, abilityMod, formatWorldStateSummary }
+export { STRICTNESS_DIRECTIVES, abilityMod, formatWorldStateSummary }

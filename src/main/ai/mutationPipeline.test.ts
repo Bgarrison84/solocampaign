@@ -450,6 +450,108 @@ describe('mutationPipeline', () => {
       // Fell back to resolvePlayerCharacterId — the real player's flag flipped.
       expect(row!.hasInspiration).toBe(true)
     })
+
+    // ─── Phase 7: companion mutations (PARTY-02) ──────────────────────────────
+
+    it('addCompanion creates a companion character row with isCompanion=true and pushes a companion chip', async () => {
+      const { db, campaign, applyMutationBatch } = await setup()
+
+      const { chips } = await applyMutationBatch(
+        [
+          {
+            toolName: 'addCompanion',
+            args: { name: 'Shadowfax', type: 'Animal Companion', hpMax: 25, ac: 13 },
+          },
+        ],
+        campaign.id,
+        null,
+      )
+
+      // A companion chip must be pushed
+      expect(chips.some((c) => c.type === 'companion')).toBe(true)
+      expect(chips.find((c) => c.type === 'companion')?.label).toContain('Shadowfax')
+
+      // A characters row with isCompanion=true must exist
+      const companionRows = db
+        .select()
+        .from(schema.characters)
+        .where(eq(schema.characters.campaignId, campaign.id))
+        .all()
+        .filter((r) => r.isCompanion)
+      expect(companionRows).toHaveLength(1)
+      expect(companionRows[0].name).toBe('Shadowfax')
+      expect(companionRows[0].isCompanion).toBe(true)
+
+      // A characterResources row must exist for the companion
+      const resRow = db
+        .select()
+        .from(schema.characterResources)
+        .where(eq(schema.characterResources.characterId, companionRows[0].id))
+        .get()
+      expect(resRow).toBeDefined()
+      expect(resRow!.hpMax).toBe(25)
+      expect(resRow!.hpCurrent).toBe(25)
+    })
+
+    it('addCompanion with invalid args (empty name) is rejected and no row created', async () => {
+      const { db, campaign, applyMutationBatch } = await setup()
+
+      await applyMutationBatch(
+        [{ toolName: 'addCompanion', args: { name: '', type: 'Familiar', hpMax: 10, ac: 12 } }],
+        campaign.id,
+        null,
+      )
+
+      const companionRows = db
+        .select()
+        .from(schema.characters)
+        .where(eq(schema.characters.campaignId, campaign.id))
+        .all()
+        .filter((r) => r.isCompanion)
+      expect(companionRows).toHaveLength(0)
+    })
+
+    it('removeCompanion deletes the companion character row', async () => {
+      const { db, campaign, applyMutationBatch } = await setup()
+
+      // First add a companion
+      await applyMutationBatch(
+        [
+          {
+            toolName: 'addCompanion',
+            args: { name: 'Sparky', type: 'Familiar', hpMax: 10, ac: 12 },
+          },
+        ],
+        campaign.id,
+        null,
+      )
+
+      const beforeRows = db
+        .select()
+        .from(schema.characters)
+        .where(eq(schema.characters.campaignId, campaign.id))
+        .all()
+        .filter((r) => r.isCompanion)
+      expect(beforeRows).toHaveLength(1)
+      const companionId = beforeRows[0].id
+
+      // Now remove the companion
+      const { chips } = await applyMutationBatch(
+        [{ toolName: 'removeCompanion', args: { companionId } }],
+        campaign.id,
+        null,
+      )
+
+      expect(chips.some((c) => c.type === 'companion')).toBe(true)
+
+      const afterRows = db
+        .select()
+        .from(schema.characters)
+        .where(eq(schema.characters.campaignId, campaign.id))
+        .all()
+        .filter((r) => r.isCompanion)
+      expect(afterRows).toHaveLength(0)
+    })
   })
 
   function questsList(db: ReturnType<typeof drizzle>, campaignId: string) {

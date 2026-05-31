@@ -45,6 +45,8 @@ import {
   updateWorldTimeSchema,
   updateLocationSchema,
   awardInspirationSchema,
+  addCompanionSchema,
+  removeCompanionSchema,
 } from './toolSchemas'
 
 // ─── Public Types ─────────────────────────────────────────────────────────────
@@ -65,6 +67,8 @@ export interface MutationChip {
     | 'quest_complete'
     | 'npc'
     | 'inspiration'
+    // Phase 7 additions (PARTY-02)
+    | 'companion'
 }
 
 export interface ShowDiceRollData {
@@ -539,6 +543,50 @@ function applyOneTool(
         .run()
       acc.chips.push({ id: chipId(), label: 'Inspiration awarded!', type: 'inspiration' })
       logEvent(campaignId, sessionId, 'inspiration_awarded', { characterId: charId })
+      return
+    }
+
+    // ─── Phase 7: companion mutations (PARTY-02) ──────────────────────────────
+
+    case 'addCompanion': {
+      const r = addCompanionSchema.safeParse(args)
+      if (!r.success) {
+        log.warn('[mutationPipeline] invalid addCompanion args')
+        return
+      }
+      const companion = charactersRepo.createCompanion({
+        campaignId,
+        name: r.data.name,
+        type: r.data.type,
+        hpMax: r.data.hpMax,
+        ac: r.data.ac,
+      })
+      acc.chips.push({
+        id: chipId(),
+        label: `${r.data.name} joined`,
+        type: 'companion',
+      })
+      logEvent(campaignId, sessionId, 'companion_added', {
+        companionId: companion.id,
+        name: r.data.name,
+        type: r.data.type,
+      })
+      return
+    }
+
+    case 'removeCompanion': {
+      const r = removeCompanionSchema.safeParse(args)
+      if (!r.success) {
+        log.warn('[mutationPipeline] invalid removeCompanion args')
+        return
+      }
+      charactersRepo.deleteCompanion(r.data.companionId, campaignId)
+      acc.chips.push({
+        id: chipId(),
+        label: 'Companion removed',
+        type: 'companion',
+      })
+      logEvent(campaignId, sessionId, 'companion_removed', { companionId: r.data.companionId })
       return
     }
 

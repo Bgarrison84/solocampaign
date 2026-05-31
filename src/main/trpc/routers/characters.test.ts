@@ -10,6 +10,7 @@ import { join, resolve } from 'path'
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
+import { eq } from 'drizzle-orm'
 import * as schema from '../../db/schema'
 
 // Must be set before electron mock closes over it
@@ -119,7 +120,7 @@ describe('characters tRPC router', () => {
 
     // tRPC v10 API: router.createCaller(ctx)
     const caller = charactersRouter.createCaller({})
-    return { caller, campaign, campaignsRepo }
+    return { db, caller, campaign, campaignsRepo }
   }
 
   // Minimal valid character input for tests
@@ -213,8 +214,9 @@ describe('characters tRPC router', () => {
     it('allows a second character in the same campaign (Phase 7 party mode — D-18)', async () => {
       // Phase 7 (PARTY-01, D-18): the uniqueCampaign DB constraint was dropped in migration 0007.
       // Multiple characters per campaign are now allowed up to the campaign's partySize limit.
-      // Application-level partySize enforcement lives in charactersRepo (planned for 07-04).
-      const { caller, campaign } = await makeRouter()
+      // Set partySize to 2 to allow two player characters (partySize enforcement implemented in 07-03).
+      const { db, caller, campaign } = await makeRouter()
+      db.update(schema.campaigns).set({ partySize: 2 }).where(eq(schema.campaigns.id, campaign.id)).run()
 
       const first = await caller.create({ ...baseCharInput, campaignId: campaign.id, name: 'First' })
       const second = await caller.create({ ...baseCharInput, campaignId: campaign.id, name: 'Second' })

@@ -338,4 +338,56 @@ export const PHASE6_TOOLS = {
  * Exactly 20 tools (12 Phase 5 + 8 Phase 6), none with an execute property (D-04).
  * Phase 6 MUST extend, not replace, the Phase 5 surface (Pitfall 2).
  */
-export const ALL_TOOLS = { ...PHASE5_TOOLS, ...PHASE6_TOOLS } as const satisfies ToolSet
+export const ALL_TOOLS_P5P6 = { ...PHASE5_TOOLS, ...PHASE6_TOOLS } as const satisfies ToolSet
+
+// ─── Phase 7 Zod Schemas (PARTY-02 — companion management) ────────────────────
+//
+// addCompanion: adds a familiar, animal companion, or summoned creature to the party.
+// removeCompanion: removes a companion by its character row ID.
+// Same conventions as Phase 5/6 — bounded, closed enum, no execute property.
+
+/** addCompanion: add a familiar, animal companion, or summoned creature to the party. */
+export const addCompanionSchema = z.object({
+  name: z.string().min(1).max(100),
+  type: z.enum(['Familiar', 'Animal Companion', 'Summoned Creature']),
+  hpMax: z.number().int().positive().max(9999),
+  ac: z.number().int().min(1).max(30),
+})
+
+/** removeCompanion: remove a companion by its character row ID. */
+export const removeCompanionSchema = z.object({
+  companionId: z.string(),
+})
+
+// ─── Phase 7 tool() Registrations (NO execute — D-04, Pitfall 1) ──────────────
+
+export const addCompanionTool = tool({
+  description:
+    "Add a familiar, animal companion, or summoned creature to the party. They appear in the campaign context and can receive HP updates.",
+  inputSchema: addCompanionSchema,
+})
+
+export const removeCompanionTool = tool({
+  description:
+    "Remove a companion from the party (they were dismissed, died, or left). Pass the companion's character id.",
+  inputSchema: removeCompanionSchema,
+})
+
+/**
+ * The 2 Phase 7 companion tools. Combined with P5+P6 tools into ALL_TOOLS.
+ * Never passed to streamText on its own — ALL_TOOLS is the complete surface.
+ */
+export const PHASE7_TOOLS = {
+  addCompanion: addCompanionTool,
+  removeCompanion: removeCompanionTool,
+} as const satisfies ToolSet
+
+/**
+ * The full tool set passed to streamText({ tools }) from Phase 7 onward.
+ * Exactly 22 tools (12 Phase 5 + 8 Phase 6 + 2 Phase 7), none with an execute property (D-04).
+ */
+export const ALL_TOOLS = {
+  ...PHASE5_TOOLS,
+  ...PHASE6_TOOLS,
+  ...PHASE7_TOOLS,
+} as const satisfies ToolSet

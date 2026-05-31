@@ -237,8 +237,9 @@ describe('toolSchemas', () => {
   })
 
   describe('ALL_TOOLS', () => {
-    it('combines all 20 tools (12 Phase 5 + 8 Phase 6)', () => {
-      expect(Object.keys(ALL_TOOLS)).toHaveLength(20)
+    it('combines Phase 5 and Phase 6 tools (count updated to 22 in Phase 7)', () => {
+      // Phase 7 added 2 companion tools — ALL_TOOLS now has 22 entries.
+      expect(Object.keys(ALL_TOOLS)).toHaveLength(22)
     })
 
     it('includes every Phase 5 and Phase 6 tool', () => {
@@ -250,6 +251,107 @@ describe('toolSchemas', () => {
       for (const value of Object.values(ALL_TOOLS)) {
         expect(value).not.toHaveProperty('execute')
       }
+    })
+  })
+})
+
+// ─── Phase 7 Tool Schema Tests (PARTY-02) ─────────────────────────────────────
+
+import {
+  addCompanionSchema,
+  removeCompanionSchema,
+  PHASE7_TOOLS,
+} from './toolSchemas'
+
+describe('Phase 7 toolSchemas', () => {
+  describe('addCompanionSchema', () => {
+    it('accepts a valid companion', () => {
+      const r = addCompanionSchema.safeParse({
+        name: 'Shadowfax',
+        type: 'Animal Companion',
+        hpMax: 50,
+        ac: 12,
+      })
+      expect(r.success).toBe(true)
+    })
+
+    it('rejects an empty name', () => {
+      expect(
+        addCompanionSchema.safeParse({ name: '', type: 'Familiar', hpMax: 10, ac: 12 }).success,
+      ).toBe(false)
+    })
+
+    it('rejects name longer than 100 chars', () => {
+      expect(
+        addCompanionSchema.safeParse({
+          name: 'x'.repeat(101),
+          type: 'Familiar',
+          hpMax: 10,
+          ac: 12,
+        }).success,
+      ).toBe(false)
+    })
+
+    it('rejects ac > 30', () => {
+      expect(
+        addCompanionSchema.safeParse({ name: 'X', type: 'Familiar', hpMax: 10, ac: 31 }).success,
+      ).toBe(false)
+    })
+
+    it('rejects hpMax <= 0', () => {
+      expect(
+        addCompanionSchema.safeParse({ name: 'X', type: 'Familiar', hpMax: 0, ac: 12 }).success,
+      ).toBe(false)
+    })
+
+    it('rejects invalid type enum', () => {
+      expect(
+        addCompanionSchema.safeParse({ name: 'X', type: 'Dragon', hpMax: 10, ac: 12 }).success,
+      ).toBe(false)
+    })
+
+    it('accepts all three companion types', () => {
+      for (const type of ['Familiar', 'Animal Companion', 'Summoned Creature'] as const) {
+        expect(
+          addCompanionSchema.safeParse({ name: 'X', type, hpMax: 10, ac: 12 }).success,
+        ).toBe(true)
+      }
+    })
+  })
+
+  describe('removeCompanionSchema', () => {
+    it('accepts a companionId', () => {
+      expect(removeCompanionSchema.safeParse({ companionId: 'char-companion-1' }).success).toBe(
+        true,
+      )
+    })
+
+    it('rejects missing companionId', () => {
+      expect(removeCompanionSchema.safeParse({}).success).toBe(false)
+    })
+  })
+
+  describe('PHASE7_TOOLS', () => {
+    it('contains addCompanion and removeCompanion', () => {
+      expect(PHASE7_TOOLS).toHaveProperty('addCompanion')
+      expect(PHASE7_TOOLS).toHaveProperty('removeCompanion')
+    })
+
+    it('has no execute property on any tool (D-04)', () => {
+      for (const value of Object.values(PHASE7_TOOLS)) {
+        expect(value).not.toHaveProperty('execute')
+      }
+    })
+  })
+
+  describe('ALL_TOOLS (Phase 7 updated)', () => {
+    it('includes addCompanion and removeCompanion in ALL_TOOLS', () => {
+      expect(ALL_TOOLS).toHaveProperty('addCompanion')
+      expect(ALL_TOOLS).toHaveProperty('removeCompanion')
+    })
+
+    it('has 22 tools total (20 Phase 5+6 + 2 Phase 7)', () => {
+      expect(Object.keys(ALL_TOOLS)).toHaveLength(22)
     })
   })
 })

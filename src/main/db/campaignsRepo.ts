@@ -164,6 +164,45 @@ export const campaignsRepo = {
       .get()
   },
 
+  /**
+   * Persist the AI-generated or player-written world brief for a campaign (WORLD-01).
+   * Called by the generateWorldBrief tRPC mutation.
+   */
+  updateWorldBrief(campaignId: string, worldBrief: string): void {
+    const db = getDb()
+    db.update(campaigns)
+      .set({ worldBrief })
+      .where(eq(campaigns.id, campaignId))
+      .run()
+  },
+
+  /**
+   * Read the world overview columns for the contextBuilder injection (WORLD-01, STATE-06).
+   * Returns worldBrief, worldDocument, and encumbranceEnabled — the three Phase 7 fields
+   * needed to build the World Overview block in the system prompt.
+   * Returns undefined if the campaign does not exist.
+   */
+  getWorldOverview(
+    campaignId: string,
+  ):
+    | {
+        worldBrief: string | null
+        worldDocument: string | null
+        encumbranceEnabled: boolean
+      }
+    | undefined {
+    const db = getDb()
+    return db
+      .select({
+        worldBrief: campaigns.worldBrief,
+        worldDocument: campaigns.worldDocument,
+        encumbranceEnabled: campaigns.encumbranceEnabled,
+      })
+      .from(campaigns)
+      .where(eq(campaigns.id, campaignId))
+      .get()
+  },
+
   delete(id: string): void {
     const db = getDb()
     db.delete(campaigns).where(eq(campaigns.id, id)).run()

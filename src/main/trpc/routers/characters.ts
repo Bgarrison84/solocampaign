@@ -389,10 +389,13 @@ export const charactersRouter = t.router({
     }),
 
   /**
-   * Level up a character: increment level (capped at 20), add hpGain to hpMax/hpCurrent,
+   * Level up a character: increment level (uncapped — D-24), add hpGain to hpMax/hpCurrent,
    * and merge new slot maxes (preserving used counts).
+   * Optional `classes` replaces characters.classes JSON (multiclass — D-07/D-08).
+   * Optional `subclass` writes characters.subclass (subclass selection — D-15).
+   * When neither is provided, single-class behavior is identical to the Phase 5 path.
    * Zod bounds: hpGain 1–50 (T-05-06-01); newSlotMax values 0–9.
-   * (D-31, PROG-01)
+   * (D-24, D-31, PROG-01)
    */
   levelUp: t.procedure
     .input(
@@ -400,10 +403,22 @@ export const charactersRouter = t.router({
         characterId: characterIdSchema,
         hpGain: z.number().int().min(1).max(50),
         newSlotMax: z.record(z.string(), z.number().int().min(0).max(9)),
+        classes: z
+          .array(
+            z.object({
+              className: z.string().min(1).max(100),
+              level: z.number().int().min(1).max(30),
+            }),
+          )
+          .optional(),
+        subclass: z.string().max(100).optional(),
       }),
     )
     .mutation(({ input }) => {
-      charactersRepo.levelUp(input.characterId, input.hpGain, input.newSlotMax)
+      charactersRepo.levelUp(input.characterId, input.hpGain, input.newSlotMax, {
+        classes: input.classes,
+        subclass: input.subclass,
+      })
       return { leveled: true }
     }),
 

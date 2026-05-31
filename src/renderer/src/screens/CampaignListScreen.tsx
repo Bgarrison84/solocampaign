@@ -1,14 +1,17 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { trpc } from '../lib/trpc'
 import { CampaignCard } from '../components/CampaignCard'
 import { NewCampaignCard } from '../components/NewCampaignCard'
 import { EmptyState } from '../components/EmptyState'
 import { CreateCampaignModal } from '../components/CreateCampaignModal'
+import { Button } from '../components/ui/button'
 
 export function CampaignListScreen() {
   // Modal state — NOT defaulting to true (per D-07: no auto-open on first launch)
   const [modalOpen, setModalOpen] = useState(false)
+  const navigate = useNavigate()
 
   const campaignsQuery = useQuery({
     queryKey: ['campaigns', 'list'],
@@ -34,7 +37,17 @@ export function CampaignListScreen() {
 
   return (
     <div className="flex flex-col min-h-full bg-background p-8">
-      <h1 className="text-2xl font-semibold text-foreground mb-8">Your Campaigns</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-semibold text-foreground">Your Campaigns</h1>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/library')}
+          className="text-muted-foreground hover:text-foreground gap-1"
+        >
+          Rules
+        </Button>
+      </div>
 
       {isLoading ? (
         // Ghost loading cards — same grid dimensions, no shimmer per plan

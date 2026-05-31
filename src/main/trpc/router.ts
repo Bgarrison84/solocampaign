@@ -1,9 +1,12 @@
 import { t } from './_base'
 import { aiRouter } from './routers/ai'
+import { campaignDocsRouter } from './routers/campaignDocs'
 import { campaignsRouter } from './routers/campaigns'
 import { charactersRouter } from './routers/characters'
 import { combatRouter } from './routers/combat'
 import { contentRouter } from './routers/content'
+import { featsRouter } from './routers/feats'
+import { libraryRouter } from './routers/library'
 import { npcsRouter } from './routers/npcs'
 import { prefsRouter } from './routers/prefs'
 import { questsRouter } from './routers/quests'
@@ -15,11 +18,14 @@ import { worldStateRouter, factionsRouter } from './routers/worldState'
 
 export const router = t.router({
   ai: aiRouter,
+  campaignDocs: campaignDocsRouter,
   campaigns: campaignsRouter,
   characters: charactersRouter,
   combat: combatRouter,
   content: contentRouter,
   factions: factionsRouter,
+  feats: featsRouter,
+  library: libraryRouter,
   npcs: npcsRouter,
   prefs: prefsRouter,
   quests: questsRouter,

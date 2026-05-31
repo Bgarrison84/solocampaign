@@ -21,13 +21,36 @@ export const campaignsRepo = {
     return db.select().from(campaigns).orderBy(desc(campaigns.createdAt)).all()
   },
 
-  create({ name }: { name: string }): Campaign {
+  create({
+    name,
+    partySize = 1,
+    encumbranceEnabled = false,
+    worldSetupMode = null,
+    worldBrief = null,
+    worldDocument = null,
+  }: {
+    name: string
+    partySize?: number
+    encumbranceEnabled?: boolean
+    worldSetupMode?: string | null
+    worldBrief?: string | null
+    worldDocument?: string | null
+  }): Campaign {
     const db = getDb()
     const id = randomUUID()
     const now = Date.now()
 
     db.insert(campaigns)
-      .values({ id, name, createdAt: new Date(now) })
+      .values({
+        id,
+        name,
+        createdAt: new Date(now),
+        partySize,
+        encumbranceEnabled,
+        worldSetupMode,
+        worldBrief,
+        worldDocument,
+      })
       .run()
 
     const created = db

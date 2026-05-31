@@ -1,12 +1,15 @@
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { generateText } from 'ai'
+import path from 'node:path'
+import { dialog } from 'electron'
 import { t } from '../_base'
 import { campaignsRepo } from '../../db/campaignsRepo'
 import { campaignNameSchema, campaignIdSchema, aiConfigSchema } from '../schemas'
 import { importImage, getImageDataUrl } from '../../imageService'
 import { secretStorage } from '../../secrets'
 import { buildModel } from '../../ai/llmProvider'
+import { extractTextFromFile, readTextFile } from '../../services/pdfExtractor'
 import log from 'electron-log'
 
 export const campaignsRouter = t.router({
@@ -15,9 +18,25 @@ export const campaignsRouter = t.router({
   }),
 
   create: t.procedure
-    .input(z.object({ name: campaignNameSchema }))
+    .input(
+      z.object({
+        name: campaignNameSchema,
+        partySize: z.number().int().min(1).max(4).optional(),
+        encumbranceEnabled: z.boolean().optional(),
+        worldSetupMode: z.enum(['ai', 'brief', 'import']).optional(),
+        worldBrief: z.string().max(8000).optional(),
+        worldDocument: z.string().max(50_000).optional(),
+      }),
+    )
     .mutation(({ input }) => {
-      return campaignsRepo.create({ name: input.name })
+      return campaignsRepo.create({
+        name: input.name,
+        partySize: input.partySize ?? 1,
+        encumbranceEnabled: input.encumbranceEnabled ?? false,
+        worldSetupMode: input.worldSetupMode ?? null,
+        worldBrief: input.worldBrief ?? null,
+        worldDocument: input.worldDocument ?? null,
+      })
     }),
 
   get: t.procedure
@@ -126,6 +145,51 @@ export const campaignsRouter = t.router({
       // Return the updated campaign row (contains no key columns — D-23)
       return campaignsRepo.get(campaignId)
     }),
+
+  /**
+   * Open the OS file picker and extract text from a PDF/txt/md document.
+   * Used by the "Import a Document" world-setup mode in the campaign creation wizard.
+   *
+   * Security (T-07-07-01):
+   * - File path comes ONLY from dialog.showOpenDialog (OS-validated by user — no renderer path injection).
+   * - Extracted text is returned to renderer for wizard-state preview; written to DB only at create time.
+   * - Content truncated to 50,000 chars (mirrors campaignDocs.import cap).
+   *
+   * Returns null if the user cancels the dialog.
+   */
+  importWorldDoc: t.procedure.mutation(async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      title: 'Select World Document',
+      filters: [
+        { name: 'Documents', extensions: ['pdf', 'txt', 'md'] },
+      ],
+      properties: ['openFile'],
+    })
+
+    if (canceled || filePaths.length === 0) return null
+
+    const filePath = filePaths[0]
+
+    // Security: absolute path guaranteed by dialog; double-check no traversal
+    if (!path.isAbsolute(filePath) || filePath.includes('..')) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid file path' })
+    }
+
+    log.debug('[campaigns] importWorldDoc', { filePath })
+
+    const ext = path.extname(filePath).toLowerCase()
+    let rawContent: string
+    if (ext === '.pdf') {
+      rawContent = await extractTextFromFile(filePath)
+    } else {
+      rawContent = await readTextFile(filePath)
+    }
+
+    const content = rawContent.substring(0, 50_000)
+    const filename = path.basename(filePath)
+
+    return { filename, content }
+  }),
 
   /**
    * Generate a world brief for a campaign via AI (WORLD-01).

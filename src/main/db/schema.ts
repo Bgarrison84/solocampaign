@@ -26,6 +26,18 @@ export const campaigns = sqliteTable('campaigns', {
   worldDayNumber: integer('world_day_number'),
   worldSeason: text('world_season'),
   worldLocationPath: text('world_location_path'),
+  // Phase 7 (PARTY-01): party size at campaign creation (1–4)
+  partySize: integer('party_size').notNull().default(1),
+  // Phase 7 (WORLD-01): world setup mode ('ai' | 'brief' | 'import' — nullable for legacy)
+  worldSetupMode: text('world_setup_mode'),
+  // Phase 7 (WORLD-01): AI-generated or player-written world brief (~500–800 words)
+  worldBrief: text('world_brief'),
+  // Phase 7 (WORLD-01/RULES-04): imported world document (PDF/text extracted content)
+  worldDocument: text('world_document'),
+  // Phase 7 (STATE-06): encumbrance tracking toggle (default off)
+  encumbranceEnabled: integer('encumbrance_enabled', { mode: 'boolean' }).notNull().default(false),
+  // Phase 7 (RULES-03): free-form homebrew content (text injected into AI context)
+  homebrewContent: text('homebrew_content'),
 })
 
 export type Campaign = typeof campaigns.$inferSelect
@@ -135,11 +147,16 @@ export const characters = sqliteTable(
     updatedAt: integer('updated_at', { mode: 'timestamp_ms' })
       .notNull()
       .default(sql`(unixepoch() * 1000)`),
+    // Phase 7 (CHAR-04): multiclass classes JSON array [{className, level, subclass?}]; null for single-class characters
+    classes: text('classes'),
+    // Phase 7 (PARTY-02): true for familiars, animal companions, and summoned creatures
+    isCompanion: integer('is_companion', { mode: 'boolean' }).notNull().default(false),
+    // Phase 7 (CHAR-03): negative traits JSON {presetFlaws: string[], freeFormFlaws: string[]}
+    negativeTraits: text('negative_traits'),
+    // Phase 7 (PARTY-01): uniqueCampaign removed — multiple characters per campaign now supported.
+    // The unique index is dropped in migration 0007 via DROP INDEX IF EXISTS characters_campaign_id_unique.
+    // Application-level enforcement via charactersRepo (partySize check).
   },
-  (table) => ({
-    // D-03: one character per campaign in Phase 2
-    uniqueCampaign: unique().on(table.campaignId),
-  }),
 )
 
 export type Character = typeof characters.$inferSelect
@@ -318,3 +335,57 @@ export const factions = sqliteTable(
 
 export type Faction = typeof factions.$inferSelect
 export type NewFaction = typeof factions.$inferInsert
+
+// ============ Phase 7: Content Depth & Advanced Character ============
+
+// Phase 7 (CHAR-05, RULES-03): custom_feats — campaign-scoped homebrew feats (name + description only)
+// Must be declared BEFORE characterFeats due to FK reference from characterFeats.customFeatId → customFeats.id.
+export const customFeats = sqliteTable('custom_feats', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description').notNull().default(''),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+})
+
+export type CustomFeat = typeof customFeats.$inferSelect
+export type NewCustomFeat = typeof customFeats.$inferInsert
+
+// Phase 7 (CHAR-05, PROG-03): character_feats — feats acquired by a character
+// feat_source: 'srd' | 'custom' | 'epic_boon'
+export const characterFeats = sqliteTable('character_feats', {
+  id: text('id').primaryKey(),
+  characterId: text('character_id')
+    .notNull()
+    .references(() => characters.id, { onDelete: 'cascade' }),
+  featName: text('feat_name').notNull(),
+  featSource: text('feat_source').notNull().default('srd'),
+  customFeatId: text('custom_feat_id').references(() => customFeats.id, { onDelete: 'set null' }),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+})
+
+export type CharacterFeat = typeof characterFeats.$inferSelect
+export type NewCharacterFeat = typeof characterFeats.$inferInsert
+
+// Phase 7 (RULES-04, WORLD-01): campaign_reference_docs — user-imported PDF/text docs per campaign
+// Content is capped at 50,000 chars at write time in campaignReferenceDocsRepo (Pitfall 7).
+export const campaignReferenceDocs = sqliteTable('campaign_reference_docs', {
+  id: text('id').primaryKey(),
+  campaignId: text('campaign_id')
+    .notNull()
+    .references(() => campaigns.id, { onDelete: 'cascade' }),
+  filename: text('filename').notNull(),
+  content: text('content').notNull().default(''),
+  createdAt: integer('created_at', { mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(unixepoch() * 1000)`),
+})
+
+export type CampaignReferenceDoc = typeof campaignReferenceDocs.$inferSelect
+export type NewCampaignReferenceDoc = typeof campaignReferenceDocs.$inferInsert

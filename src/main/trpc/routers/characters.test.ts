@@ -210,14 +210,18 @@ describe('characters tRPC router', () => {
       ).rejects.toThrow()
     })
 
-    it('throws CONFLICT TRPCError when called twice for same campaignId', async () => {
+    it('allows a second character in the same campaign (Phase 7 party mode — D-18)', async () => {
+      // Phase 7 (PARTY-01, D-18): the uniqueCampaign DB constraint was dropped in migration 0007.
+      // Multiple characters per campaign are now allowed up to the campaign's partySize limit.
+      // Application-level partySize enforcement lives in charactersRepo (planned for 07-04).
       const { caller, campaign } = await makeRouter()
 
-      await caller.create({ ...baseCharInput, campaignId: campaign.id })
+      const first = await caller.create({ ...baseCharInput, campaignId: campaign.id, name: 'First' })
+      const second = await caller.create({ ...baseCharInput, campaignId: campaign.id, name: 'Second' })
 
-      await expect(
-        caller.create({ ...baseCharInput, campaignId: campaign.id })
-      ).rejects.toMatchObject({ code: 'CONFLICT' })
+      expect(first.id).toBeTruthy()
+      expect(second.id).toBeTruthy()
+      expect(first.id).not.toBe(second.id)
     })
   })
 

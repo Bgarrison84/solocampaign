@@ -137,6 +137,10 @@ function makeCharacter(overrides: Partial<CharacterWithResources> = {}): Charact
       updatedAt: new Date(),
     },
     items: [],
+    // Phase 7 fields — default null/false for existing tests
+    classes: null,
+    isCompanion: false,
+    negativeTraits: null,
     ...overrides,
   }
 }

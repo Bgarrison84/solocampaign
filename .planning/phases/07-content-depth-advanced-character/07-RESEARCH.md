@@ -918,22 +918,25 @@ The following wave ordering is recommended based on cross-plan dependencies:
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`awardInspiration` tool with party mode:** Phase 6 CONTEXT.md D-08 notes: "future-proof for Phase 7 party mode." In party mode, the system prompt currently injects only the "player character ID." The contextBuilder needs to inject ALL party member IDs so the AI can target any of them. This is a contextBuilder extension, not a tool schema change.
+1. **RESOLVED — `awardInspiration` tool with party mode:** Phase 6 CONTEXT.md D-08 notes: "future-proof for Phase 7 party mode." In party mode, the system prompt currently injects only the "player character ID." The contextBuilder needs to inject ALL party member IDs so the AI can target any of them. This is a contextBuilder extension, not a tool schema change.
    - What we know: `awardInspiration({ characterId: string })` already supports any character ID
    - What's unclear: Whether the character summary section should list all party members or just the active one
    - Recommendation: Inject a "Party Members" section with all non-companion character IDs in the world state summary block
+   - **RESOLVED:** 07-11 Task 1 — contextBuilder is extended to inject a "Party Members:" line listing all non-companion character IDs so the AI can target any party member with `awardInspiration`. No tool schema change required (A4 confirmed).
 
-2. **Multi-character combat tracker:** When `partySize > 1`, multiple characters are in the combat tracker. The existing `is_player` flag marks player characters. Phase 7 adds `isCompanion` characters. The Phase 5 combat tracker adds player characters via `addCombatant({ isPlayer: true })`. In party mode, how are multiple player characters added?
+2. **RESOLVED — Multi-character combat tracker:** When `partySize > 1`, multiple characters are in the combat tracker. The existing `is_player` flag marks player characters. Phase 7 adds `isCompanion` characters. The Phase 5 combat tracker adds player characters via `addCombatant({ isPlayer: true })`. In party mode, how are multiple player characters added?
    - What we know: The combat tracker `is_player` flag already exists; companions are added via `addCompanion` tool
    - What's unclear: Whether a "Start Combat" flow automatically adds all party members, or the AI calls `addCombatant` once per party member
    - Recommendation: "Start Combat" button automatically adds all active (non-companion) party members as combatants with current HP; AI adds enemies and companions
+   - **RESOLVED:** 07-08 Task 3 — the Start Combat handler is modified to call `trpc.combat.addCombatant({ isPlayer: true, … })` for each non-companion party member when `partySize > 1`. Solo campaigns (`partySize = 1`) are unaffected.
 
-3. **`reference_docs` JSON column migration strategy:** Currently stores `string[]` (relative paths of bundled docs). Phase 7 extends this to also include `campaign_reference_docs.id` strings. These look like UUIDs vs. relative paths — the system can distinguish them. But existing campaigns with reference_docs selections must continue to work.
+3. **RESOLVED — `reference_docs` JSON column migration strategy:** Currently stores `string[]` (relative paths of bundled docs). Phase 7 extends this to also include `campaign_reference_docs.id` strings. These look like UUIDs vs. relative paths — the system can distinguish them. But existing campaigns with reference_docs selections must continue to work.
    - What we know: The column is a JSON string array; the referenceDocLoader reads it and calls `readReferenceDocs(paths)` which looks up files on disk
    - What's unclear: Whether to keep the mixed-array approach or split into two columns
    - Recommendation: Keep mixed array. The `readReferenceDocs` function is extended to recognize IDs (UUIDs) and query `campaign_reference_docs` for those entries. Relative path strings continue to load from disk as before.
+   - **RESOLVED:** 07-10 Task 2 — mixed-array approach adopted. `referenceDocLoader.ts` is extended: entries that match UUID format are resolved via `campaignReferenceDocsRepo.getById`; relative path strings continue to load from disk. Existing campaigns are unaffected.
 
 ---
 

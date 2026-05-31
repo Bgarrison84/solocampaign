@@ -1,9 +1,13 @@
 import { z } from 'zod'
+import { TRPCError } from '@trpc/server'
+import { generateText } from 'ai'
 import { t } from '../_base'
 import { campaignsRepo } from '../../db/campaignsRepo'
 import { campaignNameSchema, campaignIdSchema, aiConfigSchema } from '../schemas'
 import { importImage, getImageDataUrl } from '../../imageService'
 import { secretStorage } from '../../secrets'
+import { buildModel } from '../../ai/llmProvider'
+import log from 'electron-log'
 
 export const campaignsRouter = t.router({
   list: t.procedure.query(() => {
@@ -121,5 +125,76 @@ export const campaignsRouter = t.router({
 
       // Return the updated campaign row (contains no key columns — D-23)
       return campaignsRepo.get(campaignId)
+    }),
+
+  /**
+   * Generate a world brief for a campaign via AI (WORLD-01).
+   *
+   * Produces a 500-800 word world brief describing: setting name, tone, factions,
+   * main conflict, key locations, and a Session 1 hook. Uses generateText (non-streaming)
+   * to mirror the recap generator pattern (Phase 4). Saves the result via
+   * campaignsRepo.updateWorldBrief so contextBuilder can inject it into future sessions.
+   *
+   * Security: campaignId validated as UUID; apiKey fetched from safeStorage (not DB).
+   */
+  generateWorldBrief: t.procedure
+    .input(z.object({ campaignId: campaignIdSchema }))
+    .mutation(async ({ input }) => {
+      const { campaignId } = input
+
+      const campaign = campaignsRepo.get(campaignId)
+      if (!campaign) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Campaign not found' })
+      }
+
+      if (!campaign.providerType || !campaign.modelName) {
+        throw new TRPCError({
+          code: 'PRECONDITION_FAILED',
+          message: 'AI provider is not configured for this campaign',
+        })
+      }
+
+      const apiKey = await secretStorage.decrypt('ai-key-' + campaignId)
+
+      const model = buildModel({
+        type: campaign.providerType as 'openai-compatible' | 'gemini',
+        endpointUrl: campaign.endpointUrl ?? undefined,
+        modelName: campaign.modelName,
+        apiKey: apiKey ?? undefined,
+      })
+
+      const prompt =
+        `You are world-building a D&D 5e campaign setting. Create a detailed world brief for the campaign named "${campaign.name}". ` +
+        'Include: the setting name and geographic overview, the overall tone and themes, 2-3 major factions or power groups, ' +
+        'the main conflict or central threat, 3-5 key locations, and a compelling Session 1 hook. ' +
+        'Write in 500-800 words in third-person present tense. Be specific and evocative. ' +
+        'This brief will be used by an AI Dungeon Master to guide the entire campaign.'
+
+      log.debug('[campaigns] generateWorldBrief starting', { campaignId, modelName: campaign.modelName })
+
+      try {
+        const result = await generateText({
+          model,
+          prompt,
+          temperature: 0.8,
+        })
+
+        const brief = result.text
+        campaignsRepo.updateWorldBrief(campaignId, brief)
+
+        log.debug('[campaigns] generateWorldBrief complete', {
+          campaignId,
+          briefLength: brief.length,
+        })
+
+        return { brief }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err)
+        log.error('[campaigns] generateWorldBrief failed:', message)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `World brief generation failed: ${message}`,
+        })
+      }
     }),
 })

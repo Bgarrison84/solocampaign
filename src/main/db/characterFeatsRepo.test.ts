@@ -11,6 +11,7 @@ import { join, resolve } from 'path'
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
+import { eq } from 'drizzle-orm'
 import * as schema from './schema'
 
 let testDir = ''
@@ -186,7 +187,10 @@ describe('characterFeatsRepo', () => {
   })
 
   it('listByCharacter does not return feats from other characters', async () => {
-    const { characterFeatsRepo, charactersRepo, campaign, character } = await getRepo()
+    const { db, characterFeatsRepo, charactersRepo, campaign, character } = await getRepo()
+
+    // Set partySize to 2 so a second character can be created (Phase 7 party mode, PARTY-01)
+    db.update(schema.campaigns).set({ partySize: 2 }).where(eq(schema.campaigns.id, campaign.id)).run()
 
     const otherChar = charactersRepo.createWithResources({
       ...baseCharInput,

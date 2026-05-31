@@ -237,10 +237,9 @@ describe('toolSchemas', () => {
   })
 
   describe('ALL_TOOLS', () => {
-    it('combines all 20 tools (12 Phase 5 + 8 Phase 6)', () => {
-      // Note: this count will be 22 after Phase 7 companion tools are added.
-      // Updated below in Phase 7 tests.
-      expect(Object.keys(ALL_TOOLS)).toHaveLength(20)
+    it('combines Phase 5 and Phase 6 tools (count updated to 22 in Phase 7)', () => {
+      // Phase 7 added 2 companion tools — ALL_TOOLS now has 22 entries.
+      expect(Object.keys(ALL_TOOLS)).toHaveLength(22)
     })
 
     it('includes every Phase 5 and Phase 6 tool', () => {

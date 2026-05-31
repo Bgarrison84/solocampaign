@@ -450,7 +450,6 @@ describe('mutationPipeline', () => {
       // Fell back to resolvePlayerCharacterId — the real player's flag flipped.
       expect(row!.hasInspiration).toBe(true)
     })
-  })
 
     // ─── Phase 7: companion mutations (PARTY-02) ──────────────────────────────
 

@@ -4,7 +4,7 @@
  * JSON columns are parsed before returning — the renderer never receives raw JSON strings.
  */
 
-import { eq, asc, sql } from 'drizzle-orm'
+import { eq, asc, sql, and, count } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 import log from 'electron-log'
 import { getDb } from './index'
@@ -12,6 +12,7 @@ import {
   characters,
   characterResources,
   characterItems,
+  campaigns,
 } from './schema'
 import type {
   Character,
@@ -113,9 +114,40 @@ export const charactersRepo = {
   /**
    * Atomically create a character with its resources and starting items
    * in a single synchronous transaction (Pitfall 1: NEVER async tx).
+   *
+   * PARTY-01: Enforces partySize at application layer before insert.
+   * Non-companion characters are counted; throws if count >= campaign.partySize.
+   * Companions (isCompanion=true) bypass this check — use createCompanion() instead.
    */
   createWithResources(input: CreateCharacterInput): CharacterWithResources {
     const db = getDb()
+
+    // PARTY-01: partySize enforcement for non-companion characters
+    const campaign = db
+      .select({ partySize: campaigns.partySize })
+      .from(campaigns)
+      .where(eq(campaigns.id, input.campaignId))
+      .get()
+
+    if (campaign) {
+      const [{ value: nonCompanionCount }] = db
+        .select({ value: count() })
+        .from(characters)
+        .where(
+          and(
+            eq(characters.campaignId, input.campaignId),
+            eq(characters.isCompanion, false),
+          ),
+        )
+        .all()
+
+      if (nonCompanionCount >= campaign.partySize) {
+        throw new Error(
+          `[charactersRepo] Party is full: campaign partySize is ${campaign.partySize} and there are already ${nonCompanionCount} non-companion characters`,
+        )
+      }
+    }
+
     const charId = randomUUID()
     const resId = randomUUID()
 
@@ -539,5 +571,127 @@ export const charactersRepo = {
       })
       .where(eq(characterResources.characterId, characterId))
       .run()
+  },
+
+  /**
+   * Create a companion (familiar, animal companion, summoned creature) for a campaign.
+   * Bypasses partySize enforcement — companions do not count toward the party limit (PARTY-01).
+   *
+   * Companion type is stored in the `subclass` column (a text field repurposed for companions;
+   * documented in Phase 7 plan 03 SUMMARY). This avoids a schema change while preserving
+   * all companion metadata within the existing characters table.
+   *
+   * Non-nullable columns (class, background, ability scores) receive minimal placeholder values
+   * so the row is valid per the DB schema. The AI context will identify this row as a companion
+   * via isCompanion=true and use name + type (from subclass) + HP/AC for narration.
+   */
+  createCompanion(input: {
+    campaignId: string
+    name: string
+    type: string
+    hpMax: number
+    ac: number
+  }): CharacterWithResources {
+    const db = getDb()
+    const charId = randomUUID()
+    const resId = randomUUID()
+    const now = new Date(Date.now())
+
+    db.transaction((tx) => {
+      tx.insert(characters)
+        .values({
+          id: charId,
+          campaignId: input.campaignId,
+          name: input.name,
+          race: 'Companion',
+          subrace: null,
+          class: 'Companion', // required NOT NULL — companion role marker
+          subclass: input.type, // companion type stored here (see SUMMARY note)
+          background: 'Companion', // required NOT NULL — placeholder
+          level: 1,
+          xp: 0,
+          backstory: null,
+          strength: 10,
+          dexterity: 10,
+          constitution: 10,
+          intelligence: 10,
+          wisdom: 10,
+          charisma: 10,
+          savingThrowProficiencies: '[]',
+          skillProficiencies: '[]',
+          skillExpertise: '[]',
+          ac: input.ac,
+          initiativeBonus: 0,
+          speed: 30,
+          proficiencyBonus: 2,
+          languages: '[]',
+          toolProficiencies: '[]',
+          armorProficiencies: '[]',
+          weaponProficiencies: '[]',
+          racialTraitsText: null,
+          classFeatureText: null,
+          backgroundFeatureText: null,
+          equipmentPackage: null,
+          portraitPath: null,
+          isCompanion: true,
+          classes: null,
+          negativeTraits: null,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .run()
+
+      tx.insert(characterResources)
+        .values({
+          id: resId,
+          characterId: charId,
+          hpCurrent: input.hpMax,
+          hpMax: input.hpMax,
+          hpTemp: 0,
+          spellSlots: '{}',
+          cp: 0,
+          sp: 0,
+          ep: 0,
+          gp: 0,
+          pp: 0,
+          conditions: '[]',
+          deathSaveSuccesses: 0,
+          deathSaveFailures: 0,
+          hasInspiration: false,
+          updatedAt: now,
+        })
+        .run()
+    })
+
+    const created = this.getWithResources(charId)
+    if (!created) {
+      throw new Error('[charactersRepo] Failed to retrieve companion after create')
+    }
+    return created
+  },
+
+  /**
+   * Delete a companion by character ID, scoped to a campaign to prevent cross-campaign deletes.
+   * Used by the removeCompanion mutation pipeline case.
+   */
+  deleteCompanion(companionId: string, campaignId: string): void {
+    const db = getDb()
+    const result = db
+      .delete(characters)
+      .where(
+        and(
+          eq(characters.id, companionId),
+          eq(characters.campaignId, campaignId),
+          eq(characters.isCompanion, true),
+        ),
+      )
+      .run()
+    if (result.changes === 0) {
+      log.warn(
+        '[charactersRepo] deleteCompanion: no companion matched id/campaignId',
+        companionId,
+        campaignId,
+      )
+    }
   },
 }

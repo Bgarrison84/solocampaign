@@ -50,6 +50,39 @@
     ],
     "spellcaster": false,
     "choosesSubclassAtLevel1": false,
+    "subclassLevel": 3,
+    "subclasses": [
+      {
+        "id": "berserker",
+        "name": "Path of the Berserker",
+        "description": "The Path of the Berserker is a path of untrammeled fury, slick with blood. Berserkers follow a simple code: strength is everything.",
+        "features": [
+          {
+            "name": "Frenzy",
+            "description": "You can go into a frenzy when you rage. If you do, for the duration of your rage you can make a single melee weapon attack as a bonus action on each of your turns. When your rage ends, you suffer one level of exhaustion."
+          },
+          {
+            "name": "Mindless Rage",
+            "description": "At 6th level, you can't be charmed or frightened while raging. If you are charmed or frightened when you enter your rage, the effect is suspended for the duration of the rage."
+          }
+        ]
+      },
+      {
+        "id": "totem-warrior",
+        "name": "Path of the Totem Warrior",
+        "description": "The Path of the Totem Warrior is a spiritual journey as the barbarian accepts a spirit animal as guide, protector, and inspiration.",
+        "features": [
+          {
+            "name": "Spirit Seeker",
+            "description": "You gain the ability to cast Beast Sense and Speak with Animals as rituals."
+          },
+          {
+            "name": "Totem Spirit",
+            "description": "Choose a totem spirit: Bear (resistance to all damage except psychic while raging), Eagle (enemies have disadvantage on opportunity attacks against you and you can Dash as a bonus action while raging), or Wolf (your friends have advantage on melee attack rolls against hostile creatures adjacent to you while raging)."
+          }
+        ]
+      }
+    ],
     "source": "SRD 5.1"
   },
   {
@@ -106,6 +139,39 @@
     "spellcaster": true,
     "spellcastingAbility": "charisma",
     "choosesSubclassAtLevel1": false,
+    "subclassLevel": 3,
+    "subclasses": [
+      {
+        "id": "lore",
+        "name": "College of Lore",
+        "description": "Bards of the College of Lore know something about most things, collecting bits of knowledge from sources as diverse as scholarly tomes and peasant tales.",
+        "features": [
+          {
+            "name": "Bonus Proficiencies",
+            "description": "You gain proficiency with three skills of your choice."
+          },
+          {
+            "name": "Cutting Words",
+            "description": "When a creature you can see within 60 feet makes an attack roll, ability check, or damage roll, you can use your reaction to expend one Bardic Inspiration die to subtract the number rolled from the creature's roll."
+          }
+        ]
+      },
+      {
+        "id": "valor",
+        "name": "College of Valor",
+        "description": "Bards of the College of Valor are daring skalds who keep alive the memory of great heroes and inspire a new generation.",
+        "features": [
+          {
+            "name": "Bonus Proficiencies",
+            "description": "You gain proficiency with medium armor, shields, and martial weapons."
+          },
+          {
+            "name": "Combat Inspiration",
+            "description": "A creature with a Bardic Inspiration die from you can also roll that die and add the number rolled to their AC against one attack or to a weapon damage roll."
+          }
+        ]
+      }
+    ],
     "source": "SRD 5.1"
   },
   {
@@ -165,10 +231,12 @@
     "spellcaster": true,
     "spellcastingAbility": "wisdom",
     "choosesSubclassAtLevel1": true,
+    "subclassLevel": 1,
     "subclasses": [
       {
         "id": "life",
         "name": "Life Domain",
+        "description": "The Life domain focuses on the vibrant positive energy that sustains all life. Clerics of life are master healers who can restore the wounded and protect the living.",
         "features": [
           {
             "name": "Bonus Proficiency",
@@ -183,6 +251,7 @@
       {
         "id": "light",
         "name": "Light Domain",
+        "description": "Gods of light — including Helm, Lathander, Pholtus, Branchala, the Silver Flame, Belenus, Apollo, and Re-Horakhty — promote the ideals of rebirth and renewal.",
         "features": [
           {
             "name": "Bonus Cantrip",
@@ -197,6 +266,7 @@
       {
         "id": "trickery",
         "name": "Trickery Domain",
+        "description": "Gods of trickery are mischief-makers and instigators who stand as a constant challenge to the accepted order among both gods and mortals.",
         "features": [
           {
             "name": "Blessing of the Trickster",
@@ -207,6 +277,7 @@
       {
         "id": "knowledge",
         "name": "Knowledge Domain",
+        "description": "The gods of knowledge value learning and understanding above all else, and their clerics include sages, scholars, and librarians.",
         "features": [
           {
             "name": "Blessings of Knowledge",
@@ -217,6 +288,7 @@
       {
         "id": "nature",
         "name": "Nature Domain",
+        "description": "Gods of nature are as varied as the natural world itself. Druids revere nature as a whole, while clerics of a nature deity focus on their deity's particular domain.",
         "features": [
           {
             "name": "Acolyte of Nature",
@@ -231,6 +303,7 @@
       {
         "id": "tempest",
         "name": "Tempest Domain",
+        "description": "Gods whose portfolios include the Tempest domain govern storms, seas, and sky. Tempest clerics are fierce warriors who can call down the wrath of the heavens.",
         "features": [
           {
             "name": "Bonus Proficiencies",
@@ -245,6 +318,7 @@
       {
         "id": "war",
         "name": "War Domain",
+        "description": "War has many manifestations. It can make heroes of ordinary people. It can be desperate and horrific, with acts of cruelty and cowardice eclipsing the deeds of the brave.",
         "features": [
           {
             "name": "Bonus Proficiencies",
@@ -314,6 +388,43 @@
     "spellcaster": true,
     "spellcastingAbility": "wisdom",
     "choosesSubclassAtLevel1": false,
+    "subclassLevel": 2,
+    "subclasses": [
+      {
+        "id": "land",
+        "name": "Circle of the Land",
+        "description": "The Circle of the Land is made up of mystics and sages who safeguard ancient knowledge and rites through a vast oral tradition.",
+        "features": [
+          {
+            "name": "Bonus Cantrip",
+            "description": "You learn one additional druid cantrip of your choice."
+          },
+          {
+            "name": "Natural Recovery",
+            "description": "Once per day after a short rest, you can recover expended spell slots with a combined level equal to half your druid level (rounded up). You cannot recover 6th-level or higher slots this way."
+          },
+          {
+            "name": "Circle Spells",
+            "description": "Your mystical connection to the land infuses you with the ability to cast certain spells. Choose a type of terrain (Arctic, Coast, Desert, Forest, Grassland, Mountain, Swamp, or Underdark) to gain terrain-specific always-prepared spells."
+          }
+        ]
+      },
+      {
+        "id": "moon",
+        "name": "Circle of the Moon",
+        "description": "Druids of the Circle of the Moon are fierce guardians of the wilds who use Wild Shape as a primary weapon.",
+        "features": [
+          {
+            "name": "Combat Wild Shape",
+            "description": "You can use Wild Shape as a bonus action. Additionally, while in beast form you can use a bonus action to expend spell slots to regain 1d8 hit points per spell slot level."
+          },
+          {
+            "name": "Circle Forms",
+            "description": "You can use your Wild Shape to transform into beasts with a CR as high as 1 (at 2nd level) scaling upward. The CR limit increases as you gain druid levels."
+          }
+        ]
+      }
+    ],
     "source": "SRD 5.1"
   },
   {
@@ -370,6 +481,54 @@
     ],
     "spellcaster": false,
     "choosesSubclassAtLevel1": false,
+    "subclassLevel": 3,
+    "subclasses": [
+      {
+        "id": "champion",
+        "name": "Champion",
+        "description": "The archetypal Champion focuses on the development of raw physical power honed to deadly perfection.",
+        "features": [
+          {
+            "name": "Improved Critical",
+            "description": "Your weapon attacks score a critical hit on a roll of 19 or 20."
+          },
+          {
+            "name": "Remarkable Athlete",
+            "description": "At 7th level, you can add half your proficiency bonus (rounded up) to any Strength, Dexterity, or Constitution check you make that doesn't already use your proficiency bonus."
+          }
+        ]
+      },
+      {
+        "id": "battle-master",
+        "name": "Battle Master",
+        "description": "Those who emulate the archetypal Battle Master employ martial techniques passed down through generations.",
+        "features": [
+          {
+            "name": "Combat Superiority",
+            "description": "You learn three maneuvers of your choice (from the Battle Master list) and gain four superiority dice (d8s). Spent dice are recovered on a short or long rest. Save DCs equal 8 + proficiency bonus + Strength or Dexterity modifier."
+          },
+          {
+            "name": "Student of War",
+            "description": "You gain proficiency with one type of artisan's tools of your choice."
+          }
+        ]
+      },
+      {
+        "id": "eldritch-knight",
+        "name": "Eldritch Knight",
+        "description": "The archetypal Eldritch Knight combines the martial mastery common to all fighters with a careful study of magic.",
+        "features": [
+          {
+            "name": "Spellcasting",
+            "description": "You augment your martial prowess with the ability to cast spells. You learn two cantrips from the wizard spell list. You know 3 spells of 1st level, mostly from Abjuration and Evocation schools."
+          },
+          {
+            "name": "Weapon Bond",
+            "description": "At 3rd level, you learn a ritual that creates a magical bond between yourself and one weapon. You can't be disarmed of a bonded weapon, and can summon it telekinetically as a bonus action."
+          }
+        ]
+      }
+    ],
     "source": "SRD 5.1"
   },
   {
@@ -423,6 +582,42 @@
     ],
     "spellcaster": false,
     "choosesSubclassAtLevel1": false,
+    "subclassLevel": 3,
+    "subclasses": [
+      {
+        "id": "open-hand",
+        "name": "Way of the Open Hand",
+        "description": "Monks of the Way of the Open Hand are the ultimate masters of martial arts combat, whether armed or unarmed.",
+        "features": [
+          {
+            "name": "Open Hand Technique",
+            "description": "Whenever you hit a creature with one of the attacks granted by your Flurry of Blows, you can impose one of the following effects: the target must succeed on a Dexterity save or be knocked prone; the target must make a Strength save or be pushed up to 15 feet away; the target can't take reactions until the end of your next turn."
+          }
+        ]
+      },
+      {
+        "id": "shadow",
+        "name": "Way of Shadow",
+        "description": "Monks of the Way of Shadow follow a tradition that values stealth and subterfuge.",
+        "features": [
+          {
+            "name": "Shadow Arts",
+            "description": "You can spend 2 ki points to cast Darkness, Darkvision, Pass without Trace, or Silence without providing material components. You also know the Minor Illusion cantrip."
+          }
+        ]
+      },
+      {
+        "id": "four-elements",
+        "name": "Way of the Four Elements",
+        "description": "You follow a monastic tradition that teaches you to harness the elements, bending the four elements to your will.",
+        "features": [
+          {
+            "name": "Disciple of the Elements",
+            "description": "You learn magical disciplines that use ki points. Disciplines include Breath of Winter, Clench of the North Wind, Eternal Mountain Defense, Fangs of the Fire Snake, Fist of Four Thunders, Fist of Unbroken Air, Flames of the Phoenix, Gong of the Summit, Mist Stance, Ride the Wind, River of Hungry Flame, Rush of the Gale Spirits, Shape of the Flowing River, Sweeping Cinder Strike, and Water Whip."
+          }
+        ]
+      }
+    ],
     "source": "SRD 5.1"
   },
   {
@@ -481,6 +676,54 @@
     "spellcaster": true,
     "spellcastingAbility": "charisma",
     "choosesSubclassAtLevel1": false,
+    "subclassLevel": 3,
+    "subclasses": [
+      {
+        "id": "devotion",
+        "name": "Oath of Devotion",
+        "description": "The Oath of Devotion binds a paladin to the loftiest ideals of justice, virtue, and order. These paladins are the classic knights in shining armor.",
+        "features": [
+          {
+            "name": "Sacred Weapon",
+            "description": "As an action, imbue one weapon with positive energy. For 1 minute, add your Charisma modifier to attack rolls with that weapon (minimum +1), it emits bright light in a 20-foot radius, and it counts as magical for overcoming resistance."
+          },
+          {
+            "name": "Turn the Unholy",
+            "description": "As an action, present your holy symbol and speak a prayer censuring fiends and undead. Each such creature within 30 feet must make a Wisdom save. On a failure, the creature is turned for 1 minute."
+          }
+        ]
+      },
+      {
+        "id": "ancients",
+        "name": "Oath of the Ancients",
+        "description": "The Oath of the Ancients is as old as the race of elves and the rituals of the druids. Paladins who swear this oath are called green knights.",
+        "features": [
+          {
+            "name": "Nature's Wrath",
+            "description": "As an action, cause spectral vines to spring up and bind a creature within 10 feet. The creature must succeed on a Strength or Dexterity save (its choice) or be restrained. The creature can repeat the save at the end of each of its turns."
+          },
+          {
+            "name": "Turn the Faithless",
+            "description": "As an action, present your holy symbol and speak a prayer castigating fey and fiends. Each such creature within 30 feet must make a Wisdom save or be turned for 1 minute."
+          }
+        ]
+      },
+      {
+        "id": "vengeance",
+        "name": "Oath of Vengeance",
+        "description": "The Oath of Vengeance is a solemn commitment to punish those who have committed a grievous sin. Paladins who uphold these tenets are called avengers.",
+        "features": [
+          {
+            "name": "Abjure Enemy",
+            "description": "As an action, choose a creature and present your holy symbol. That creature must make a Wisdom save. On a failure, the creature is frightened for 1 minute and its speed is 0. On a success, its speed is halved."
+          },
+          {
+            "name": "Vow of Enmity",
+            "description": "As a bonus action, utter a vow of enmity against a creature within 10 feet. You gain advantage on attack rolls against that creature for 1 minute, or until it drops to 0 hit points or falls unconscious."
+          }
+        ]
+      }
+    ],
     "source": "SRD 5.1"
   },
   {
@@ -539,6 +782,31 @@
     "spellcaster": true,
     "spellcastingAbility": "wisdom",
     "choosesSubclassAtLevel1": false,
+    "subclassLevel": 3,
+    "subclasses": [
+      {
+        "id": "hunter",
+        "name": "Hunter",
+        "description": "Emulating the Hunter archetype means accepting your place as a bulwark between civilization and the terrors of the wilderness.",
+        "features": [
+          {
+            "name": "Hunter's Prey",
+            "description": "Choose one: Colossus Slayer (once per turn, deal extra 1d8 damage to a creature below its max HP), Giant Killer (react to a Large or larger creature's attack to make a melee attack against it), or Horde Breaker (once per turn, make an extra attack against a different adjacent foe)."
+          }
+        ]
+      },
+      {
+        "id": "beast-master",
+        "name": "Beast Master",
+        "description": "The Beast Master archetype embodies a friendship between the civilized races and the beasts of the world.",
+        "features": [
+          {
+            "name": "Ranger's Companion",
+            "description": "You gain a beast companion that accompanies you on adventures. It obeys your commands and acts on your initiative. You can use a bonus action to command the beast to take one of the actions in its stat block."
+          }
+        ]
+      }
+    ],
     "source": "SRD 5.1"
   },
   {
@@ -601,6 +869,54 @@
     ],
     "spellcaster": false,
     "choosesSubclassAtLevel1": false,
+    "subclassLevel": 3,
+    "subclasses": [
+      {
+        "id": "thief",
+        "name": "Thief",
+        "description": "You hone your skills in the larcenous arts. Burglars, bandits, cutpurses, and other criminals typically follow this archetype.",
+        "features": [
+          {
+            "name": "Fast Hands",
+            "description": "You can use the bonus action granted by your Cunning Action to make a Dexterity (Sleight of Hand) check, use your thieves' tools to disarm a trap or open a lock, or take the Use an Object action."
+          },
+          {
+            "name": "Second-Story Work",
+            "description": "You gain the ability to climb faster than normal; climbing no longer costs extra movement. When you make a running jump, the distance you cover increases by a number of feet equal to your Dexterity modifier."
+          }
+        ]
+      },
+      {
+        "id": "assassin",
+        "name": "Assassin",
+        "description": "You focus your training on the grim art of death. Those who adhere to this archetype are diverse — hired killers, spies, bounty hunters, and even sanctioned assassins.",
+        "features": [
+          {
+            "name": "Bonus Proficiencies",
+            "description": "You gain proficiency with the disguise kit and the poisoner's kit."
+          },
+          {
+            "name": "Assassinate",
+            "description": "During the first round of combat, you have advantage on attack rolls against any creature that hasn't taken a turn. Any hit you score against a surprised creature is a critical hit."
+          }
+        ]
+      },
+      {
+        "id": "arcane-trickster",
+        "name": "Arcane Trickster",
+        "description": "Some rogues enhance their fine-honed skills of stealth and agility with magic, learning tricks of enchantment and illusion.",
+        "features": [
+          {
+            "name": "Spellcasting",
+            "description": "You learn three wizard cantrips (at least two from Enchantment or Illusion) and know 3 spells of 1st level, mostly from Enchantment and Illusion schools, using Intelligence as your spellcasting ability."
+          },
+          {
+            "name": "Mage Hand Legerdemain",
+            "description": "You can make your Mage Hand invisible, and you can perform additional tasks: stow/retrieve objects, use thieves' tools, perform sleight of hand — all using Dexterity (Sleight of Hand) vs. the target's passive Perception."
+          }
+        ]
+      }
+    ],
     "source": "SRD 5.1"
   },
   {
@@ -660,10 +976,12 @@
     "spellcaster": true,
     "spellcastingAbility": "charisma",
     "choosesSubclassAtLevel1": true,
+    "subclassLevel": 1,
     "subclasses": [
       {
         "id": "draconic",
         "name": "Draconic Bloodline",
+        "description": "Your innate magic comes from draconic magic that was mingled with your blood or that of your ancestors.",
         "features": [
           {
             "name": "Dragon Ancestor",
@@ -678,6 +996,7 @@
       {
         "id": "wild-magic",
         "name": "Wild Magic Surge",
+        "description": "Your innate magic comes from the wild forces of chaos that underlie the order of creation.",
         "features": [
           {
             "name": "Wild Magic Surge",
@@ -747,10 +1066,12 @@
     "spellcaster": true,
     "spellcastingAbility": "charisma",
     "choosesSubclassAtLevel1": true,
+    "subclassLevel": 1,
     "subclasses": [
       {
         "id": "archfey",
         "name": "The Archfey",
+        "description": "Your patron is a lord or lady of the fey, a creature of legend who holds secrets that were forgotten before the mortal races were born.",
         "features": [
           {
             "name": "Fey Presence",
@@ -761,6 +1082,7 @@
       {
         "id": "fiend",
         "name": "The Fiend",
+        "description": "You have made a pact with a fiend from the lower planes of existence, a being whose aims are evil, even if you strive against those goals.",
         "features": [
           {
             "name": "Dark One's Blessing",
@@ -771,6 +1093,7 @@
       {
         "id": "great-old-one",
         "name": "The Great Old One",
+        "description": "Your patron is a mysterious entity whose nature is utterly foreign to the fabric of reality. It might be associated with the Far Realm, or it could be an elder god.",
         "features": [
           {
             "name": "Awakened Mind",
@@ -835,6 +1158,129 @@
     "spellcaster": true,
     "spellcastingAbility": "intelligence",
     "choosesSubclassAtLevel1": false,
+    "subclassLevel": 2,
+    "subclasses": [
+      {
+        "id": "evocation",
+        "name": "School of Evocation",
+        "description": "You focus your study on magic that creates powerful elemental effects such as bitter cold, searing flame, rolling thunder, crackling lightning, and burning acid.",
+        "features": [
+          {
+            "name": "Evocation Savant",
+            "description": "The gold and time you spend to copy an evocation spell into your spellbook is halved."
+          },
+          {
+            "name": "Sculpt Spells",
+            "description": "When you cast an evocation spell that affects other creatures that you can see, you can choose a number of them equal to 1 + the spell's level. The chosen creatures automatically succeed on their saving throws against the spell, and take no damage if they would normally take half damage on a successful save."
+          }
+        ]
+      },
+      {
+        "id": "abjuration",
+        "name": "School of Abjuration",
+        "description": "The School of Abjuration emphasizes magic that blocks, banishes, or protects. Its practitioners are sought when powerful undead or demons threaten.",
+        "features": [
+          {
+            "name": "Abjuration Savant",
+            "description": "The gold and time you spend to copy an abjuration spell into your spellbook is halved."
+          },
+          {
+            "name": "Arcane Ward",
+            "description": "When you cast an abjuration spell of 1st level or higher, you can simultaneously use a strand of the spell's magic to create a magical ward on yourself. The ward has HP equal to twice your wizard level + your Intelligence modifier and absorbs damage you take."
+          }
+        ]
+      },
+      {
+        "id": "conjuration",
+        "name": "School of Conjuration",
+        "description": "As a conjurer, you favor spells that produce objects and creatures out of thin air.",
+        "features": [
+          {
+            "name": "Conjuration Savant",
+            "description": "The gold and time you spend to copy a conjuration spell into your spellbook is halved."
+          },
+          {
+            "name": "Minor Conjuration",
+            "description": "As an action, you can conjure up an inanimate object in your hand or on the ground in an unoccupied space within 10 feet. The object can be no larger than 3 feet on a side and weigh no more than 10 pounds, and its form must be that of a nonmagical object."
+          }
+        ]
+      },
+      {
+        "id": "divination",
+        "name": "School of Divination",
+        "description": "The counsel of a diviner is sought by royalty and commoners alike, for all seek a clearer understanding of the past, present, and future.",
+        "features": [
+          {
+            "name": "Divination Savant",
+            "description": "The gold and time you spend to copy a divination spell into your spellbook is halved."
+          },
+          {
+            "name": "Portent",
+            "description": "After a long rest, roll two d20s and record the numbers. Once before your next long rest, you can replace any attack roll, saving throw, or ability check made by you or a creature you can see with one of these rolls."
+          }
+        ]
+      },
+      {
+        "id": "enchantment",
+        "name": "School of Enchantment",
+        "description": "As a member of the School of Enchantment, you have honed your ability to magically entrance and beguile other people and monsters.",
+        "features": [
+          {
+            "name": "Enchantment Savant",
+            "description": "The gold and time you spend to copy an enchantment spell into your spellbook is halved."
+          },
+          {
+            "name": "Hypnotic Gaze",
+            "description": "As an action, choose a creature within 5 feet and fix your gaze upon it. The creature must make a Wisdom saving throw. On a failure, it is charmed and incapacitated until the start of your next turn, its speed drops to 0, and it is visually dazed."
+          }
+        ]
+      },
+      {
+        "id": "illusion",
+        "name": "School of Illusion",
+        "description": "You focus your studies on magic that dazzles the senses, befuddles the mind, and tricks even the wisest folk.",
+        "features": [
+          {
+            "name": "Illusion Savant",
+            "description": "The gold and time you spend to copy an illusion spell into your spellbook is halved."
+          },
+          {
+            "name": "Improved Minor Illusion",
+            "description": "You know the Minor Illusion cantrip. When you cast it, you can create both a sound and an image with a single casting."
+          }
+        ]
+      },
+      {
+        "id": "necromancy",
+        "name": "School of Necromancy",
+        "description": "The School of Necromancy explores the cosmic forces of life, death, and undeath.",
+        "features": [
+          {
+            "name": "Necromancy Savant",
+            "description": "The gold and time you spend to copy a necromancy spell into your spellbook is halved."
+          },
+          {
+            "name": "Grim Harvest",
+            "description": "Once per turn when you kill one or more creatures with a spell of 1st level or higher, you regain hit points equal to twice the spell's level, or three times if the spell is a necromancy spell."
+          }
+        ]
+      },
+      {
+        "id": "transmutation",
+        "name": "School of Transmutation",
+        "description": "You are a student of spells that modify energy and matter. To you, the world is not a fixed thing, but eminently mutable.",
+        "features": [
+          {
+            "name": "Transmutation Savant",
+            "description": "The gold and time you spend to copy a transmutation spell into your spellbook is halved."
+          },
+          {
+            "name": "Minor Alchemy",
+            "description": "You can temporarily alter the physical properties of one nonmagical object, changing it from one substance into another. You perform a special alchemical procedure on one object composed entirely of wood, stone, iron, copper, or silver, transforming it into a different one of those materials."
+          }
+        ]
+      }
+    ],
     "source": "SRD 5.1"
   }
 ]

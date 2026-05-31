@@ -1,0 +1,226 @@
+[
+  {
+    "id": "bag-of-holding",
+    "name": "Bag of Holding",
+    "rarity": "Uncommon",
+    "attunement": "",
+    "description": "This bag has an interior space considerably larger than its outside dimensions, roughly 2 feet in diameter at the mouth and 4 feet deep. The bag can hold up to 500 pounds, not exceeding a volume of 64 cubic feet. Retrieving an item requires an action. Breathing creatures inside suffocate after a number of minutes equal to 10 divided by the number of creatures. Placing it inside another extradimensional space causes both to be destroyed."
+  },
+  {
+    "id": "cloak-of-protection",
+    "name": "Cloak of Protection",
+    "rarity": "Uncommon",
+    "attunement": "Requires attunement",
+    "description": "You gain a +1 bonus to AC and saving throws while wearing this cloak."
+  },
+  {
+    "id": "ring-of-protection",
+    "name": "Ring of Protection",
+    "rarity": "Rare",
+    "attunement": "Requires attunement",
+    "description": "You gain a +1 bonus to AC and saving throws while wearing this ring."
+  },
+  {
+    "id": "boots-of-elvenkind",
+    "name": "Boots of Elvenkind",
+    "rarity": "Uncommon",
+    "attunement": "",
+    "description": "While wearing these boots, your steps make no sound, regardless of the surface you are moving across. You also have advantage on Dexterity (Stealth) checks that rely on moving silently."
+  },
+  {
+    "id": "cloak-of-elvenkind",
+    "name": "Cloak of Elvenkind",
+    "rarity": "Uncommon",
+    "attunement": "Requires attunement",
+    "description": "While wearing this cloak with its hood up, Wisdom (Perception) checks made to see you have disadvantage, and you have advantage on Dexterity (Stealth) checks made to hide, as the cloak's color shifts to camouflage you."
+  },
+  {
+    "id": "gloves-of-elvenkind",
+    "name": "Gloves of Missile Snaring",
+    "rarity": "Uncommon",
+    "attunement": "Requires attunement",
+    "description": "When a ranged weapon attack hits you while wearing these gloves, you can use your reaction to reduce the damage by 1d10 + your Dexterity modifier, provided your hand is free. If you reduce the damage to 0, you can catch the missile if it is small enough to hold in one hand."
+  },
+  {
+    "id": "lantern-of-revealing",
+    "name": "Lantern of Revealing",
+    "rarity": "Uncommon",
+    "attunement": "",
+    "description": "While lit, this lantern burns for 6 hours on a flask of oil, shedding bright light in a 30-foot radius and dim light for an additional 30 feet. Invisible creatures and objects are visible as long as they are in the lantern's bright light."
+  },
+  {
+    "id": "rope-of-climbing",
+    "name": "Rope of Climbing",
+    "rarity": "Uncommon",
+    "attunement": "",
+    "description": "This 60-foot length of silk rope weighs 3 pounds and can hold up to 3,000 pounds. If you hold one end of the rope and use an action to speak a command word, the rope animates and can climb, knot, unknot, or coil itself as directed. It can be commanded to fasten itself securely to a surface."
+  },
+  {
+    "id": "boots-of-speed",
+    "name": "Boots of Speed",
+    "rarity": "Rare",
+    "attunement": "Requires attunement",
+    "description": "While wearing these boots, you can use a bonus action to click the heels together. If you do, the boots double your walking speed, and any creature that makes an opportunity attack against you has disadvantage on the attack roll. The effect lasts for 10 minutes, and you can end it before then by clicking your heels together again. Once activated, the boots can't be used again until the next dawn."
+  },
+  {
+    "id": "belt-of-giant-strength",
+    "name": "Belt of Giant Strength",
+    "rarity": "Varies",
+    "attunement": "Requires attunement",
+    "description": "While wearing this belt, your Strength score changes to match the belt type: Hill Giant (21, Uncommon), Stone/Frost Giant (23, Rare), Fire Giant (25, Rare), Cloud Giant (27, Very Rare), Storm Giant (29, Legendary). If your Strength is already equal to or greater than the belt's score, the belt has no effect."
+  },
+  {
+    "id": "gauntlets-of-ogre-power",
+    "name": "Gauntlets of Ogre Power",
+    "rarity": "Uncommon",
+    "attunement": "Requires attunement",
+    "description": "Your Strength score is 19 while wearing these gauntlets. They have no effect on you if your Strength is already 19 or higher."
+  },
+  {
+    "id": "headband-of-intellect",
+    "name": "Headband of Intellect",
+    "rarity": "Uncommon",
+    "attunement": "Requires attunement",
+    "description": "Your Intelligence score is 19 while wearing this headband. It has no effect on you if your Intelligence is already 19 or higher."
+  },
+  {
+    "id": "amulet-of-health",
+    "name": "Amulet of Health",
+    "rarity": "Rare",
+    "attunement": "Requires attunement",
+    "description": "Your Constitution score is 19 while wearing this amulet. It has no effect on you if your Constitution is already 19 or higher."
+  },
+  {
+    "id": "periapt-of-wisdom",
+    "name": "Periapt of Wisdom",
+    "rarity": "Uncommon",
+    "attunement": "Requires attunement",
+    "description": "Your Wisdom score is 19 while wearing this periapt. It has no effect on you if your Wisdom is already 19 or higher."
+  },
+  {
+    "id": "cloak-of-charisma",
+    "name": "Cloak of Charisma",
+    "rarity": "Uncommon",
+    "attunement": "Requires attunement",
+    "description": "While wearing this cloak, your Charisma score is 20. It has no effect on you if your Charisma is already 20 or higher."
+  },
+  {
+    "id": "ring-of-spell-storing",
+    "name": "Ring of Spell Storing",
+    "rarity": "Rare",
+    "attunement": "Requires attunement",
+    "description": "This ring stores spells cast into it, holding up to 5 levels worth of spells. Any creature can cast a spell of 1st through 5th level into the ring, and the wearer can cast any spell stored in it, using the original caster's spell save DC, attack bonus, and spellcasting ability."
+  },
+  {
+    "id": "wand-of-magic-missiles",
+    "name": "Wand of Magic Missiles",
+    "rarity": "Uncommon",
+    "attunement": "",
+    "description": "This wand has 7 charges. While holding it, you can use an action to expend 1 or more of its charges to cast the magic missile spell from it. For 1 charge, you cast the 1st-level version; for each additional charge spent, the spell level increases by one. The wand regains 1d6 + 1 charges daily at dawn."
+  },
+  {
+    "id": "staff-of-healing",
+    "name": "Staff of Healing",
+    "rarity": "Rare",
+    "attunement": "Requires attunement by a bard, cleric, or druid",
+    "description": "This staff has 10 charges. While holding the staff, you can use an action to expend charges to cast Cure Wounds (1 charge/level up to 4th), Lesser Restoration (2 charges), or Mass Cure Wounds (5 charges). The staff regains 1d6 + 4 expended charges daily at dawn."
+  },
+  {
+    "id": "staff-of-the-woodlands",
+    "name": "Staff of the Woodlands",
+    "rarity": "Rare",
+    "attunement": "Requires attunement by a druid",
+    "description": "This staff has 10 charges. While holding it, you have a +2 bonus to attack and damage rolls with it, and you can cast Animal Friendship, Awaken, Barkskin, Locate Animals or Plants, Speak with Animals, Speak with Plants, or Wall of Thorns using its charges. It regains 1d6 + 4 charges at dawn."
+  },
+  {
+    "id": "flame-tongue",
+    "name": "Flame Tongue",
+    "rarity": "Rare",
+    "attunement": "Requires attunement",
+    "description": "You can use a bonus action to speak this magic sword's command word, causing flames to erupt from the blade. These flames shed bright light in a 40-foot radius and dim light for an additional 40 feet. While ablaze, the sword deals an extra 2d6 fire damage. The flames last until you use a bonus action to speak the command word again, or until you drop or sheathe the sword."
+  },
+  {
+    "id": "frost-brand",
+    "name": "Frost Brand",
+    "rarity": "Very Rare",
+    "attunement": "Requires attunement",
+    "description": "When you hit with an attack using this magic sword, the target takes an extra 1d6 cold damage. In addition, while holding the sword, you have resistance to fire damage. In freezing temperatures, the blade sheds bright light in a 10-foot radius and dim light for an additional 10 feet."
+  },
+  {
+    "id": "holy-avenger",
+    "name": "Holy Avenger",
+    "rarity": "Legendary",
+    "attunement": "Requires attunement by a paladin",
+    "description": "You gain a +3 bonus to attack and damage rolls made with this magic sword. When you hit a fiend or an undead with it, that creature takes an extra 2d10 radiant damage. While holding the sword, you aura extends to your allies within 10 feet, granting advantage on saving throws against spells and other magical effects."
+  },
+  {
+    "id": "vorpal-sword",
+    "name": "Vorpal Sword",
+    "rarity": "Legendary",
+    "attunement": "Requires attunement",
+    "description": "You gain a +3 bonus to attack and damage rolls. The sword ignores resistance to slashing damage. When you roll a 20 on your attack roll with this weapon, you cut off one of the target's heads (if it has one). If the creature can survive without the head, it takes 6d8 slashing damage instead."
+  },
+  {
+    "id": "ring-of-invisibility",
+    "name": "Ring of Invisibility",
+    "rarity": "Legendary",
+    "attunement": "Requires attunement",
+    "description": "While wearing this ring, you can turn invisible as an action. Anything you are wearing or carrying is invisible with you. You remain invisible until the ring is removed, until you attack or cast a spell, or until you use a bonus action to become visible again."
+  },
+  {
+    "id": "amulet-of-proof-against-detection",
+    "name": "Amulet of Proof Against Detection and Location",
+    "rarity": "Uncommon",
+    "attunement": "Requires attunement",
+    "description": "While wearing this amulet, you are hidden from divination magic. You can't be targeted by such magic or perceived through magical scrying sensors."
+  },
+  {
+    "id": "bracers-of-defense",
+    "name": "Bracers of Defense",
+    "rarity": "Rare",
+    "attunement": "Requires attunement",
+    "description": "While wearing these bracers, you gain a +2 bonus to AC if you are wearing no armor and using no shield."
+  },
+  {
+    "id": "helm-of-brilliance",
+    "name": "Helm of Brilliance",
+    "rarity": "Very Rare",
+    "attunement": "Requires attunement",
+    "description": "This helm is set with 1d10 diamonds, 2d10 rubies, 3d10 fire opals, and 4d10 opals. Any gem pried from the helm turns to dust. While wearing it you gain several benefits including casting Daylight, Fireball, Prismatic Spray, or Wall of Fire using the gems as fuel. Sunlight causes undead within 30 feet to have disadvantage on attack rolls."
+  },
+  {
+    "id": "ring-of-feather-falling",
+    "name": "Ring of Feather Falling",
+    "rarity": "Rare",
+    "attunement": "Requires attunement",
+    "description": "When you fall while wearing this ring, you descend 60 feet per round and take no damage from falling."
+  },
+  {
+    "id": "necklace-of-fireballs",
+    "name": "Necklace of Fireballs",
+    "rarity": "Rare",
+    "attunement": "",
+    "description": "This necklace has 1d6 + 3 beads hanging from it. You can use an action to detach a bead and throw it up to 60 feet away. When it reaches its destination it explodes in a 20-foot-radius sphere. Each bead explodes as a 3rd-level Fireball spell (save DC 15), dealing 8d6 fire damage. You can throw multiple beads simultaneously to combine their damage."
+  },
+  {
+    "id": "portable-hole",
+    "name": "Portable Hole",
+    "rarity": "Rare",
+    "attunement": "",
+    "description": "This fine black cloth unfolds into a circular sheet 6 feet in diameter. By placing it on a solid surface, you can create an extradimensional hole 10 feet deep. The cloth can be folded up; a folded hole is 6 inches in diameter. Creatures and objects inside are not trapped but can suffocate. Placing another extradimensional storage inside the portable hole destroys both."
+  },
+  {
+    "id": "potion-of-healing",
+    "name": "Potion of Healing",
+    "rarity": "Common",
+    "attunement": "",
+    "description": "You regain 2d4 + 2 hit points when you drink this potion. The potion's red liquid glimmers when agitated. Greater Healing restores 4d4 + 4, Superior Healing restores 8d4 + 8, and Supreme Healing restores 10d4 + 20."
+  },
+  {
+    "id": "potion-of-fire-resistance",
+    "name": "Potion of Fire Resistance",
+    "rarity": "Uncommon",
+    "attunement": "",
+    "description": "When you drink this potion, you gain resistance to fire damage for 1 hour. Potions of Resistance exist for all damage types and appear as different colored liquids depending on the damage type they protect against."
+  }
+]

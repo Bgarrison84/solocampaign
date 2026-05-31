@@ -1,0 +1,132 @@
+[
+  {
+    "id": "boon-of-combat-prowess",
+    "name": "Boon of Combat Prowess",
+    "description": "When you miss with a melee weapon attack, you can choose to hit instead. Once you use this boon, you can't use it again until you finish a short or long rest."
+  },
+  {
+    "id": "boon-of-dimensional-travel",
+    "name": "Boon of Dimensional Travel",
+    "description": "As a bonus action, you can cast the Misty Step spell without expending a spell slot. Once you use this boon, you can't use it again until you finish a short or long rest."
+  },
+  {
+    "id": "boon-of-fate",
+    "name": "Boon of Fate",
+    "description": "When another creature you can see makes an ability check, attack roll, or saving throw, you can impose disadvantage on the roll as a reaction. Once you use this boon, you can't use it again until you finish a short or long rest."
+  },
+  {
+    "id": "boon-of-fortitude",
+    "name": "Boon of Fortitude",
+    "description": "Your hit point maximum increases by 40."
+  },
+  {
+    "id": "boon-of-high-magic",
+    "name": "Boon of High Magic",
+    "description": "You gain one 9th-level spell slot, provided you already have one. This extra spell slot is regained when you finish a long rest."
+  },
+  {
+    "id": "boon-of-immortality",
+    "name": "Boon of Immortality",
+    "description": "You stop aging. You are immune to any effect that would age you, and you can't die from old age."
+  },
+  {
+    "id": "boon-of-invincibility",
+    "name": "Boon of Invincibility",
+    "description": "When you take damage from any source, you can reduce that damage to 0. Once you use this boon, you can't use it again until you finish a short or long rest."
+  },
+  {
+    "id": "boon-of-irresistible-offense",
+    "name": "Boon of Irresistible Offense",
+    "description": "You can bypass the resistances and immunities of any creature for the purposes of the damage you deal with attacks and spells. Your weapon attacks and spells treat all damage resistances as if the creature had vulnerability, and all damage immunities as resistances."
+  },
+  {
+    "id": "boon-of-luck",
+    "name": "Boon of Luck",
+    "description": "You can add a d10 to any ability check, attack roll, or saving throw you make. Once you use this boon, you can't use it again until you finish a short or long rest."
+  },
+  {
+    "id": "boon-of-magic-resistance",
+    "name": "Boon of Magic Resistance",
+    "description": "You have advantage on saving throws against spells and other magical effects."
+  },
+  {
+    "id": "boon-of-peerless-aim",
+    "name": "Boon of Peerless Aim",
+    "description": "When you make a ranged attack and miss, you can cause that attack to hit instead. Once you use this boon, you can't use it again until you finish a short or long rest."
+  },
+  {
+    "id": "boon-of-perfect-health",
+    "name": "Boon of Perfect Health",
+    "description": "You are immune to all diseases and poisons, and you have advantage on Constitution saving throws."
+  },
+  {
+    "id": "boon-of-planar-travel",
+    "name": "Boon of Planar Travel",
+    "description": "When you gain this boon, choose a plane of existence other than the Material Plane. You can cast the Plane Shift spell without expending a spell slot, targeting only yourself. Once you use this boon, you can't use it again until you finish a long rest."
+  },
+  {
+    "id": "boon-of-quick-casting",
+    "name": "Boon of Quick Casting",
+    "description": "Choose one of your spells of 1st through 3rd level that has a casting time of 1 action. That spell's casting time is now 1 bonus action for you."
+  },
+  {
+    "id": "boon-of-recovery",
+    "name": "Boon of Recovery",
+    "description": "You can use a bonus action to regain hit points equal to half your hit point maximum. Once you use this boon, you can't use it again until you finish a long rest."
+  },
+  {
+    "id": "boon-of-resilience",
+    "name": "Boon of Resilience",
+    "description": "You have resistance to bludgeoning, piercing, and slashing damage from nonmagical weapons."
+  },
+  {
+    "id": "boon-of-skill-proficiency",
+    "name": "Boon of Skill Proficiency",
+    "description": "You gain proficiency in all skills."
+  },
+  {
+    "id": "boon-of-speed",
+    "name": "Boon of Speed",
+    "description": "Your walking speed increases by 30 feet. In addition, you can take the Dash action as a bonus action."
+  },
+  {
+    "id": "boon-of-spell-mastery",
+    "name": "Boon of Spell Mastery",
+    "description": "Choose one 1st-level sorcerer, warlock, or wizard spell that you can cast. You can now cast that spell at its lowest level without expending a spell slot."
+  },
+  {
+    "id": "boon-of-spell-recall",
+    "name": "Boon of Spell Recall",
+    "description": "You can cast any spell you know or have prepared without expending a spell slot. Once you use this boon, you can't use it again until you finish a long rest."
+  },
+  {
+    "id": "boon-of-the-fire-soul",
+    "name": "Boon of the Fire Soul",
+    "description": "You have immunity to fire damage. You can also cast Burning Hands as a 3rd-level spell at will without expending a spell slot."
+  },
+  {
+    "id": "boon-of-the-night-spirit",
+    "name": "Boon of the Night Spirit",
+    "description": "You can become invisible as a bonus action. The invisibility ends when you make an attack roll, deal damage, or cast a spell. You also have darkvision out to a range of 300 feet. Once you use the invisibility, you can't use it again until you finish a short or long rest."
+  },
+  {
+    "id": "boon-of-the-stormborn",
+    "name": "Boon of the Stormborn",
+    "description": "You have immunity to lightning and thunder damage. You can also cast Call Lightning as a 3rd-level spell at will without expending a spell slot, and you can fly at a speed equal to your walking speed."
+  },
+  {
+    "id": "boon-of-the-unfettered",
+    "name": "Boon of the Unfettered",
+    "description": "You have advantage on ability checks made to escape a grapple. You are also immune to the paralyzed and restrained conditions."
+  },
+  {
+    "id": "boon-of-truesight",
+    "name": "Boon of Truesight",
+    "description": "You have truesight with a range of 60 feet. Within that range, you can see in normal and magical darkness, see invisible creatures and objects, detect visual illusions and succeed on saving throws against them, and perceive the original form of a shapechanger or creature transformed by magic."
+  },
+  {
+    "id": "boon-of-undetectability",
+    "name": "Boon of Undetectability",
+    "description": "You gain a +10 bonus to Dexterity (Stealth) checks, and you can't be detected or targeted by divination magic, including scrying sensors created by spells such as Scrying."
+  }
+]

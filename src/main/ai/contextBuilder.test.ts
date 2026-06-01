@@ -19,6 +19,7 @@ vi.mock('electron-log', () => ({
 vi.mock('../db/charactersRepo', () => ({
   charactersRepo: {
     getByCampaignId: vi.fn(),
+    listByCampaign: vi.fn().mockReturnValue([]),
   },
 }))
 
@@ -53,6 +54,7 @@ vi.mock('../db/campaignsRepo', () => ({
   campaignsRepo: {
     getWorldState: vi.fn().mockReturnValue(undefined),
     getWorldOverview: vi.fn().mockReturnValue(undefined),
+    get: vi.fn().mockReturnValue(undefined),
   },
 }))
 
@@ -180,6 +182,8 @@ describe('contextBuilder', () => {
     vi.mocked(factionsRepo.list).mockReturnValue([])
     vi.mocked(campaignsRepo.getWorldState).mockReturnValue(undefined)
     vi.mocked(campaignsRepo.getWorldOverview).mockReturnValue(undefined)
+    vi.mocked(campaignsRepo.get).mockReturnValue(undefined)
+    vi.mocked(charactersRepo.listByCampaign).mockReturnValue([])
   })
 
   describe('abilityMod', () => {
@@ -890,6 +894,91 @@ describe('contextBuilder', () => {
       ]) {
         expect(systemPrompt).toContain(tool)
       }
+    })
+
+    // ─── Phase 7: Party Members ID injection (PARTY-01, OQ1) ─────────────────
+
+    it('buildContext injects "Party Members" section when partySize > 1 with non-companion members', () => {
+      // Campaign with partySize=3
+      vi.mocked(campaignsRepo.get).mockReturnValue({ partySize: 3 } as never)
+
+      const member1 = makeCharacter({ id: 'char-p1', name: 'Aldric', isCompanion: false })
+      const member2 = makeCharacter({ id: 'char-p2', name: 'Brienna', isCompanion: false })
+      const member3 = makeCharacter({ id: 'char-p3', name: 'Corwin', isCompanion: false })
+      const companion = makeCharacter({ id: 'char-c1', name: 'Ember', isCompanion: true })
+
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(member1)
+      vi.mocked(charactersRepo.listByCampaign).mockReturnValue([member1, member2, member3, companion])
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: { strictness: 'balanced' },
+      })
+
+      expect(systemPrompt).toContain('Party Members:')
+      // All non-companion members listed with name + id
+      expect(systemPrompt).toContain('Aldric')
+      expect(systemPrompt).toContain('char-p1')
+      expect(systemPrompt).toContain('Brienna')
+      expect(systemPrompt).toContain('char-p2')
+      expect(systemPrompt).toContain('Corwin')
+      expect(systemPrompt).toContain('char-p3')
+      // Companion excluded from Party Members list
+      expect(systemPrompt).not.toContain('char-c1')
+    })
+
+    it('buildContext omits "Party Members" section for solo campaign (partySize === 1)', () => {
+      vi.mocked(campaignsRepo.get).mockReturnValue({ partySize: 1 } as never)
+
+      const solo = makeCharacter({ id: 'char-solo', name: 'Aldric', isCompanion: false })
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(solo)
+      vi.mocked(charactersRepo.listByCampaign).mockReturnValue([solo])
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: { strictness: 'balanced' },
+      })
+
+      expect(systemPrompt).not.toContain('Party Members:')
+    })
+
+    it('buildContext omits "Party Members" section when campaign not found (partySize defaults to 1)', () => {
+      vi.mocked(campaignsRepo.get).mockReturnValue(undefined)
+
+      const solo = makeCharacter({ id: 'char-solo', name: 'Aldric', isCompanion: false })
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(solo)
+      vi.mocked(charactersRepo.listByCampaign).mockReturnValue([solo])
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: { strictness: 'balanced' },
+      })
+
+      expect(systemPrompt).not.toContain('Party Members:')
+    })
+
+    it('buildContext excludes companions from Party Members list', () => {
+      vi.mocked(campaignsRepo.get).mockReturnValue({ partySize: 2 } as never)
+
+      const member1 = makeCharacter({ id: 'char-p1', name: 'Aldric', isCompanion: false })
+      const member2 = makeCharacter({ id: 'char-p2', name: 'Brienna', isCompanion: false })
+      const companion = makeCharacter({ id: 'char-c1', name: 'Sprite', isCompanion: true })
+
+      vi.mocked(charactersRepo.getByCampaignId).mockReturnValue(member1)
+      vi.mocked(charactersRepo.listByCampaign).mockReturnValue([member1, member2, companion])
+
+      const { systemPrompt } = buildContext({
+        campaignId: 'campaign-1',
+        sessionId: null,
+        config: { strictness: 'balanced' },
+      })
+
+      expect(systemPrompt).toContain('Party Members:')
+      expect(systemPrompt).not.toContain('char-c1')
+      expect(systemPrompt).not.toContain('Sprite')
     })
   })
 })

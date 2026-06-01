@@ -648,6 +648,37 @@ export function CampaignViewScreen() {
               </TabsContent>
 
               <TabsContent value="inventory" className="flex-1 overflow-auto p-6">
+                {/* Encumbrance display — shown when campaign.encumbranceEnabled = true (STATE-06, D-27) */}
+                {campaignQuery.data?.encumbranceEnabled && characterQuery.data && (() => {
+                  const char = characterQuery.data
+                  const strScore = char.strength
+                  const carriedWeight = char.items.reduce((sum, item) => sum + (item.weight ?? 0) * item.quantity, 0)
+                  const encumberedThreshold = 5 * strScore
+                  const heavilyEncumberedThreshold = 10 * strScore
+                  const carryingCapacity = 15 * strScore
+                  const isEncumbered = carriedWeight >= encumberedThreshold
+                  const isHeavilyEncumbered = carriedWeight >= heavilyEncumberedThreshold
+                  return (
+                    <div className="flex justify-between items-center py-2 border-b border-border mb-3">
+                      <span className="text-sm font-semibold text-foreground">Carrying Capacity</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm text-foreground">
+                          {Math.round(carriedWeight * 10) / 10} / {carryingCapacity} lbs
+                        </span>
+                        {isHeavilyEncumbered && (
+                          <span className="rounded-full px-2 py-0.5 text-xs font-semibold border bg-red-950/60 border-red-600 text-red-400">
+                            Heavily Encumbered
+                          </span>
+                        )}
+                        {!isHeavilyEncumbered && isEncumbered && (
+                          <span className="rounded-full px-2 py-0.5 text-xs font-semibold border bg-amber-950/60 border-amber-600 text-amber-400">
+                            Encumbered
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })()}
                 <div className="flex flex-col items-center max-w-[400px] mx-auto" style={{ paddingTop: '30%' }}>
                   <h2 className="text-xl font-semibold text-foreground mb-2">Inventory</h2>
                   <p className="text-sm text-muted-foreground text-center">

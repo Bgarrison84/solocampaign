@@ -73,6 +73,8 @@ export interface CreateCharacterInput
   classFeatureText?: string | null
   backgroundFeatureText?: string | null
   equipmentPackage?: string | null
+  // Phase 7 (07-06, CHAR-03): negative traits from point-buy step
+  negativeTraits?: { presetFlaws: string[]; freeFormFlaws: string[] } | null
   // Resource fields
   calculatedHp: number
   spellSlots?: SpellSlotMap
@@ -191,6 +193,8 @@ export const charactersRepo = {
           backgroundFeatureText: input.backgroundFeatureText ?? null,
           equipmentPackage: input.equipmentPackage ?? null,
           portraitPath: null,
+          // Phase 7 (07-06, CHAR-03): persist negative traits as JSON
+          negativeTraits: input.negativeTraits ? JSON.stringify(input.negativeTraits) : null,
           createdAt: now,
           updatedAt: now,
         })

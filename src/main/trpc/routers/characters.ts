@@ -69,6 +69,9 @@ export const charactersRouter = t.router({
    * Create a character with auto-calculated stats (D-15).
    * Applies racial ASI bonuses to base ability scores before persisting.
    * Wraps DB insert in a transaction; throws CONFLICT on duplicate campaignId.
+   *
+   * Phase 7 (07-06): accepts negativeTraits from point-buy wizard step (CHAR-03).
+   * negativeTraits is optional; non-null only when the player used Point Buy mode with flaws.
    */
   create: t.procedure
     .input(
@@ -95,6 +98,13 @@ export const charactersRouter = t.router({
         hitDie: z.number().int().min(4).max(12),
         armorBaseAc: z.number().int().min(0).max(20).optional(),
         speed: z.number().int().min(0).max(120).default(30),
+        // Phase 7 (07-06, CHAR-03): negative traits from point-buy step — Zod-bounded
+        negativeTraits: z
+          .object({
+            presetFlaws: z.array(z.string().min(1).max(100)).max(12),
+            freeFormFlaws: z.array(z.string().max(280)).max(2),
+          })
+          .optional(),
       }),
     )
     .mutation(({ input }) => {
@@ -196,13 +206,22 @@ export const charactersRouter = t.router({
           spellSlots,
           startingGold: input.startingGold,
           startingItems: input.startingItems,
+          // Phase 7 (07-06, CHAR-03): persist negative traits if provided
+          negativeTraits: input.negativeTraits ?? null,
         })
       } catch (err: unknown) {
+        const errObj = err as { code?: string; message?: string }
+        // Catch PARTY-01 party-full error from charactersRepo (07-06)
+        if (errObj?.message?.includes('Party is full') || errObj?.message?.includes('partySize')) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: "This campaign's party is full.",
+          })
+        }
         // Catch SQLite UNIQUE constraint violation (T-02-05, Pitfall 7)
-        const sqliteErr = err as { code?: string; message?: string }
         if (
-          sqliteErr?.code === 'SQLITE_CONSTRAINT_UNIQUE' ||
-          (sqliteErr?.message?.includes('UNIQUE constraint failed') ?? false)
+          errObj?.code === 'SQLITE_CONSTRAINT_UNIQUE' ||
+          (errObj?.message?.includes('UNIQUE constraint failed') ?? false)
         ) {
           throw new TRPCError({
             code: 'CONFLICT',

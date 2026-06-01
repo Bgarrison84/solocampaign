@@ -16,6 +16,7 @@ import { StepClass } from './wizard/StepClass'
 import { StepAbilityScores } from './wizard/StepAbilityScores'
 import { StepBackground } from './wizard/StepBackground'
 import { StepEquipment } from './wizard/StepEquipment'
+import { StepStartingFeat } from './wizard/StepStartingFeat'
 import { StepReview } from './wizard/StepReview'
 import {
   initialWizardState,
@@ -28,14 +29,20 @@ import type { Race, DndClass, Background, EquipmentPackageOption } from '../../.
 
 interface CreateCharacterWizardProps {
   campaignId: string
+  /**
+   * Optional callback invoked after character creation completes successfully.
+   * When provided, the wizard calls this instead of navigating to '/'.
+   * Use for re-triggered party-member creation.
+   */
+  onComplete?: () => void
 }
 
 /**
- * 6-step character creation wizard.
+ * 7-step character creation wizard (extended for Phase 7).
  *
- * Per D-04: modal is non-dismissible. The only exit is:
- * - Complete all 6 steps and click "Create Character" → character saved
- * - Click "Cancel Character Creation" → AlertDialog confirmation → navigate to '/'
+ * Per D-04: modal is non-dismissible. The only exits are:
+ * - Complete all 7 steps and click "Create Character" → character saved
+ * - Click "Cancel Character Creation" → AlertDialog confirmation → navigate to '/' (or call onComplete)
  *
  * Steps:
  *  0 = Race (+ name/backstory)
@@ -43,9 +50,17 @@ interface CreateCharacterWizardProps {
  *  2 = Ability Scores
  *  3 = Background
  *  4 = Equipment
- *  5 = Review
+ *  5 = Starting Feat (optional — skippable)
+ *  6 = Review
+ *
+ * Phase 7 additions (07-06):
+ *  - Step 5: Optional Starting Feat via FeatPicker (CHAR-05)
+ *  - negativeTraits (from ability step) persisted to characters.negativeTraits
+ *  - trpc.feats.add called after character creation when a starting feat is chosen
+ *  - onComplete prop for re-triggerable party-member creation (PARTY-01)
+ *  - Party-full error surfaced inline ("This campaign's party is full.")
  */
-export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps) {
+export function CreateCharacterWizard({ campaignId, onComplete }: CreateCharacterWizardProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -93,12 +108,46 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
   const createMutation = useMutation({
     mutationFn: (input: Parameters<typeof trpc.characters.create.mutate>[0]) =>
       trpc.characters.create.mutate(input),
-    onSuccess: () => {
+    onSuccess: async (character) => {
       queryClient.invalidateQueries({ queryKey: ['characters', 'getByCampaignId', campaignId] })
       setError(null)
+
+      // After character created, persist starting feat if chosen (CHAR-05, 07-06)
+      if (wizardState.startingFeat) {
+        try {
+          await trpc.feats.add.mutate({
+            characterId: character.id,
+            featName: wizardState.startingFeat.featName,
+            featSource: wizardState.startingFeat.featSource,
+            customFeatId: wizardState.startingFeat.customFeatId,
+          })
+          // Invalidate feats for the new character
+          queryClient.invalidateQueries({
+            queryKey: ['feats', 'listByCharacter', character.id],
+          })
+        } catch (featErr: unknown) {
+          // Log but don't block — character was created successfully
+          console.error('[CreateCharacterWizard] Failed to save starting feat:', featErr)
+        }
+      }
+
+      // Navigate or callback
+      if (onComplete) {
+        onComplete()
+      } else {
+        navigate(`/campaign/${campaignId}`)
+      }
     },
     onError: (err: Error) => {
-      setError(err.message || 'Failed to create character. Please try again.')
+      // PARTY-01: surface party-full error inline (D-18)
+      if (
+        err.message?.includes('Party is full') ||
+        err.message?.includes('partySize')
+      ) {
+        setError("This campaign's party is full.")
+      } else {
+        setError(err.message || 'Failed to create character. Please try again.')
+      }
     },
   })
 
@@ -127,7 +176,9 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
         )
       case 4: // Equipment
         return wizardState.selectedEquipmentPackage !== null
-      case 5: // Review
+      case 5: // Starting Feat — always valid (step is optional/skippable)
+        return true
+      case 6: // Review
         return true
       default:
         return false
@@ -148,6 +199,12 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
     if (targetStep <= completedUpTo && targetStep !== step) {
       setStep(targetStep)
     }
+  }
+
+  /** Skip the Starting Feat step without clearing any previously chosen feat */
+  function handleSkipFeat() {
+    setCompletedUpTo(Math.max(completedUpTo, step))
+    setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1))
   }
 
   function updateWizard(partial: Partial<WizardState>) {
@@ -256,6 +313,11 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
       else if (n.includes('leather')) armorBaseAc = 11
     }
 
+    // Build negativeTraits payload — only include if any traits were chosen (Point Buy only)
+    const hasNegativeTraits =
+      s.negativeTraits.presetFlaws.length > 0 ||
+      s.negativeTraits.freeFormFlaws.some((f) => f.trim().length > 0)
+
     createMutation.mutate({
       campaignId,
       name: s.characterName.trim(),
@@ -279,7 +341,17 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
       hitDie: s.selectedClass!.hitDie,
       armorBaseAc,
       speed: s.selectedRace?.speed ?? 30,
+      // Phase 7 (07-06): persist negative traits (CHAR-03)
+      negativeTraits: hasNegativeTraits ? s.negativeTraits : undefined,
     })
+  }
+
+  function handleCancel() {
+    if (onComplete) {
+      onComplete()
+    } else {
+      navigate('/')
+    }
   }
 
   const isValid = isCurrentStepValid()
@@ -287,6 +359,9 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
   const classes = (classesQuery.data ?? []) as DndClass[]
   const backgrounds = (backgroundsQuery.data ?? []) as Background[]
   const equipmentPackages = (equipmentQuery.data ?? []) as EquipmentPackageOption[]
+
+  // The Review step is now step index 6
+  const REVIEW_STEP = TOTAL_STEPS - 1
 
   return (
     <>
@@ -341,6 +416,14 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
               />
             )}
             {step === 5 && (
+              <StepStartingFeat
+                wizardState={wizardState}
+                campaignId={campaignId}
+                onChange={updateWizard}
+                onSkip={handleSkipFeat}
+              />
+            )}
+            {step === REVIEW_STEP && (
               <StepReview
                 wizardState={wizardState}
                 spellSlotsData={(spellSlotsQuery.data ?? null) as Record<number, Record<string, number>> | null}
@@ -373,7 +456,7 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
                   Back
                 </Button>
               )}
-              {step < TOTAL_STEPS - 1 ? (
+              {step < REVIEW_STEP ? (
                 <Button
                   type="button"
                   onClick={handleNext}
@@ -415,7 +498,7 @@ export function CreateCharacterWizard({ campaignId }: CreateCharacterWizardProps
             <Button
               type="button"
               variant="destructive"
-              onClick={() => navigate('/')}
+              onClick={handleCancel}
             >
               Yes, cancel
             </Button>

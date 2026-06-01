@@ -281,6 +281,21 @@ export const charactersRepo = {
   },
 
   /**
+   * List all characters (party members + companions) for a campaign.
+   * Used by CharacterSheetTab to build the party switcher and companions section.
+   */
+  listByCampaign(campaignId: string): CharacterWithResources[] {
+    const db = getDb()
+    const rows = db
+      .select()
+      .from(characters)
+      .where(eq(characters.campaignId, campaignId))
+      .orderBy(asc(characters.createdAt))
+      .all()
+    return rows.map((char) => this.getWithResources(char.id)).filter((c): c is CharacterWithResources => c !== undefined)
+  },
+
+  /**
    * Get a character by campaign ID (D-04: auto-launch check).
    * Returns undefined if no character exists for this campaign.
    */

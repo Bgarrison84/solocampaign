@@ -233,6 +233,50 @@ export const charactersRouter = t.router({
     }),
 
   /**
+   * List all characters (party members + companions) for a campaign.
+   * Used by CharacterSheetTab to build the party switcher and companions section (PARTY-01, PARTY-02).
+   */
+  list: t.procedure
+    .input(z.object({ campaignId: campaignIdSchema }))
+    .query(({ input }) => {
+      return charactersRepo.listByCampaign(input.campaignId)
+    }),
+
+  /**
+   * Add a companion to a campaign.
+   * Server-side Zod validation mirrors addCompanionSchema (T-07-08-01).
+   */
+  addCompanion: t.procedure
+    .input(
+      z.object({
+        campaignId: campaignIdSchema,
+        name: z.string().min(1).max(100),
+        type: z.enum(['Familiar', 'Animal Companion', 'Summoned Creature']),
+        hpMax: z.number().int().min(1).max(9999),
+        ac: z.number().int().min(1).max(30),
+      }),
+    )
+    .mutation(({ input }) => {
+      return charactersRepo.createCompanion(input)
+    }),
+
+  /**
+   * Remove a companion from a campaign.
+   * Scoped to campaign (T-07-08-01).
+   */
+  deleteCompanion: t.procedure
+    .input(
+      z.object({
+        companionId: characterIdSchema,
+        campaignId: campaignIdSchema,
+      }),
+    )
+    .mutation(({ input }) => {
+      charactersRepo.deleteCompanion(input.companionId, input.campaignId)
+      return { deleted: true }
+    }),
+
+  /**
    * Get a character with resources and items by campaign ID.
    * Returns null if no character exists (triggers wizard auto-launch, D-04).
    */

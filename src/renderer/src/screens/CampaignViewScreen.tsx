@@ -23,6 +23,7 @@ import { usePanelSizeStore } from '../stores/panelSizeStore'
 import { useWindowStore } from '../stores/windowStore'
 import { useSessionStore } from '../stores/sessionStore'
 import { useCombatStore } from '../stores/combatStore'
+import { useCampaignViewStore } from '../stores/campaignViewStore'
 import { CharacterSheetTab } from '../components/CharacterSheetTab'
 import { MutationChipStack } from '../components/MutationChipStack'
 import { CombatTrackerTab } from '../components/CombatTrackerTab'
@@ -294,6 +295,12 @@ export function CampaignViewScreen() {
       content: '[Begin session narration]',
     })
   }, [sessionStore.isSessionActive, sessionStore.activeSessionId, id, messagesQuery.data])
+
+  // Reset activeCharacterId when the campaign changes (Pitfall 6 — stale selection guard).
+  // This fires before CharacterSheetTab mounts, so the switcher always defaults to first member.
+  useEffect(() => {
+    useCampaignViewStore.getState().resetActiveCharacterId()
+  }, [id])
 
   // Load persisted panel sizes on mount or campaign change
   useEffect(() => {
@@ -625,7 +632,7 @@ export function CampaignViewScreen() {
               <MutationChipStack />
 
               <TabsContent value="character-sheet" className="flex-1 overflow-hidden p-0">
-                <CharacterSheetTab campaignId={id} />
+                <CharacterSheetTab campaignId={id} campaign={campaignQuery.data} />
               </TabsContent>
 
               <TabsContent value="combat-tracker" className="flex-1 overflow-hidden p-0">

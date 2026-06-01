@@ -59,6 +59,25 @@ export function SheetHeader({ character }: SheetHeaderProps) {
   const currentLevel = character.level
   const nextLevelXp = XP_THRESHOLDS[currentLevel] ?? XP_THRESHOLDS[XP_THRESHOLDS.length - 1]
 
+  // Multiclass display (CHAR-04): build "Fighter 5 / Wizard 3 — Level 8" when classes.length > 1
+  let classesData: Array<{ className: string; level: number }> | null = null
+  if (character.classes) {
+    try {
+      const parsed = JSON.parse(character.classes) as Array<{ className: string; level: number }>
+      if (Array.isArray(parsed) && parsed.length > 1) {
+        classesData = parsed
+      }
+    } catch {
+      // JSON parse failed — fall back to single-class display
+    }
+  }
+  const multiclassBreakdown =
+    classesData !== null
+      ? classesData.map((c) => `${c.className} ${c.level}`).join(' / ') +
+        ' — Level ' +
+        classesData.reduce((sum, c) => sum + c.level, 0)
+      : null
+
   return (
     <div className="flex flex-row gap-4 items-start">
       <PortraitSlot
@@ -69,9 +88,16 @@ export function SheetHeader({ character }: SheetHeaderProps) {
       />
       <div className="flex flex-col gap-1">
         <h1 className="text-4xl font-semibold leading-tight">{character.name}</h1>
-        <p className="text-sm text-muted-foreground">
-          {character.race} {character.class} · Level {character.level}
-        </p>
+        {multiclassBreakdown ? (
+          <>
+            <p className="text-sm text-muted-foreground">{character.race}</p>
+            <p className="text-sm text-muted-foreground">{multiclassBreakdown}</p>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {character.race} {character.class} · Level {character.level}
+          </p>
+        )}
         <div className="flex flex-row items-center gap-2">
           <span className="text-sm text-muted-foreground">
             XP: {character.xp} / {nextLevelXp}

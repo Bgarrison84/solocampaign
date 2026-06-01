@@ -23,6 +23,7 @@ import { usePanelSizeStore } from '../stores/panelSizeStore'
 import { useWindowStore } from '../stores/windowStore'
 import { useSessionStore } from '../stores/sessionStore'
 import { useCombatStore } from '../stores/combatStore'
+import { useCampaignViewStore } from '../stores/campaignViewStore'
 import { CharacterSheetTab } from '../components/CharacterSheetTab'
 import { MutationChipStack } from '../components/MutationChipStack'
 import { CombatTrackerTab } from '../components/CombatTrackerTab'
@@ -174,11 +175,55 @@ export function CampaignViewScreen() {
   })
 
   // startCombat (store action) sets activeTab='combat-tracker' to auto-switch the panel (D-17)
-  const handleStartCombat = useCallback(() => {
-    useCombatStore.getState().startCombat(id!)
-    startCombatMutation.mutate()
+  // Party-aware: in party mode (partySize > 1), auto-adds all non-companion party members as
+  // player combatants (PARTY-01, RESEARCH Open Question 2).
+  // Solo mode (partySize === 1): unchanged from Phase 5 — no auto-add.
+  // Duplicate-guard: skips members whose name already appears as a player combatant.
+  const handleStartCombat = useCallback(async () => {
+    const campaignId = id!
+    const currentPartySize = campaignQuery.data?.partySize ?? 1
+
+    // 1. Set combat active in store (auto-switches panel to combat-tracker, D-17)
+    useCombatStore.getState().startCombat(campaignId)
+    // 2. Log combat_started event via tRPC
+    await startCombatMutation.mutateAsync()
+
+    // 3. Auto-add party members only in party mode
+    if (currentPartySize > 1) {
+      try {
+        // Get all non-companion party members for this campaign
+        const allCharacters = await trpc.characters.list.query({ campaignId })
+        const partyMembers = allCharacters.filter((c) => !c.isCompanion)
+
+        // Get current combatant list to guard against duplicates (T-07-08-03)
+        const activeCombatants = await trpc.combat.listActive.query({ campaignId })
+        const existingPlayerNames = new Set(
+          activeCombatants.filter((c) => c.isPlayer).map((c) => c.name),
+        )
+
+        // Add each party member not already in the tracker
+        for (const member of partyMembers) {
+          if (existingPlayerNames.has(member.name)) continue
+          await trpc.combat.addCombatant.mutate({
+            campaignId,
+            name: member.name,
+            hpMax: member.resources.hpMax,
+            ac: member.ac,
+            initiative: 0,
+            initiativeOrder: 0,
+            isPlayer: true,
+          })
+        }
+
+        // Invalidate combat list so tracker reflects all party members
+        queryClient.invalidateQueries({ queryKey: ['combat', 'listActive', campaignId] })
+      } catch (err) {
+        // Non-fatal — combat is started, auto-add failed. Player can add manually.
+        console.error('[handleStartCombat] party auto-add failed:', err)
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
+  }, [id, queryClient, campaignQuery.data?.partySize])
   const handleEndCombat = useCallback(() => {
     useCombatStore.getState().endCombat()
     endCombatMutation.mutate()
@@ -294,6 +339,12 @@ export function CampaignViewScreen() {
       content: '[Begin session narration]',
     })
   }, [sessionStore.isSessionActive, sessionStore.activeSessionId, id, messagesQuery.data])
+
+  // Reset activeCharacterId when the campaign changes (Pitfall 6 — stale selection guard).
+  // This fires before CharacterSheetTab mounts, so the switcher always defaults to first member.
+  useEffect(() => {
+    useCampaignViewStore.getState().resetActiveCharacterId()
+  }, [id])
 
   // Load persisted panel sizes on mount or campaign change
   useEffect(() => {
@@ -625,7 +676,7 @@ export function CampaignViewScreen() {
               <MutationChipStack />
 
               <TabsContent value="character-sheet" className="flex-1 overflow-hidden p-0">
-                <CharacterSheetTab campaignId={id} />
+                <CharacterSheetTab campaignId={id} campaign={campaignQuery.data} />
               </TabsContent>
 
               <TabsContent value="combat-tracker" className="flex-1 overflow-hidden p-0">
@@ -641,6 +692,37 @@ export function CampaignViewScreen() {
               </TabsContent>
 
               <TabsContent value="inventory" className="flex-1 overflow-auto p-6">
+                {/* Encumbrance display — shown when campaign.encumbranceEnabled = true (STATE-06, D-27) */}
+                {campaignQuery.data?.encumbranceEnabled && characterQuery.data && (() => {
+                  const char = characterQuery.data
+                  const strScore = char.strength
+                  const carriedWeight = char.items.reduce((sum, item) => sum + (item.weight ?? 0) * item.quantity, 0)
+                  const encumberedThreshold = 5 * strScore
+                  const heavilyEncumberedThreshold = 10 * strScore
+                  const carryingCapacity = 15 * strScore
+                  const isEncumbered = carriedWeight >= encumberedThreshold
+                  const isHeavilyEncumbered = carriedWeight >= heavilyEncumberedThreshold
+                  return (
+                    <div className="flex justify-between items-center py-2 border-b border-border mb-3">
+                      <span className="text-sm font-semibold text-foreground">Carrying Capacity</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm text-foreground">
+                          {Math.round(carriedWeight * 10) / 10} / {carryingCapacity} lbs
+                        </span>
+                        {isHeavilyEncumbered && (
+                          <span className="rounded-full px-2 py-0.5 text-xs font-semibold border bg-red-950/60 border-red-600 text-red-400">
+                            Heavily Encumbered
+                          </span>
+                        )}
+                        {!isHeavilyEncumbered && isEncumbered && (
+                          <span className="rounded-full px-2 py-0.5 text-xs font-semibold border bg-amber-950/60 border-amber-600 text-amber-400">
+                            Encumbered
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })()}
                 <div className="flex flex-col items-center max-w-[400px] mx-auto" style={{ paddingTop: '30%' }}>
                   <h2 className="text-xl font-semibold text-foreground mb-2">Inventory</h2>
                   <p className="text-sm text-muted-foreground text-center">

@@ -26,10 +26,10 @@ progress:
 ## Current Position
 
 Phase: 07 (content-depth-advanced-character) — IN PROGRESS
-Plan: 07-08 (Wave 5 executing)
+Plan: 07-11 (Wave 6 executing)
 **Milestone:** v1
 **Phase:** Phase 7 — Content Depth & Advanced Character
-**Status:** Phase 07 executing — Wave 5 in progress (9/11 plans complete)
+**Status:** Phase 07 executing — Wave 6 in progress (10/11 plans complete)
 
 **Progress:** [████████████████░░░░] 67% (6/9 phases complete)
 

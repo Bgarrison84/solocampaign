@@ -1,5 +1,6 @@
 import type { Race, DndClass, Background, EquipmentPackageOption } from '../../../../main/db/contentTypes'
 import type { NegativeTraits } from '../../lib/pointBuy'
+import type { FeatSelection } from '../FeatPicker'
 
 /** The four ability score generation methods available in the wizard. */
 export type AbilityScoreMethod = 'standard-array' | '4d6-roll' | 'point-buy' | 'manual'
@@ -9,7 +10,7 @@ export type AbilityScoreMethod = 'standard-array' | '4d6-roll' | 'point-buy' | '
  * Held in CreateCharacterWizard's local useState.
  */
 export interface WizardState {
-  step: number // 0-5
+  step: number // 0-6
   // Step 1 — Race
   characterName: string
   backstory: string
@@ -49,9 +50,11 @@ export interface WizardState {
   flaw: string
   // Step 5 — Equipment
   selectedEquipmentPackage: EquipmentPackageOption | null
+  // Step 6 — Starting Feat (optional)
+  startingFeat: FeatSelection | null
 }
 
-export const TOTAL_STEPS = 6
+export const TOTAL_STEPS = 7
 
 export const STEP_NAMES: string[] = [
   'Race',
@@ -59,6 +62,7 @@ export const STEP_NAMES: string[] = [
   'Ability Scores',
   'Background',
   'Equipment',
+  'Starting Feat',
   'Review',
 ]
 
@@ -97,6 +101,7 @@ export const initialWizardState: WizardState = {
   bond: '',
   flaw: '',
   selectedEquipmentPackage: null,
+  startingFeat: null,
 }
 
 // Standard array values used in Step 3

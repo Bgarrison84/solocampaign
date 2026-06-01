@@ -85,18 +85,38 @@ export interface CreateCharacterInput
 
 // ─── JSON Parse Helpers ────────────────────────────────────────────────────────
 
+function safeParseArray(json: string, label: string): string[] {
+  try {
+    const parsed = JSON.parse(json)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    log.error(`[charactersRepo] Failed to parse JSON column "${label}":`, json)
+    return []
+  }
+}
+
+function safeParseObject<T>(json: string, label: string, fallback: T): T {
+  try {
+    const parsed = JSON.parse(json)
+    return parsed !== null && typeof parsed === 'object' ? (parsed as T) : fallback
+  } catch {
+    log.error(`[charactersRepo] Failed to parse JSON column "${label}":`, json)
+    return fallback
+  }
+}
+
 function parseCharacterJsonFields(
   char: Character,
 ): Omit<CharacterWithResources, 'resources' | 'items'> {
   return {
     ...char,
-    savingThrowProficiencies: JSON.parse(char.savingThrowProficiencies) as string[],
-    skillProficiencies: JSON.parse(char.skillProficiencies) as string[],
-    skillExpertise: JSON.parse(char.skillExpertise) as string[],
-    languages: JSON.parse(char.languages) as string[],
-    toolProficiencies: JSON.parse(char.toolProficiencies) as string[],
-    armorProficiencies: JSON.parse(char.armorProficiencies) as string[],
-    weaponProficiencies: JSON.parse(char.weaponProficiencies) as string[],
+    savingThrowProficiencies: safeParseArray(char.savingThrowProficiencies, 'savingThrowProficiencies'),
+    skillProficiencies: safeParseArray(char.skillProficiencies, 'skillProficiencies'),
+    skillExpertise: safeParseArray(char.skillExpertise, 'skillExpertise'),
+    languages: safeParseArray(char.languages, 'languages'),
+    toolProficiencies: safeParseArray(char.toolProficiencies, 'toolProficiencies'),
+    armorProficiencies: safeParseArray(char.armorProficiencies, 'armorProficiencies'),
+    weaponProficiencies: safeParseArray(char.weaponProficiencies, 'weaponProficiencies'),
   }
 }
 
@@ -105,8 +125,8 @@ function parseResourcesJsonFields(
 ): CharacterWithResources['resources'] {
   return {
     ...res,
-    conditions: JSON.parse(res.conditions) as string[],
-    spellSlots: JSON.parse(res.spellSlots) as SpellSlotMap,
+    conditions: safeParseArray(res.conditions, 'conditions'),
+    spellSlots: safeParseObject<SpellSlotMap>(res.spellSlots, 'spellSlots', {}),
   }
 }
 

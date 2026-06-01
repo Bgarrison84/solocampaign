@@ -409,8 +409,10 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
   const worldOverview = campaignsRepo.getWorldOverview(campaignId)
   let worldOverviewBlock = ''
   if (worldOverview?.worldDocument) {
-    // worldDocument takes precedence — truncate to 16,000 chars (T-07-03-05)
-    const docContent = worldOverview.worldDocument.substring(0, 16_000)
+    // worldDocument takes precedence — strip newline injections then truncate (T-07-03-05)
+    const docContent = worldOverview.worldDocument
+      .replace(/[\r\n]+/g, ' ')
+      .substring(0, 16_000)
     worldOverviewBlock = '\nWorld Reference Document:\n' + docContent
   } else if (worldOverview?.worldBrief) {
     worldOverviewBlock = '\nWorld Overview:\n' + stripNewlines(worldOverview.worldBrief)

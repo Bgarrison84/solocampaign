@@ -114,7 +114,8 @@ export function CharacterSheetTab({ campaignId, campaign }: CharacterSheetTabPro
 
   const nextLevel = activeCharacter.level + 1
   const isLevelUpAvailable =
-    nextLevel <= 20 && activeCharacter.xp >= (XP_THRESHOLDS[nextLevel] ?? Infinity)
+    (XP_THRESHOLDS[nextLevel] !== undefined) &&
+    activeCharacter.xp >= XP_THRESHOLDS[nextLevel]
 
   // HP mutation handler for companions
   function handleUpdateCompanionHp(companionId: string, delta: number) {

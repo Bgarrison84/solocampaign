@@ -234,6 +234,9 @@ export function LevelUpModal({ open, onClose, character }: LevelUpModalProps) {
   const [selectedSubclass, setSelectedSubclass] = useState<string | null>(null)
   const [subclassDescription, setSubclassDescription] = useState<string>('')
 
+  // Submit error
+  const [levelUpError, setLevelUpError] = useState<string | null>(null)
+
   // Epic Boon
   const { data: epicBoons = [] } = useQuery({
     queryKey: ['feats', 'listEpicBoons'],
@@ -366,51 +369,58 @@ export function LevelUpModal({ open, onClose, character }: LevelUpModalProps) {
 
   const handleConfirm = async () => {
     if (hpGainTotal === null) return
+    setLevelUpError(null)
 
-    // Persist feat / epic boon first (fire-and-forget side mutations)
-    if (isASILevel && !isEpicBoonLevel && asiChoice === 'feat' && selectedFeat) {
-      await featAddMutation.mutateAsync({
-        characterId: character.id,
-        featName: selectedFeat.featName,
-        featSource: selectedFeat.featSource,
-        customFeatId: selectedFeat.customFeatId,
-      })
-    }
-    if (isEpicBoonLevel && selectedBoon) {
-      await featAddMutation.mutateAsync({
-        characterId: character.id,
-        featName: selectedBoon.name,
-        featSource: 'epic_boon',
-      })
-    }
-
-    // Build new slot max
-    const newSlotMax: Record<string, number> = {}
-    if (newSpellSlots) {
-      for (const [level, max] of Object.entries(newSpellSlots)) {
-        newSlotMax[level] = max
+    try {
+      // Build new slot max
+      const newSlotMax: Record<string, number> = {}
+      if (newSpellSlots) {
+        for (const [level, max] of Object.entries(newSpellSlots)) {
+          newSlotMax[level] = max
+        }
       }
+
+      // Determine classes to persist
+      const classesToPersist =
+        isMulticlass || multiclassChoice === 'add'
+          ? updatedClasses.length > 0 ? updatedClasses : undefined
+          : undefined
+
+      // Determine subclass to persist
+      const subclassToPersist = isSubclassLevel && selectedSubclass ? selectedSubclass : undefined
+
+      // Level up first — only persist feat/boon if level-up succeeds (CR-03)
+      await levelUpMutation.mutateAsync({
+        hpGain: hpGainTotal,
+        newSlotMax,
+        classes: classesToPersist,
+        subclass: subclassToPersist,
+      })
+
+      // Persist feat / epic boon only after successful level-up
+      if (isASILevel && !isEpicBoonLevel && asiChoice === 'feat' && selectedFeat) {
+        await featAddMutation.mutateAsync({
+          characterId: character.id,
+          featName: selectedFeat.featName,
+          featSource: selectedFeat.featSource,
+          customFeatId: selectedFeat.customFeatId,
+        })
+      }
+      if (isEpicBoonLevel && selectedBoon) {
+        await featAddMutation.mutateAsync({
+          characterId: character.id,
+          featName: selectedBoon.name,
+          featSource: 'epic_boon',
+        })
+      }
+    } catch (err) {
+      setLevelUpError(err instanceof Error ? err.message : 'Level-up failed. Please try again.')
     }
-
-    // Determine classes to persist
-    const classesToPersist =
-      isMulticlass || multiclassChoice === 'add'
-        ? updatedClasses.length > 0 ? updatedClasses : undefined
-        : undefined
-
-    // Determine subclass to persist
-    const subclassToPersist = isSubclassLevel && selectedSubclass ? selectedSubclass : undefined
-
-    levelUpMutation.mutate({
-      hpGain: hpGainTotal,
-      newSlotMax,
-      classes: classesToPersist,
-      subclass: subclassToPersist,
-    })
   }
 
   const handleClose = () => {
     // Reset all state on close
+    setLevelUpError(null)
     setHpMethod(null)
     setHpRollResult(null)
     setMulticlassChoice('continue')
@@ -789,6 +799,9 @@ export function LevelUpModal({ open, onClose, character }: LevelUpModalProps) {
         </div>
 
         <DialogFooter>
+          {levelUpError && (
+            <p className="text-sm text-destructive w-full mb-2">{levelUpError}</p>
+          )}
           <Button
             variant="ghost"
             onClick={handleClose}

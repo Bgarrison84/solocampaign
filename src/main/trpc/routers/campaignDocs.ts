@@ -105,7 +105,7 @@ export const campaignDocsRouter = t.router({
    * Delete an imported reference doc. campaignId guard prevents cross-campaign deletes.
    */
   delete: t.procedure
-    .input(z.object({ docId: z.string(), campaignId: campaignIdSchema }))
+    .input(z.object({ docId: z.string().uuid(), campaignId: campaignIdSchema }))
     .mutation(({ input }) => {
       campaignReferenceDocsRepo.delete(input.docId, input.campaignId)
     }),

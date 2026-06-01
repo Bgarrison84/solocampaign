@@ -175,11 +175,55 @@ export function CampaignViewScreen() {
   })
 
   // startCombat (store action) sets activeTab='combat-tracker' to auto-switch the panel (D-17)
-  const handleStartCombat = useCallback(() => {
-    useCombatStore.getState().startCombat(id!)
-    startCombatMutation.mutate()
+  // Party-aware: in party mode (partySize > 1), auto-adds all non-companion party members as
+  // player combatants (PARTY-01, RESEARCH Open Question 2).
+  // Solo mode (partySize === 1): unchanged from Phase 5 — no auto-add.
+  // Duplicate-guard: skips members whose name already appears as a player combatant.
+  const handleStartCombat = useCallback(async () => {
+    const campaignId = id!
+    const currentPartySize = campaignQuery.data?.partySize ?? 1
+
+    // 1. Set combat active in store (auto-switches panel to combat-tracker, D-17)
+    useCombatStore.getState().startCombat(campaignId)
+    // 2. Log combat_started event via tRPC
+    await startCombatMutation.mutateAsync()
+
+    // 3. Auto-add party members only in party mode
+    if (currentPartySize > 1) {
+      try {
+        // Get all non-companion party members for this campaign
+        const allCharacters = await trpc.characters.list.query({ campaignId })
+        const partyMembers = allCharacters.filter((c) => !c.isCompanion)
+
+        // Get current combatant list to guard against duplicates (T-07-08-03)
+        const activeCombatants = await trpc.combat.listActive.query({ campaignId })
+        const existingPlayerNames = new Set(
+          activeCombatants.filter((c) => c.isPlayer).map((c) => c.name),
+        )
+
+        // Add each party member not already in the tracker
+        for (const member of partyMembers) {
+          if (existingPlayerNames.has(member.name)) continue
+          await trpc.combat.addCombatant.mutate({
+            campaignId,
+            name: member.name,
+            hpMax: member.resources.hpMax,
+            ac: member.ac,
+            initiative: 0,
+            initiativeOrder: 0,
+            isPlayer: true,
+          })
+        }
+
+        // Invalidate combat list so tracker reflects all party members
+        queryClient.invalidateQueries({ queryKey: ['combat', 'listActive', campaignId] })
+      } catch (err) {
+        // Non-fatal — combat is started, auto-add failed. Player can add manually.
+        console.error('[handleStartCombat] party auto-add failed:', err)
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
+  }, [id, queryClient, campaignQuery.data?.partySize])
   const handleEndCombat = useCallback(() => {
     useCombatStore.getState().endCombat()
     endCombatMutation.mutate()

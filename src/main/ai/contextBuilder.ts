@@ -439,6 +439,25 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
     }
   }
 
+  // --- Phase 7: Party Members ID injection (PARTY-01 / OQ1) ---
+  // When partySize > 1, inject all non-companion character IDs + names so the AI
+  // can target awardInspiration({characterId}) at any party member (not just char-1).
+  let partyMembersBlock = ''
+  {
+    const campaign = campaignsRepo.get(campaignId)
+    const partySize = campaign?.partySize ?? 1
+    if (partySize > 1) {
+      const allChars = charactersRepo.listByCampaign(campaignId)
+      const partyMembers = allChars.filter((c) => !c.isCompanion)
+      if (partyMembers.length > 0) {
+        const memberLines = partyMembers.map(
+          (c) => `  - ${stripNewlines(c.name)} (ID: ${c.id})`,
+        )
+        partyMembersBlock = '\nParty Members:\n' + memberLines.join('\n')
+      }
+    }
+  }
+
   // --- Phase 6: world-state summary (D-18) — injected after the tool block ---
   const worldStateSummary = formatWorldStateSummary(campaignId, character?.id)
 
@@ -453,6 +472,7 @@ export function buildContext(args: BuildContextArgs): BuiltContext {
       .join('\n\n')
     + (worldOverviewBlock ? '\n\n' + worldOverviewBlock : '')
     + '\n\n' + toolDescriptionsBlock
+    + (partyMembersBlock ? '\n\n' + partyMembersBlock : '')
     + (worldStateSummary ? '\n\n' + worldStateSummary : '')
     + referenceDocBlock
     + l3Block

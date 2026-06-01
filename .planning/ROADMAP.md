@@ -17,7 +17,7 @@
 - [x] **Phase 4: Long-Campaign Memory & Session Flow** — Three-layer memory architecture, structured session start prompts, end-of-session recap, and AI-generated summaries that keep months-long campaigns coherent
 - [ ] **Phase 5: Rules Engine, Dice & Combat** — Deterministic rules engine, player-rolls-dice paradigm, combat tracker with initiative/HP/conditions, XP-driven level-up, rests, spell slot management, and currency
 - [ ] **Phase 6: Quests, NPCs & World State** — AI-populated quest log, NPC tracker, faction/reputation, in-world calendar, location breadcrumb, and AI-awarded Inspiration via structured tool-call mutations
-- [ ] **Phase 7: Content Depth & Advanced Character** — Full ability score generation methods (incl. negative-trait point buy), multiclass without prerequisites, feats + custom editor, companions as party members, Epic Boons, three world-setup modes, SRD reference, homebrew, and PDF/text rules import
+- [x] **Phase 7: Content Depth & Advanced Character** — Full ability score generation methods (incl. negative-trait point buy), multiclass without prerequisites, feats + custom editor, companions as party members, Epic Boons, three world-setup modes, SRD reference, homebrew, and PDF/text rules import ✓ 11/11 plans complete (2026-06-01)
 - [ ] **Phase 8: Polish, Export & Accessibility** — Full campaign JSON export/import, character sheet PDF, sharable starter templates, custom data folder, and accessibility (font scaling, high contrast, ARIA/keyboard)
 - [ ] **Phase 9: Distribution & Update Notifications** — Signed + notarized cross-platform installers (Windows, macOS, Linux), GitHub Releases publishing, and notify-only update flow
 
@@ -225,19 +225,19 @@ Plans:
   4. User can set up a campaign world by letting the AI generate it, writing a text brief, or importing a PDF/text document — all three modes available per campaign
   5. User can browse the bundled SRD (rules, spells, items, monsters), add custom homebrew via in-app editor or file import, and import their own PDF/text documents as rules reference available to the AI
   6. User can enable encumbrance tracking per campaign and continue progressing characters past level 20 via Epic Boons
-**Plans:** 11 plans
+**Plans:** 11/11 plans complete
 Plans:
-- [ ] 07-01-PLAN.md — Foundation: unpdf install + migration 0007 + point-buy/multiclass calculations + 3 repos + pdfExtractor + Wave 0 tests [BLOCKING migration]
-- [ ] 07-02-PLAN.md — Content JSON: feats, magic-items, rules, monsters, epic-boons + classes.json subclasses
-- [ ] 07-03-PLAN.md — AI layer: library/feats/campaignDocs routers + addCompanion/removeCompanion tools + contextBuilder World Overview + partySize enforcement + generateWorldBrief
-- [ ] 07-04-PLAN.md — Ability score wizard: method selector + point buy + negative traits + per-stat reroll (CHAR-02/03)
-- [ ] 07-05-PLAN.md — LevelUpModal: multiclass + ASI/feat + subclass + Epic Boon + reusable FeatPicker (CHAR-04/05, PROG-03)
-- [ ] 07-06-PLAN.md — CreateCharacterWizard: starting feat step + negative-trait persistence + re-triggerable party members
-- [ ] 07-07-PLAN.md — CreateCampaignModal: party size + encumbrance + World Setup step + AI brief generation
-- [ ] 07-08-PLAN.md — Character Sheet view: party switcher chips + CompanionsSection + multiclass header + encumbrance display
-- [ ] 07-09-PLAN.md — LibraryScreen (/library) + navigation wiring (RULES-01/02)
-- [ ] 07-10-PLAN.md — Homebrew tab + ReferenceDocSelect merge + referenceDocLoader extension (RULES-03/04)
-- [ ] 07-11-PLAN.md — Integration sweep: party-mode Inspiration injection + full suite + e2e human-verify
+- [x] 07-01-PLAN.md — Foundation: unpdf install + migration 0007 + point-buy/multiclass calculations + 3 repos + pdfExtractor + Wave 0 tests ✓ 2026-06-01
+- [x] 07-02-PLAN.md — Content JSON: feats, magic-items, rules, monsters, epic-boons + classes.json subclasses ✓ 2026-06-01
+- [x] 07-03-PLAN.md — AI layer: library/feats/campaignDocs routers + addCompanion/removeCompanion tools + contextBuilder World Overview + partySize enforcement + generateWorldBrief ✓ 2026-06-01
+- [x] 07-04-PLAN.md — Ability score wizard: method selector + point buy + negative traits + per-stat reroll (CHAR-02/03) ✓ 2026-06-01
+- [x] 07-05-PLAN.md — LevelUpModal: multiclass + ASI/feat + subclass + Epic Boon + reusable FeatPicker (CHAR-04/05, PROG-03) ✓ 2026-06-01
+- [x] 07-06-PLAN.md — CreateCharacterWizard: starting feat step + negative-trait persistence + re-triggerable party members ✓ 2026-06-01
+- [x] 07-07-PLAN.md — CreateCampaignModal: party size + encumbrance + World Setup step + AI brief generation ✓ 2026-06-01
+- [x] 07-08-PLAN.md — Character Sheet view: party switcher chips + CompanionsSection + multiclass header + encumbrance display ✓ 2026-06-01
+- [x] 07-09-PLAN.md — LibraryScreen (/library) + navigation wiring (RULES-01/02) ✓ 2026-06-01
+- [x] 07-10-PLAN.md — Homebrew tab + ReferenceDocSelect merge + referenceDocLoader extension (RULES-03/04) ✓ 2026-06-01
+- [x] 07-11-PLAN.md — Integration sweep: party-mode Inspiration injection + full suite + e2e human-verify ✓ 2026-06-01
 **Wave structure:**
   - Wave 1: 07-01 + 07-02 (foundation; content JSON — no shared files)
   - Wave 2: 07-03 + 07-04 (AI layer; ability score wizard — independent)

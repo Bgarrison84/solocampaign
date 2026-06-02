@@ -270,7 +270,7 @@ Plans:
 - [x] 08-04-PLAN.md — Starter templates: exportStarterTemplate + exportTemplate procedure + CreateCampaignModal pre-fill (DIST-03)
 - [x] 08-05-PLAN.md — Character sheet PDF: pdfService.ts (dynamic import) + CharacterSheetPdf.tsx + exportPdf procedure + CharacterSheetTab button (DIST-02)
 - [x] 08-06-PLAN.md — Data folder migration: changeDataFolder (.backup + integrity check) + SettingsScreen Data section (DIST-04)
-- [ ] 08-07-PLAN.md — Accessibility pass: off-screen aria-live region + aria-label audit + keyboard/screen-reader human-verify (A11Y-02, A11Y-03)
+- [x] 08-07-PLAN.md — Accessibility pass: off-screen aria-live region + aria-label audit + keyboard/screen-reader human-verify (A11Y-02, A11Y-03)
 **Wave structure:**
   - Wave 0: 08-01 (foundation — appPrefs + IPC bridge + route scaffold + custom DB path)
   - Wave 1: 08-02 (font/contrast CSS + settings Appearance UI; depends on 08-01)

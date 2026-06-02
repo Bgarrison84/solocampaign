@@ -79,6 +79,7 @@ export function TitleBar() {
           onClick={() => trpc.window.minimize.mutate()}
           className={`flex items-center justify-center w-[46px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors`}
           style={{ height: tbHeight }}
+          aria-label="Minimize window"
           title="Minimize"
         >
           <Minus size={10} />
@@ -89,6 +90,7 @@ export function TitleBar() {
           onClick={() => trpc.window.maximize.mutate()}
           className={`flex items-center justify-center w-[46px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors`}
           style={{ height: tbHeight }}
+          aria-label={isMaximized ? 'Restore window' : 'Maximize window'}
           title={isMaximized ? 'Restore' : 'Maximize'}
         >
           {isMaximized ? <Copy size={10} /> : <Square size={10} />}
@@ -99,6 +101,7 @@ export function TitleBar() {
           onClick={() => trpc.window.close.mutate()}
           className={`flex items-center justify-center w-[46px] text-muted-foreground hover:bg-destructive hover:text-primary-foreground transition-colors`}
           style={{ height: tbHeight }}
+          aria-label="Close window"
           title="Close"
         >
           <X size={10} />

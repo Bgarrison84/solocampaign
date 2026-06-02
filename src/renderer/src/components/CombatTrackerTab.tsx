@@ -272,7 +272,12 @@ function CombatantRow({
   return (
     <Collapsible className={rowClassName}>
       <CollapsibleTrigger asChild>
-        <div className="px-3 py-2 flex items-center gap-3 w-full" role="button" tabIndex={0}>
+        <div
+          className="px-3 py-2 flex items-center gap-3 w-full"
+          role="button"
+          tabIndex={0}
+          aria-label={`${combatant.name} — view details`}
+        >
           {/* Initiative order */}
           <span className="text-sm font-semibold text-muted-foreground w-5 text-right shrink-0">
             {combatant.initiativeOrder}

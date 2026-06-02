@@ -85,5 +85,22 @@ declare global {
      * Consolidates the previously untyped window.platform reference.
      */
     platform: NodeJS.Platform
+
+    /**
+     * Narrow read-only surface for reading app preferences before React mounts.
+     * Exposed by preload/index.ts via contextBridge.exposeInMainWorld('appPrefsSync', ...).
+     *
+     * Called in main.tsx IIFE before ReactDOM.createRoot() to apply --font-scale
+     * and .high-contrast class to documentElement (D-07, D-08, A11Y-01 — FOUC prevention).
+     *
+     * T-08-02: Returns only fontSize/highContrast/dataFolder — no secrets, no API keys.
+     */
+    appPrefsSync: {
+      getInitialPrefs(): Promise<{
+        fontSize: 'small' | 'normal' | 'large'
+        highContrast: boolean
+        dataFolder: string | null
+      }>
+    }
   }
 }

@@ -45,7 +45,7 @@ Declared values (all multiples of 4 — Tailwind v4 rem-based utilities):
 | 3xl | 64px | Page-level spacing (settings screen top/bottom padding on large display) |
 
 Exceptions:
-- Touch/click targets: minimum 44px height for all interactive controls (font size segmented buttons, high contrast toggle row, Change data folder button) — satisfies WCAG 2.5.5 Target Size
+- Touch/click targets: minimum 44px height for all interactive controls (font size segmented buttons, high contrast toggle row, Change Folder button) — satisfies WCAG 2.5.5 Target Size
 - CampaignCard 3-dot trigger button: 32px (icon-only, `size="icon"` variant) — acceptable because it is supplemental to the card's primary click target
 
 ---
@@ -57,9 +57,9 @@ All sizes in `rem` — they respond to the `--font-scale` CSS custom property se
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
 | Body | 14px (0.875rem) | 400 (regular) | 1.5 | Settings field labels, data folder path display, menu items, error messages |
-| Label | 12px (0.75rem) | 500 (medium) | 1.4 | Section subheadings ("Appearance", "Data"), restart banner text, template pre-fill banner |
+| Label | 12px (0.75rem) | 400 (regular) | 1.4 | Section subheadings ("Appearance", "Data"), restart banner text, template pre-fill banner |
 | Heading | 20px (1.25rem) | 600 (semibold) | 1.2 | Settings page title ("Settings"), section headers |
-| Display | 28px (1.75rem) | 700 (bold) | 1.15 | Not used in Phase 8 (reserved for CampaignListScreen title — existing) |
+| Display | 28px (1.75rem) | 600 (semibold) | 1.15 | Not used in Phase 8 (reserved for CampaignListScreen title — existing) |
 
 **Font scale behavior:**
 - `--font-scale: 0.875` (Small) → body = ~12.25px effective
@@ -96,8 +96,8 @@ All sizes in `rem` — they respond to the `--font-scale` CSS custom property se
 
 **Accent reserved for:**
 - Gear icon in TitleBar (hover state only — default is muted)
-- "Import..." button in CampaignListScreen header (primary variant)
-- "Change..." data folder button (primary variant)
+- "Import Campaign..." button in CampaignListScreen header (primary variant)
+- "Change Folder..." data folder button (primary variant)
 - Font size segmented control — active/selected button background
 - High contrast toggle — checked state
 - PDF export button — hover state indicator
@@ -174,6 +174,8 @@ Rationale for each override: The existing dark palette has adequate contrast for
 
 ### Settings Screen
 
+**Primary visual anchor:** "Settings" page title — 20px/semibold (Heading role), leftmost position, first element in reading order. This is the focal point of the Settings screen.
+
 | Element | Copy |
 |---------|------|
 | Page title | "Settings" |
@@ -188,7 +190,7 @@ Rationale for each override: The existing dark palette has adequate contrast for
 | Data section header | "Data" |
 | Data folder label | "Campaign Data Folder" |
 | Data folder description | "Location where your campaigns and save data are stored" |
-| Change folder button | "Change..." |
+| Change folder button | "Change Folder..." |
 | Restart required banner heading | "Restart Required" |
 | Restart required banner body | "The data folder change takes effect after you restart SoloCampaign." |
 | Gear icon aria-label (TitleBar) | "Open Settings" |
@@ -201,7 +203,7 @@ Rationale for each override: The existing dark palette has adequate contrast for
 | Export JSON menu item | "Export Campaign (JSON)" |
 | Export template menu item | "Export as Starter Template" |
 | Delete menu item | "Delete Campaign" |
-| Import button (CampaignListScreen) | "Import..." |
+| Import button (CampaignListScreen) | "Import Campaign..." |
 | Import button aria-label | "Import campaign or starter template" |
 | Import progress toast | "Importing campaign..." |
 | Import success toast | "Campaign imported successfully" |
@@ -259,7 +261,7 @@ Rationale for each override: The existing dark palette has adequate contrast for
 |-----------|------|----------|---------|
 | `SettingsScreen` | `src/renderer/src/screens/SettingsScreen.tsx` | LibraryScreen pattern | Full-screen `/settings` route |
 | `AppearanceSection` | within SettingsScreen | inline | Font size picker + high contrast toggle |
-| `DataFolderSection` | within SettingsScreen | inline | Data folder path + Change button + restart banner |
+| `DataFolderSection` | within SettingsScreen | inline | Data folder path + Change Folder button + restart banner |
 | `CharacterSheetPdf` | `src/main/services/CharacterSheetPdf.tsx` | @react-pdf/renderer | PDF document component tree (no DOM, Node.js only) |
 | `CharacterSheetPdf` sub-components | same file | @react-pdf/renderer View/Text | `AbilityScoresSection`, `CombatStatsSection`, `SkillsSection`, `EquipmentSection`, `SpellsPage` |
 
@@ -269,7 +271,7 @@ Rationale for each override: The existing dark palette has adequate contrast for
 |-----------|-------------|------------|
 | `TitleBar.tsx` | Add gear icon button (Settings link) | Left of window controls zone; `useNavigate()` to `/settings`; `aria-label="Open Settings"` |
 | `CampaignCard.tsx` | Add 3-dot DropdownMenu | Top-right of card; `onClick e.stopPropagation()`; Export JSON + Export Template + separator + Delete |
-| `CampaignListScreen.tsx` | Add "Import..." button in header | Alongside "New Campaign"; triggers `campaigns.importJson` tRPC mutation (opens OS file picker in main) |
+| `CampaignListScreen.tsx` | Add "Import Campaign..." button in header | Alongside "New Campaign"; triggers `campaigns.importJson` tRPC mutation (opens OS file picker in main) |
 | `CreateCampaignModal.tsx` | Add `initialTemplate` prop + pre-fill banner | Banner shown only when template present; all fields editable after pre-fill |
 | `CharacterSheetTab.tsx` | Add PDF export button in tab header | Small button, `size="sm"` or `size="icon"`; shows loading spinner during generation |
 | `StoryScrollPanel.tsx` | Add off-screen aria-live region + remove aria-live from scroll div | Always in DOM, `className="sr-only"`, paragraph-boundary injection via `useRef` |
@@ -306,10 +308,10 @@ All other required shadcn components already installed: Button, Dialog, Alert, S
 
 ### Settings Screen — Data Folder
 
-- **Layout:** Read-only `<code>` or monospace `<p>` showing current path; "Change..." button below or inline-right
+- **Layout:** Read-only `<code>` or monospace `<p>` showing current path; "Change Folder..." button below or inline-right
 - **Font:** Monospace (Tailwind `font-mono`) for path display; body weight 400; muted-foreground color
 - **Path truncation:** CSS `text-overflow: ellipsis; overflow: hidden; white-space: nowrap` — truncates at right side for Windows paths
-- **Change flow:** Click "Change..." → `dialog.showOpenDialog({ properties: ['openDirectory'] })` in main → if confirmed: `sqlite.backup()` → integrity check → `appPrefs.set('dataFolder')` → show restart banner
+- **Change flow:** Click "Change Folder..." → `dialog.showOpenDialog({ properties: ['openDirectory'] })` in main → if confirmed: `sqlite.backup()` → integrity check → `appPrefs.set('dataFolder')` → show restart banner
 - **Restart banner:** shadcn `Alert` with `variant="default"` (not destructive); Info icon; shown only when `pendingDataFolderChange` is truthy in local component state
 
 ### CampaignCard — 3-Dot Context Menu
@@ -369,9 +371,9 @@ All other required shadcn components already installed: Button, Dialog, Alert, S
 | DropdownMenu items | Arrow up/down navigates; Enter/Space activates; Escape closes (Radix default) |
 | Settings font size buttons | Tab-reachable; Enter/Space selects |
 | Settings high contrast Switch | Tab-reachable; Enter/Space toggles |
-| Settings "Change..." button | Tab-reachable; Enter/Space activates |
+| Settings "Change Folder..." button | Tab-reachable; Enter/Space activates |
 | PDF Export button | Tab-reachable; Enter/Space activates; disabled during generation |
-| Import button | Tab-reachable; Enter/Space activates |
+| Import Campaign... button | Tab-reachable; Enter/Space activates |
 | CreateCampaignModal pre-fill fields | Tab order: banner → name field → all form fields in visual order |
 
 ---
@@ -572,6 +574,9 @@ Every design decision in this spec traces to an upstream source:
 | PDF uses Helvetica (no Font.register) | RESEARCH.md §Section 1 (font pitfall) |
 | Dynamic import(@react-pdf/renderer) pattern | RESEARCH.md §Section 1 (ESM pitfall) |
 | sqlite.backup() for data folder migration | RESEARCH.md §Section 3 (WAL pitfall) |
+| Typography: 2 weights (400 regular, 600 semibold) — Label dropped from 500 to 400, Display dropped from 700 to 600 | UI checker revision 2026-06-01 |
+| Copywriting: "Change Folder..." (was "Change..."), "Import Campaign..." (was "Import...") | UI checker revision 2026-06-01 |
+| Settings focal point: "Settings" page title at 20px/semibold, first in reading order | UI checker revision 2026-06-01 |
 
 ---
 

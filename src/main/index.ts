@@ -170,13 +170,20 @@ if (!gotLock) {
       router,
       windows: [mainWindow],
       createContext: async ({ event }: { event: Electron.IpcMainInvokeEvent }) => {
-        const senderUrl = (event as any).senderFrame?.url ?? ''
+        const senderFrame = (event as any).senderFrame
+        // senderFrame can be null during certain Electron lifecycle transitions (e.g. hard
+        // navigation during HMR). electron-trpc does NOT wrap createContext in try/catch —
+        // a throw here causes an unhandled promise rejection and the renderer hangs forever.
+        // A null senderFrame cannot originate from an external process, so allow it.
+        if (!senderFrame) return {}
+        const senderUrl = (senderFrame.url as string | undefined) ?? ''
         const isDev = process.env.NODE_ENV === 'development'
         if (
           !senderUrl.startsWith('file://') &&
           !senderUrl.startsWith('app://') &&
           !(isDev && senderUrl.startsWith('http://localhost:'))
         ) {
+          log.warn('[tRPC] IPC sender frame URL not allowed:', senderUrl)
           throw new Error('IPC sender frame URL not allowed')
         }
         return {}

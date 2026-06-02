@@ -13,9 +13,13 @@
  *   - Suspends when user has scrolled up (isUserScrolledUp)
  *   - Force-scrolls to bottom on ai:finish, on history load, and after player submits
  *
- * Accessibility:
- *   - aria-live="polite" aria-atomic="false" on the scroll area (progressive token announcements)
+ * Accessibility (A11Y-03):
+ *   - Off-screen aria-live="polite" region announces streamed narration at paragraph boundaries
+ *     (NOT per-token — avoids screen reader flood). The scroll-area div does NOT carry aria-live.
+ *   - Paragraph boundary detection: \n\n with >20 chars or sentence-end [.!?] with >60 chars.
+ *   - Buffer lives in a useRef (no per-token setState). Flushed on stream end.
  *   - aria-hidden="true" on the blinking cursor span (sighted UX only)
+ *   - Announcement uses textContent (not innerHTML) — T-08-20 injection mitigation.
  *
  * Security (T-03-04-03): react-markdown sanitizes by default; no dangerouslySetInnerHTML.
  */
@@ -55,6 +59,21 @@ export interface StoryScrollPanelProps {
   className?: string
 }
 
+/**
+ * Detect a paragraph or sentence boundary in `text`, returning the index AFTER the boundary.
+ * Returns -1 if no boundary found.
+ *
+ * Primary: double-newline (\n\n) with > 20 chars before it.
+ * Fallback: sentence-end ([.!?] followed by whitespace or newline) with > 60 chars before it.
+ */
+function findParagraphBoundary(text: string): number {
+  const dn = text.indexOf('\n\n')
+  if (dn > 20) return dn + 2
+  const se = text.search(/[.!?][\s\n]/)
+  if (se > 60) return se + 2
+  return -1
+}
+
 export function StoryScrollPanel({
   campaignId,
   isStreaming,
@@ -70,6 +89,13 @@ export function StoryScrollPanel({
 }: StoryScrollPanelProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const isUserScrolledUpRef = useRef(false)
+
+  // Off-screen ARIA live region for screen reader announcements (A11Y-03)
+  const liveRegionRef = useRef<HTMLDivElement>(null)
+  // Buffer accumulates new tokens; never held in React state (avoids per-token re-renders)
+  const paragraphBufferRef = useRef('')
+  // Track how many characters of streamingContent we've already processed
+  const lastProcessedLenRef = useRef(0)
 
   // Fetch completed message history
   const messagesQuery = useQuery({
@@ -136,6 +162,51 @@ export function StoryScrollPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messagesQuery.isSuccess])
 
+  // ── ARIA live region — paragraph-boundary announcements (A11Y-03) ─────────
+  // Feed NEW tokens (delta since last run) into paragraphBufferRef.
+  // When a boundary is detected, announce via off-screen live region using
+  // the double-update (clear → rAF set) pattern so screen readers detect change.
+  // On stream end (isStreaming → false), flush any remaining buffer.
+  // Security: textContent assignment (not innerHTML) — T-08-20 mitigated.
+  useEffect(() => {
+    const liveRegion = liveRegionRef.current
+    if (!liveRegion) return
+
+    if (isStreaming) {
+      // Append only the NEW portion of the cumulative streamingContent
+      const newDelta = streamingContent.slice(lastProcessedLenRef.current)
+      lastProcessedLenRef.current = streamingContent.length
+      paragraphBufferRef.current += newDelta
+
+      // Check for a paragraph boundary in the accumulated buffer
+      const boundaryIdx = findParagraphBoundary(paragraphBufferRef.current)
+      if (boundaryIdx !== -1) {
+        const announcement = paragraphBufferRef.current.slice(0, boundaryIdx).trim()
+        paragraphBufferRef.current = paragraphBufferRef.current.slice(boundaryIdx)
+        if (announcement) {
+          // Double-update: clear first so screen reader detects the textContent change
+          liveRegion.textContent = ''
+          requestAnimationFrame(() => {
+            liveRegion.textContent = announcement
+          })
+        }
+      }
+    } else {
+      // Stream ended — flush remaining buffer as final announcement
+      const remaining = paragraphBufferRef.current.trim()
+      if (remaining) {
+        liveRegion.textContent = ''
+        requestAnimationFrame(() => {
+          liveRegion.textContent = remaining
+        })
+      }
+      // Reset buffer + delta tracker for the next stream
+      paragraphBufferRef.current = ''
+      lastProcessedLenRef.current = 0
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [streamingContent, isStreaming])
+
   // ── Empty state ───────────────────────────────────────────────────────────
 
   const showEmptyState = messages.length === 0 && !isStreaming && !error
@@ -144,11 +215,22 @@ export function StoryScrollPanel({
 
   return (
     <>
+      {/* Off-screen ARIA live region — announces streamed narration at paragraph boundaries.
+          Always rendered (never conditional — Landmine 4: conditionally rendered regions are
+          missed by screen readers on first mount). Starts empty; content set via textContent.
+          T-08-20: textContent (not innerHTML) prevents injection from AI-generated text.
+          T-08-21: Updates fire only at paragraph/sentence boundaries, throttled via rAF. */}
+      <div
+        ref={liveRegionRef}
+        aria-live="polite"
+        aria-atomic="false"
+        aria-label="Story narration"
+        className="sr-only"
+      />
+
       <div
         ref={scrollAreaRef}
         onScroll={handleScroll}
-        aria-live="polite"
-        aria-atomic="false"
         className={cn(
           'overflow-y-auto flex-1',
           // Custom thin scrollbar (Tailwind v4 scrollbar utilities where available, else native)

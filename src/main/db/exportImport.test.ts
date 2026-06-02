@@ -333,10 +333,10 @@ function seedTestData(sqlite: ReturnType<typeof Database>) {
 }
 
 // ---------------------------------------------------------------------------
-// Test suite
+// Test suite — DB-dependent tests (Tests 1–4)
 // ---------------------------------------------------------------------------
 
-describe('exportImport', () => {
+describe('exportImport (DB tests)', () => {
   let sqlite: ReturnType<typeof Database>
   let campaignId: string
 
@@ -351,7 +351,7 @@ describe('exportImport', () => {
   })
 
   afterEach(() => {
-    sqlite.close()
+    if (sqlite) sqlite.close()
     vi.clearAllMocks()
   })
 
@@ -469,6 +469,16 @@ describe('exportImport', () => {
     // Row count must be unchanged
     const countAfter = (sqlite.prepare('SELECT COUNT(*) as n FROM campaigns').get() as { n: number }).n
     expect(countAfter).toBe(countBefore)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Dispatcher tests (Tests 5–6) — no DB needed, always run
+// ---------------------------------------------------------------------------
+
+describe('exportImport (dispatcher, no DB)', () => {
+  afterEach(() => {
+    vi.clearAllMocks()
   })
 
   // Test 5: importCampaignOrTemplate throws on version !== 1

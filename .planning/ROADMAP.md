@@ -262,7 +262,26 @@ Plans:
   4. User can change the campaign data folder from settings; existing data migrates and the app continues using the new location after restart
   5. User can scale the app's text size and enable high contrast mode from settings; both persist across launches
   6. Every interactive element has an ARIA label and can be reached/operated via keyboard; streamed AI narration announces in screen readers (NVDA + VoiceOver) on paragraph completion
-**Plans:** TBD
+**Plans:** 7 plans
+Plans:
+- [ ] 08-01-PLAN.md — Foundation: appPrefs store + tRPC router + IPC pre-mount bridge + initDatabase custom path + /settings route + TitleBar gear icon
+- [ ] 08-02-PLAN.md — Font scaling + high contrast: globals.css theme + main.tsx pre-mount + SettingsScreen Appearance section (A11Y-01)
+- [ ] 08-03-PLAN.md — Campaign JSON export/import: exportImport.ts (UUID remap, FK-ordered transaction) + DropdownMenu + CampaignCard 3-dot menu + Import button (DIST-01, DIST-03 dispatch)
+- [ ] 08-04-PLAN.md — Starter templates: exportStarterTemplate + exportTemplate procedure + CreateCampaignModal pre-fill (DIST-03)
+- [ ] 08-05-PLAN.md — Character sheet PDF: pdfService.ts (dynamic import) + CharacterSheetPdf.tsx + exportPdf procedure + CharacterSheetTab button (DIST-02)
+- [ ] 08-06-PLAN.md — Data folder migration: changeDataFolder (.backup + integrity check) + SettingsScreen Data section (DIST-04)
+- [ ] 08-07-PLAN.md — Accessibility pass: off-screen aria-live region + aria-label audit + keyboard/screen-reader human-verify (A11Y-02, A11Y-03)
+**Wave structure:**
+  - Wave 0: 08-01 (foundation — appPrefs + IPC bridge + route scaffold + custom DB path)
+  - Wave 1: 08-02 (font/contrast CSS + settings Appearance UI; depends on 08-01)
+  - Wave 2: 08-03 + 08-05 in parallel (campaign export/import; PDF export — no shared files; both depend on 08-01)
+  - Wave 3: 08-04 + 08-06 in parallel (starter templates after 08-03; data folder migration after 08-02 — no shared files between the two)
+  - Wave 4: 08-07 (final accessibility pass + human-verify; depends on all prior plans)
+**Notes:**
+  - 08-03 and 08-04 share exportImport.ts/campaigns.ts/CampaignCard.tsx/CampaignListScreen.tsx — 08-04 sequenced AFTER 08-03 (wave 3)
+  - 08-02 and 08-06 share SettingsScreen.tsx — 08-06 sequenced AFTER 08-02 (wave 3)
+  - PDF export (08-05): React 19 reconciler (Open Q1) + yoga-layout __dirname (A2) require a PACKAGED-build smoke test before phase exit
+  - High-contrast OKLCH values (08-02): require webaim contrast-checker verification before ship (A3)
 **UI hint:** yes
 
 ### Phase 9: Distribution & Update Notifications
@@ -294,7 +313,7 @@ Plans:
 | 5. Rules Engine, Dice & Combat | 7/7 | Human UAT pending | - |
 | 6. Quests, NPCs & World State | 6/7 | In Progress|  |
 | 7. Content Depth & Advanced Character | 0/11 | Planned | - |
-| 8. Polish, Export & Accessibility | 0/0 | Not started | - |
+| 8. Polish, Export & Accessibility | 0/7 | Planned | - |
 | 9. Distribution & Update Notifications | 0/0 | Not started | - |
 
 ---

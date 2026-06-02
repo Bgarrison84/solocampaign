@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import path from 'node:path'
 
 /**
  * Unit tests for appPrefsRouter.
@@ -195,8 +196,8 @@ describe('appPrefsRouter', () => {
       const caller = await makeRouter()
       await caller.changeDataFolder({ folderPath: '/new/folder' })
 
-      // backup must have been called with the new path
-      expect(backupSpy).toHaveBeenCalledWith('/new/folder/solocampaign.db')
+      // backup must have been called with the new path (platform-aware join)
+      expect(backupSpy).toHaveBeenCalledWith(path.join('/new/folder', 'solocampaign.db'))
 
       // fs.copyFile is NOT imported or used — verified by backup being the mechanism
       // backupSpy is the ONLY file-copy mechanism; unlink should NOT have been called
@@ -223,8 +224,8 @@ describe('appPrefsRouter', () => {
 
       await expect(caller.changeDataFolder({ folderPath: '/bad/folder' })).rejects.toThrow()
 
-      // unlink must have been called to clean up the corrupted copy
-      expect(unlinkSpy).toHaveBeenCalledWith('/bad/folder/solocampaign.db')
+      // unlink must have been called to clean up the corrupted copy (platform-aware join)
+      expect(unlinkSpy).toHaveBeenCalledWith(path.join('/bad/folder', 'solocampaign.db'))
 
       // dataFolder must NOT have been persisted
       const folder = await caller.getCurrentDataFolder()

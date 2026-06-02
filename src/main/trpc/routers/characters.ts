@@ -10,8 +10,11 @@
 
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
+import { dialog } from 'electron'
+import { writeFile } from 'node:fs/promises'
 import { t } from '../_base'
 import { charactersRepo } from '../../db/charactersRepo'
+import { characterSpellsRepo } from '../../db/characterSpellsRepo'
 import { messagesRepo } from '../../db/messagesRepo'
 import { loadContent } from '../../db/contentLoader'
 import {
@@ -19,6 +22,7 @@ import {
   calcAC,
   calcInitiativeBonus,
   buildSpellSlots,
+  calcAbilityModifier,
 } from '../../characters/calculations'
 import {
   campaignIdSchema,
@@ -30,6 +34,8 @@ import {
   conditionNameSchema,
 } from '../schemas'
 import { importImage, getImageDataUrl } from '../../imageService'
+import { generateCharacterPdf } from '../../services/pdfService'
+import type { CharacterPdfData } from '../../services/pdfService'
 
 // ─── Input schemas ─────────────────────────────────────────────────────────────
 
@@ -524,5 +530,211 @@ export const charactersRouter = t.router({
     .mutation(({ input }) => {
       charactersRepo.applyShortRestHp(input.characterId, input.hpRecovered, input.diceSpent)
       return { applied: true }
+    }),
+
+  /**
+   * Export the active character's sheet as a print-friendly PDF (DIST-02).
+   *
+   * Security:
+   * - T-08-14: characterId validated as UUID by Zod schema
+   * - T-08-15: Save path is from OS showSaveDialog (trusted) — renderer never supplies a path
+   * - T-08-16: PDF content is the user's own character data; no secrets/keys
+   *
+   * D-12: hasSpells = character_spells.length > 0 → controls page 2 (spell list)
+   * D-14: Export whichever character is activeCharacterId in campaignViewStore
+   */
+  exportPdf: t.procedure
+    .input(z.object({ characterId: characterIdSchema }))
+    .mutation(async ({ input }) => {
+      // Fetch character with resources + items
+      const character = charactersRepo.getWithResources(input.characterId)
+      if (!character) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Character not found.',
+        })
+      }
+
+      // Fetch character spells
+      const characterSpells = characterSpellsRepo.listByCharacter(input.characterId)
+
+      // ── Build CharacterPdfData ──────────────────────────────────────────────
+      const profBonus = character.proficiencyBonus
+
+      // Ability modifiers
+      const strMod = calcAbilityModifier(character.strength)
+      const dexMod = calcAbilityModifier(character.dexterity)
+      const conMod = calcAbilityModifier(character.constitution)
+      const intMod = calcAbilityModifier(character.intelligence)
+      const wisMod = calcAbilityModifier(character.wisdom)
+      const chaMod = calcAbilityModifier(character.charisma)
+
+      const abilityModifiers = { strMod, dexMod, conMod, intMod, wisMod, chaMod }
+      const abilityScoreMap: Record<string, number> = {
+        strength: character.strength,
+        dexterity: character.dexterity,
+        constitution: character.constitution,
+        intelligence: character.intelligence,
+        wisdom: character.wisdom,
+        charisma: character.charisma,
+      }
+      const abilityModMap: Record<string, number> = {
+        strength: strMod,
+        dexterity: dexMod,
+        constitution: conMod,
+        intelligence: intMod,
+        wisdom: wisMod,
+        charisma: chaMod,
+      }
+
+      // Saving throws
+      const savingThrows = (['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'] as const).reduce(
+        (acc, ability) => {
+          const proficient = character.savingThrowProficiencies.includes(ability)
+          const baseMod = abilityModMap[ability]
+          acc[ability] = {
+            proficient,
+            value: baseMod + (proficient ? profBonus : 0),
+          }
+          return acc
+        },
+        {} as CharacterPdfData['savingThrows'],
+      )
+
+      // Skills (D&D 5e standard 18 skills)
+      const SKILLS_DEF: Array<{ key: string; name: string; ability: keyof typeof abilityScoreMap }> = [
+        { key: 'acrobatics', name: 'Acrobatics', ability: 'dexterity' },
+        { key: 'animalHandling', name: 'Animal Handling', ability: 'wisdom' },
+        { key: 'arcana', name: 'Arcana', ability: 'intelligence' },
+        { key: 'athletics', name: 'Athletics', ability: 'strength' },
+        { key: 'deception', name: 'Deception', ability: 'charisma' },
+        { key: 'history', name: 'History', ability: 'intelligence' },
+        { key: 'insight', name: 'Insight', ability: 'wisdom' },
+        { key: 'intimidation', name: 'Intimidation', ability: 'charisma' },
+        { key: 'investigation', name: 'Investigation', ability: 'intelligence' },
+        { key: 'medicine', name: 'Medicine', ability: 'wisdom' },
+        { key: 'nature', name: 'Nature', ability: 'intelligence' },
+        { key: 'perception', name: 'Perception', ability: 'wisdom' },
+        { key: 'performance', name: 'Performance', ability: 'charisma' },
+        { key: 'persuasion', name: 'Persuasion', ability: 'charisma' },
+        { key: 'religion', name: 'Religion', ability: 'intelligence' },
+        { key: 'sleightOfHand', name: 'Sleight of Hand', ability: 'dexterity' },
+        { key: 'stealth', name: 'Stealth', ability: 'dexterity' },
+        { key: 'survival', name: 'Survival', ability: 'wisdom' },
+      ]
+
+      const skills = SKILLS_DEF.map((sk) => {
+        const proficient = character.skillProficiencies.includes(sk.key)
+        const expertise = character.skillExpertise.includes(sk.key)
+        const baseMod = abilityModMap[sk.ability]
+        const bonus = expertise ? profBonus * 2 : proficient ? profBonus : 0
+        return {
+          name: sk.name,
+          ability: sk.ability,
+          proficient,
+          expertise,
+          value: baseMod + bonus,
+        }
+      })
+
+      // Passive perception
+      const perceptionSkill = skills.find((s) => s.name === 'Perception')!
+      const passivePerception = 10 + perceptionSkill.value
+
+      // Resolve class label (multiclass support via classes JSON column)
+      let classLabel = character.class
+      try {
+        if (character.classes) {
+          const classes = JSON.parse(character.classes as string) as Array<{ className: string; level: number }>
+          if (Array.isArray(classes) && classes.length > 1) {
+            classLabel = classes.map((c) => `${c.className} ${c.level}`).join(' / ')
+          } else if (Array.isArray(classes) && classes.length === 1) {
+            classLabel = classes[0].className
+          }
+        }
+      } catch {
+        // Fallback to character.class if JSON parse fails
+      }
+
+      // hasSpells: true if character has any spells (D-12)
+      const hasSpells = characterSpells.length > 0
+
+      const data: CharacterPdfData = {
+        name: character.name,
+        race: character.race ?? '',
+        classLabel,
+        background: character.background ?? '',
+        level: character.level,
+
+        strength: character.strength,
+        dexterity: character.dexterity,
+        constitution: character.constitution,
+        intelligence: character.intelligence,
+        wisdom: character.wisdom,
+        charisma: character.charisma,
+
+        ...abilityModifiers,
+
+        savingThrows,
+        skills,
+        passivePerception,
+
+        hpCurrent: character.resources.hpCurrent,
+        hpMax: character.resources.hpMax,
+        hpTemp: character.resources.hpTemp,
+        ac: character.ac,
+        speed: character.speed,
+        initiative: character.initiativeBonus,
+        proficiencyBonus: profBonus,
+        hasInspiration: character.resources.hasInspiration,
+
+        deathSaveSuccesses: character.resources.deathSaveSuccesses,
+        deathSaveFailures: character.resources.deathSaveFailures,
+
+        conditions: character.resources.conditions,
+
+        cp: character.resources.cp,
+        sp: character.resources.sp,
+        ep: character.resources.ep,
+        gp: character.resources.gp,
+        pp: character.resources.pp,
+
+        equipment: character.items.map((item) => ({
+          name: item.name,
+          quantity: item.quantity,
+          isMagic: item.isMagic,
+        })),
+
+        // Personality traits from sheet fields (stored as text columns)
+        personality: undefined,
+        ideals: undefined,
+        bonds: undefined,
+        flaws: undefined,
+
+        hasSpells,
+        spellSlots: character.resources.spellSlots,
+        spells: characterSpells.map((spell) => ({
+          name: spell.spellName,
+          level: spell.spellLevel,
+          isPrepared: spell.isPrepared,
+        })),
+      }
+
+      // ── Generate PDF ──────────────────────────────────────────────────────
+      const buffer = await generateCharacterPdf(data)
+
+      // ── Save dialog ───────────────────────────────────────────────────────
+      const safeName = (character.name ?? 'character').toLowerCase().replace(/\s+/g, '-')
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        defaultPath: `${safeName}-sheet.pdf`,
+        filters: [{ name: 'PDF', extensions: ['pdf'] }],
+      })
+
+      if (canceled || !filePath) {
+        return { canceled: true }
+      }
+
+      await writeFile(filePath, buffer)
+      return { canceled: false }
     }),
 })

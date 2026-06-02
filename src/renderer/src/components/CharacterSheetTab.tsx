@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import { Plus, Download, Loader2 } from 'lucide-react'
 import { trpc } from '../lib/trpc'
 import { useCampaignViewStore } from '../stores/campaignViewStore'
+import { Button } from './ui/button'
 import { CreateCharacterWizard } from './CreateCharacterWizard'
 import { SheetHeader } from './sheet/SheetHeader'
 import { AbilityScoresSection } from './sheet/AbilityScoresSection'
@@ -48,9 +49,23 @@ export function CharacterSheetTab({ campaignId, campaign }: CharacterSheetTabPro
   const queryClient = useQueryClient()
   const [showLevelUpModal, setShowLevelUpModal] = useState(false)
   const [showAddWizard, setShowAddWizard] = useState(false)
+  const [pdfExportError, setPdfExportError] = useState<string | null>(null)
 
   const activeCharacterId = useCampaignViewStore((s) => s.activeCharacterId)
   const setActiveCharacterId = useCampaignViewStore((s) => s.setActiveCharacterId)
+
+  // PDF export mutation (D-13, D-14, DIST-02)
+  const exportPdfMutation = useMutation({
+    mutationFn: ({ characterId }: { characterId: string }) =>
+      trpc.characters.exportPdf.mutate({ characterId }),
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : 'PDF export failed.'
+      setPdfExportError(message)
+    },
+    onSuccess: () => {
+      setPdfExportError(null)
+    },
+  })
 
   const partySize = campaign?.partySize ?? 1
 
@@ -187,6 +202,39 @@ export function CharacterSheetTab({ campaignId, campaign }: CharacterSheetTabPro
             }}
           />
         )}
+
+        {/* PDF export button row (D-13, D-14, DIST-02) */}
+        <div className="flex flex-row items-center justify-end -mt-1 mb-1">
+          {pdfExportError && (
+            <span className="text-xs text-destructive mr-2" role="alert">
+              {pdfExportError}
+            </span>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label="Export character sheet as PDF"
+            disabled={!effectiveActiveId || exportPdfMutation.isPending}
+            onClick={() => {
+              if (effectiveActiveId) {
+                setPdfExportError(null)
+                exportPdfMutation.mutate({ characterId: effectiveActiveId })
+              }
+            }}
+          >
+            {exportPdfMutation.isPending ? (
+              <>
+                <Loader2 className="animate-spin mr-1" size={14} />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Download size={14} className="mr-1" />
+                Export PDF
+              </>
+            )}
+          </Button>
+        </div>
 
         {/* Level-up banner at top, above SheetHeader (UI-SPEC §S7a, D-30, PROG-01) */}
         {isLevelUpAvailable && (

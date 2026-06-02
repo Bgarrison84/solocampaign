@@ -41,7 +41,11 @@ export async function generateCharacterPdf(data: CharacterPdfData): Promise<Buff
     const React = await import('react')
     const { CharacterSheetPdf } = await import('./CharacterSheetPdf')
 
-    const element = React.createElement(CharacterSheetPdf, { data })
+    // Cast needed: React.createElement returns FunctionComponentElement but
+    // renderToBuffer expects ReactElement<DocumentProps>. The CharacterSheetPdf root
+    // is a <Document> so the cast is correct at runtime.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const element = React.createElement(CharacterSheetPdf, { data }) as any
     const buffer = await renderToBuffer(element)
     return buffer
   } catch (err) {

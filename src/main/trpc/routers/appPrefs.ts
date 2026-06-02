@@ -1,6 +1,13 @@
 import { z } from 'zod'
 import { t } from '../_base'
 import Store from 'electron-store'
+import path from 'node:path'
+import { unlink } from 'node:fs/promises'
+import { TRPCError } from '@trpc/server'
+import Database from 'better-sqlite3'
+import { app, dialog } from 'electron'
+import { getDb } from '../../db/index'
+import log from 'electron-log'
 
 /**
  * App-global preferences store backed by electron-store.
@@ -12,9 +19,6 @@ import Store from 'electron-store'
  *
  * Stored in userData/appPrefs.json (electron-store default).
  * Separate from campaign data (SQLite) and per-campaign panel prefs (prefs.json).
- *
- * Note: changeDataFolder and getCurrentDataFolder are added in plan 08-06.
- * This router exposes only the read + appearance-write surface for plans 08-01 and 08-02.
  */
 interface AppPrefs {
   fontSize: 'small' | 'normal' | 'large'
@@ -38,9 +42,14 @@ export const appPrefsStore = new Store<AppPrefs>({
  *   - get (query) → { fontSize, highContrast, dataFolder }
  *   - setFontSize (mutation) → { updated: true }
  *   - setHighContrast (mutation) → { updated: true }
+ *   - getCurrentDataFolder (query) → { path: string, isCustom: boolean }
+ *   - pickDataFolder (mutation) → { canceled: boolean, folderPath?: string }
+ *   - changeDataFolder (mutation, { folderPath }) → { success: true, pendingRestart: true }
  *
  * T-08-01 (Tampering): Zod enum/boolean validation at procedure boundary rejects any
  * value outside the allowed set before it reaches the store.
+ * T-08-17 (Integrity): changeDataFolder uses sqlite.backup() NOT fs.copyFile (WAL-safe).
+ * T-08-18 (Tampering): folderPath comes from OS openDirectory dialog; validated z.string().min(1).
  */
 export const appPrefsRouter = t.router({
   /**
@@ -71,5 +80,103 @@ export const appPrefsRouter = t.router({
     .mutation(({ input }) => {
       appPrefsStore.set('highContrast', input.highContrast)
       return { updated: true as const }
+    }),
+
+  /**
+   * Get the current data folder path and whether it is a custom path.
+   *
+   * Returns:
+   *   - path: custom path if set, otherwise app.getPath('userData')
+   *   - isCustom: true if a custom path has been persisted; false if using the default
+   *
+   * DIST-04: Powers the "Campaign Data Folder" display in SettingsScreen.
+   */
+  getCurrentDataFolder: t.procedure.query(() => {
+    const custom = appPrefsStore.get('dataFolder', null)
+    return {
+      path: custom ?? app.getPath('userData'),
+      isCustom: custom !== null,
+    }
+  }),
+
+  /**
+   * Open the OS folder-picker dialog and return the selected path.
+   * Does NOT copy or migrate anything — that is changeDataFolder's job.
+   *
+   * Returns { canceled: true } if user dismisses the dialog.
+   * Returns { canceled: false, folderPath: string } if user picks a folder.
+   *
+   * T-08-18: The folder path is sourced from OS openDirectory dialog (trusted absolute path).
+   */
+  pickDataFolder: t.procedure.mutation(async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['openDirectory'],
+    })
+    if (canceled || !filePaths[0]) {
+      return { canceled: true as const }
+    }
+    return { canceled: false as const, folderPath: filePaths[0] }
+  }),
+
+  /**
+   * Migrate the SQLite database to a new data folder.
+   *
+   * CRITICAL — DIST-04, T-08-17:
+   *   Uses sqlite.backup(newDbPath) NOT fs.copyFile.
+   *   SQLite in WAL mode uses three files (.db, .db-wal, .db-shm).
+   *   fs.copyFile only copies .db → corrupted database at destination.
+   *   .backup() handles WAL atomically and produces a clean copy.
+   *
+   * Steps:
+   *   1. Build destination path: path.join(folderPath, 'solocampaign.db')
+   *   2. WAL-safe copy: sqlite.backup(newDbPath)
+   *   3. Integrity check: open readonly copy, PRAGMA integrity_check, close
+   *   4. If integrity_check !== 'ok': delete copy, throw TRPCError
+   *   5. Persist: appPrefsStore.set('dataFolder', folderPath)
+   *   6. Return { success: true, pendingRestart: true }
+   *
+   * The new path takes effect on next app launch (initDatabase reads appPrefs.dataFolder).
+   */
+  changeDataFolder: t.procedure
+    .input(z.object({ folderPath: z.string().min(1) }))
+    .mutation(async ({ input }) => {
+      const newDbPath = path.join(input.folderPath, 'solocampaign.db')
+
+      try {
+        // Step 1: WAL-safe backup — CRITICAL: NOT fs.copyFile (Landmine 2, Pitfall 1)
+        const sqlite = getDb().$client
+        await sqlite.backup(newDbPath)
+
+        // Step 2: Verify integrity of the new copy
+        const newDb = new Database(newDbPath, { readonly: true })
+        const result = newDb
+          .prepare('PRAGMA integrity_check')
+          .get() as { integrity_check: string }
+        newDb.close()
+
+        // Step 3: Reject if integrity check failed — delete corrupted copy and throw
+        if (result.integrity_check !== 'ok') {
+          await unlink(newDbPath).catch(() => {})
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Integrity check failed on the new database copy.',
+          })
+        }
+
+        // Step 4: Persist new folder path — takes effect on next launch
+        appPrefsStore.set('dataFolder', input.folderPath)
+        log.info('[appPrefs] Data folder changed to:', input.folderPath)
+
+        return { success: true as const, pendingRestart: true as const }
+      } catch (err) {
+        if (err instanceof TRPCError) {
+          throw err
+        }
+        log.error('[appPrefs] changeDataFolder failed:', err)
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: err instanceof Error ? err.message : 'Failed to change data folder.',
+        })
+      }
     }),
 })

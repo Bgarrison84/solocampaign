@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { trpc } from '../lib/trpc'
 import { CampaignCard } from '../components/CampaignCard'
 import { NewCampaignCard } from '../components/NewCampaignCard'
@@ -12,10 +12,26 @@ export function CampaignListScreen() {
   // Modal state — NOT defaulting to true (per D-07: no auto-open on first launch)
   const [modalOpen, setModalOpen] = useState(false)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const campaignsQuery = useQuery({
     queryKey: ['campaigns', 'list'],
     queryFn: () => trpc.campaigns.list.query(),
+  })
+
+  const importMutation = useMutation({
+    mutationFn: () => trpc.campaigns.importJson.mutate(),
+    onSuccess: (result) => {
+      if (!result || !('kind' in result)) return
+      if (result.kind === 'campaign') {
+        // Refresh the campaign list to show the newly imported campaign
+        queryClient.invalidateQueries({ queryKey: ['campaigns', 'list'] })
+      } else if (result.kind === 'template') {
+        // 08-04: open CreateCampaignModal with result.template pre-filled
+        // For now, just open the modal without pre-fill — 08-04 wires the template prop
+        setModalOpen(true)
+      }
+    },
   })
 
   const openModal = () => setModalOpen(true)
@@ -39,14 +55,25 @@ export function CampaignListScreen() {
     <div className="flex flex-col min-h-full bg-background p-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-semibold text-foreground">Your Campaigns</h1>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate('/library')}
-          className="text-muted-foreground hover:text-foreground gap-1"
-        >
-          Rules
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            aria-label="Import campaign or starter template"
+            onClick={() => importMutation.mutate()}
+            disabled={importMutation.isPending}
+          >
+            {importMutation.isPending ? 'Importing...' : 'Import Campaign...'}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/library')}
+            className="text-muted-foreground hover:text-foreground gap-1"
+          >
+            Rules
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

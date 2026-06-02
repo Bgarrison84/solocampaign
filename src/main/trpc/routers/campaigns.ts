@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { generateText } from 'ai'
 import path from 'node:path'
+import { writeFile, readFile, stat } from 'node:fs/promises'
 import { dialog } from 'electron'
 import { t } from '../_base'
 import { campaignsRepo } from '../../db/campaignsRepo'
@@ -10,6 +11,7 @@ import { importImage, getImageDataUrl } from '../../imageService'
 import { secretStorage } from '../../secrets'
 import { buildModel } from '../../ai/llmProvider'
 import { extractTextFromFile, readTextFile } from '../../services/pdfExtractor'
+import { exportCampaign, importCampaignOrTemplate } from '../../db/exportImport'
 import log from 'electron-log'
 
 export const campaignsRouter = t.router({
@@ -201,6 +203,89 @@ export const campaignsRouter = t.router({
       campaignsRepo.updateHomebrew(input.campaignId, input.homebrewContent)
       return { updated: true }
     }),
+
+  /**
+   * Export a campaign as a JSON file via OS save dialog (DIST-01).
+   *
+   * Security (T-08-09):
+   * - campaignId validated as UUID by campaignIdSchema
+   * - File path comes ONLY from dialog.showSaveDialog (OS-validated — no path traversal)
+   */
+  export: t.procedure
+    .input(z.object({ campaignId: campaignIdSchema }))
+    .mutation(async ({ input }) => {
+      const payload = exportCampaign(input.campaignId)
+
+      const campaignName = (payload.data.campaign.name as string) ?? 'campaign'
+      const safeName = campaignName.toLowerCase().replace(/\s+/g, '-')
+
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        defaultPath: `${safeName}-export.json`,
+        filters: [{ name: 'JSON', extensions: ['json'] }],
+      })
+
+      if (canceled || !filePath) {
+        return { canceled: true }
+      }
+
+      // Path is from OS dialog — safe absolute path, no traversal risk
+      log.debug('[campaigns] export writing to:', filePath)
+      await writeFile(filePath, JSON.stringify(payload, null, 2), 'utf-8')
+
+      return { canceled: false }
+    }),
+
+  /**
+   * Import a campaign or starter template from a JSON file via OS open dialog (DIST-01, DIST-03).
+   *
+   * Security (T-08-06, T-08-08, T-08-09):
+   * - File path from dialog.showOpenDialog only (no renderer-supplied paths)
+   * - Rejects files > 50MB before readFile
+   * - JSON.parse guarded in try/catch; TRPCErrors from dispatcher propagate
+   * - All UUIDs regenerated on import (T-08-10)
+   */
+  importJson: t.procedure.mutation(async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+    })
+
+    if (canceled || !filePaths[0]) {
+      return { canceled: true }
+    }
+
+    const filePath = filePaths[0]
+
+    // Reject oversized files before reading (T-08-08, DoS protection)
+    const MAX_BYTES = 50 * 1024 * 1024 // 50 MB
+    const fileStats = await stat(filePath)
+    if (fileStats.size > MAX_BYTES) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'This file is too large to import. Campaign exports should be under 50 MB.',
+      })
+    }
+
+    const raw = await readFile(filePath, 'utf-8')
+
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message:
+          'This file is not a valid SoloCampaign export. Make sure you selected the correct .json file.',
+      })
+    }
+
+    log.debug('[campaigns] importJson dispatching parsed file from:', filePath)
+
+    // Let TRPCErrors from importCampaignOrTemplate propagate (version/type/import-failed)
+    const result = importCampaignOrTemplate(parsed)
+
+    return { canceled: false, ...result }
+  }),
 
   /**
    * Open an OS file dialog for .txt / .md files and return the text content.

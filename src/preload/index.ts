@@ -10,6 +10,23 @@ process.once('loaded', () => {
 contextBridge.exposeInMainWorld('platform', process.platform)
 
 /**
+ * window.appPrefsSync — narrow contextBridge surface for reading app preferences
+ * before React mounts (D-07, D-08 — font scale and high contrast must apply before
+ * the first render to avoid flash).
+ *
+ * Read-only: no write surface here. Writes go through tRPC (appPrefs.setFontSize,
+ * appPrefs.setHighContrast). The handler is registered in main/index.ts before
+ * BrowserWindow creation (Landmine 3 compliance).
+ *
+ * T-08-02: The returned object contains only fontSize, highContrast, dataFolder —
+ * no secrets, no API keys (those live in secretStorageService, never in appPrefs).
+ */
+contextBridge.exposeInMainWorld('appPrefsSync', {
+  getInitialPrefs: (): Promise<{ fontSize: string; highContrast: boolean; dataFolder: string | null }> =>
+    ipcRenderer.invoke('appPrefs:getInitial'),
+})
+
+/**
  * window.aiStream — narrow contextBridge surface for the AI streaming IPC channel.
  *
  * Architecture: tRPC v10 cannot stream over contextBridge (no subscription support),

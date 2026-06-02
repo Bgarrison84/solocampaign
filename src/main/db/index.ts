@@ -9,8 +9,8 @@ import { applyMigrations } from './migrate'
 
 let _db: ReturnType<typeof drizzle> | null = null
 
-export async function initDatabase() {
-  const userData = app.getPath('userData')
+export async function initDatabase(customPath?: string | null) {
+  const userData = customPath ?? app.getPath('userData')
   const dbPath = path.join(userData, 'solocampaign.db')
 
   log.info('[db] Opening database at:', dbPath)

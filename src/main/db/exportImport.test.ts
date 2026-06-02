@@ -407,9 +407,13 @@ describe('exportImport (DB tests)', () => {
     expect(newCampaign).toBeDefined()
     expect(newCampaign!.name).toBe('Test Campaign')
 
-    // No child row should reference the old campaignId
-    const allMessages = sqlite.prepare('SELECT campaign_id FROM messages').all() as { campaign_id: string }[]
-    for (const msg of allMessages) {
+    // All messages for the NEW campaign should reference the new campaign id (not old)
+    const importedMessages = sqlite
+      .prepare('SELECT campaign_id FROM messages WHERE campaign_id = ?')
+      .all(newCampaignId) as { campaign_id: string }[]
+    expect(importedMessages.length).toBeGreaterThan(0)
+    for (const msg of importedMessages) {
+      expect(msg.campaign_id).toBe(newCampaignId)
       expect(msg.campaign_id).not.toBe(campaignId)
     }
 

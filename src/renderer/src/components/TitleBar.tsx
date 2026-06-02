@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Minus, Square, Copy, X } from 'lucide-react'
+import { Minus, Square, Copy, X, Settings } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { trpc } from '../lib/trpc'
 import { useWindowStore } from '../stores/windowStore'
 
@@ -16,6 +17,7 @@ import { useWindowStore } from '../stores/windowStore'
  * from the renderer (sandbox: true means no direct electron access anyway).
  */
 export function TitleBar() {
+  const navigate = useNavigate()
   const campaignName = useWindowStore((s) => s.campaignName)
   const [isMaximized, setIsMaximized] = useState(false)
 
@@ -55,6 +57,19 @@ export function TitleBar() {
             {' — '}{campaignName}
           </span>
         )}
+      </div>
+
+      {/* Settings gear icon — immediately left of window controls */}
+      <div style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <button
+          onClick={() => navigate('/settings')}
+          aria-label="Open Settings"
+          title="Settings"
+          className={`flex items-center justify-center w-[46px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors`}
+          style={{ height: tbHeight }}
+        >
+          <Settings size={14} />
+        </button>
       </div>
 
       {/* Right zone — window controls (Minimize / Maximize-Restore / Close) */}

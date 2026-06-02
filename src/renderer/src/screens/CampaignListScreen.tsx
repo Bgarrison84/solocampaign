@@ -5,12 +5,14 @@ import { trpc } from '../lib/trpc'
 import { CampaignCard } from '../components/CampaignCard'
 import { NewCampaignCard } from '../components/NewCampaignCard'
 import { EmptyState } from '../components/EmptyState'
-import { CreateCampaignModal } from '../components/CreateCampaignModal'
+import { CreateCampaignModal, type StarterTemplate } from '../components/CreateCampaignModal'
 import { Button } from '../components/ui/button'
 
 export function CampaignListScreen() {
   // Modal state — NOT defaulting to true (per D-07: no auto-open on first launch)
   const [modalOpen, setModalOpen] = useState(false)
+  // Template state — set when importing a starter template; cleared on modal close
+  const [importedTemplate, setImportedTemplate] = useState<StarterTemplate | null>(null)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -27,15 +29,19 @@ export function CampaignListScreen() {
         // Refresh the campaign list to show the newly imported campaign
         queryClient.invalidateQueries({ queryKey: ['campaigns', 'list'] })
       } else if (result.kind === 'template') {
-        // 08-04: open CreateCampaignModal with result.template pre-filled
-        // For now, just open the modal without pre-fill — 08-04 wires the template prop
+        // Pre-fill the Create Campaign wizard with the template fields (D-16)
+        setImportedTemplate(result.template as StarterTemplate)
         setModalOpen(true)
       }
     },
   })
 
   const openModal = () => setModalOpen(true)
-  const closeModal = () => setModalOpen(false)
+  const closeModal = () => {
+    setModalOpen(false)
+    // Clear the imported template so a later "New Campaign" click opens a blank wizard
+    setImportedTemplate(null)
+  }
 
   if (campaignsQuery.isError) {
     return (
@@ -111,7 +117,7 @@ export function CampaignListScreen() {
         </div>
       )}
 
-      <CreateCampaignModal open={modalOpen} onClose={closeModal} />
+      <CreateCampaignModal open={modalOpen} onClose={closeModal} initialTemplate={importedTemplate} />
     </div>
   )
 }

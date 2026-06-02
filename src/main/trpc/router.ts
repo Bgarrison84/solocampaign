@@ -1,5 +1,6 @@
 import { t } from './_base'
 import { aiRouter } from './routers/ai'
+import { appPrefsRouter } from './routers/appPrefs'
 import { campaignDocsRouter } from './routers/campaignDocs'
 import { campaignsRouter } from './routers/campaigns'
 import { charactersRouter } from './routers/characters'
@@ -18,6 +19,7 @@ import { worldStateRouter, factionsRouter } from './routers/worldState'
 
 export const router = t.router({
   ai: aiRouter,
+  appPrefs: appPrefsRouter,
   campaignDocs: campaignDocsRouter,
   campaigns: campaignsRouter,
   characters: charactersRouter,

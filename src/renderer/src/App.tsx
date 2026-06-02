@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import { CampaignListScreen } from './screens/CampaignListScreen'
 import { CampaignViewScreen } from './screens/CampaignViewScreen'
 import { LibraryScreen } from './screens/LibraryScreen'
+import { SettingsScreen } from './screens/SettingsScreen'
 import { TitleBar } from './components/TitleBar'
 
 export function App() {
@@ -14,6 +15,7 @@ export function App() {
           <Route path="/" element={<CampaignListScreen />} />
           <Route path="/campaign/:id" element={<CampaignViewScreen />} />
           <Route path="/library" element={<LibraryScreen />} />
+          <Route path="/settings" element={<SettingsScreen />} />
         </Routes>
       </main>
     </div>

@@ -11,7 +11,7 @@ import { importImage, getImageDataUrl } from '../../imageService'
 import { secretStorage } from '../../secrets'
 import { buildModel } from '../../ai/llmProvider'
 import { extractTextFromFile, readTextFile } from '../../services/pdfExtractor'
-import { exportCampaign, importCampaignOrTemplate } from '../../db/exportImport'
+import { exportCampaign, importCampaignOrTemplate, exportStarterTemplate } from '../../db/exportImport'
 import log from 'electron-log'
 
 export const campaignsRouter = t.router({
@@ -230,6 +230,36 @@ export const campaignsRouter = t.router({
 
       // Path is from OS dialog — safe absolute path, no traversal risk
       log.debug('[campaigns] export writing to:', filePath)
+      await writeFile(filePath, JSON.stringify(payload, null, 2), 'utf-8')
+
+      return { canceled: false }
+    }),
+
+  /**
+   * Export a campaign as a starter template JSON file via OS save dialog (DIST-03).
+   * Includes ONLY the D-15 world config fields — no characters/sessions/save state (T-08-12).
+   *
+   * Security (T-08-13):
+   * - campaignId validated as UUID by campaignIdSchema
+   * - File path comes ONLY from dialog.showSaveDialog (OS-validated — no path traversal)
+   */
+  exportTemplate: t.procedure
+    .input(z.object({ campaignId: campaignIdSchema }))
+    .mutation(async ({ input }) => {
+      const payload = exportStarterTemplate(input.campaignId)
+
+      const safeName = payload.name.toLowerCase().replace(/\s+/g, '-')
+
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        defaultPath: `${safeName}-template.json`,
+        filters: [{ name: 'JSON', extensions: ['json'] }],
+      })
+
+      if (canceled || !filePath) {
+        return { canceled: true }
+      }
+
+      log.debug('[campaigns] exportTemplate writing to:', filePath)
       await writeFile(filePath, JSON.stringify(payload, null, 2), 'utf-8')
 
       return { canceled: false }

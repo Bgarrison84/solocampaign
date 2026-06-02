@@ -56,6 +56,10 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
     mutationFn: () => trpc.campaigns.export.mutate({ campaignId: campaign.id }),
   })
 
+  const exportTemplateMutation = useMutation({
+    mutationFn: () => trpc.campaigns.exportTemplate.mutate({ campaignId: campaign.id }),
+  })
+
   const deleteMutation = useMutation({
     mutationFn: () => trpc.campaigns.delete.mutate({ id: campaign.id }),
     onSuccess: () => {
@@ -114,7 +118,12 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
             >
               Export Campaign (JSON)
             </DropdownMenuItem>
-            {/* 08-04: Export as Starter Template item */}
+            <DropdownMenuItem
+              onSelect={() => exportTemplateMutation.mutate()}
+              disabled={exportTemplateMutation.isPending}
+            >
+              Export as Starter Template
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { ImagePlus, Loader2, User, Users } from 'lucide-react'
+import { FileText, ImagePlus, Loader2, User, Users } from 'lucide-react'
 import { trpc } from '../lib/trpc'
 import {
   Dialog,
@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from './ui/dialog'
+import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
@@ -38,9 +39,31 @@ import {
 } from './wizard/StepWorldSetup'
 import { cn } from '../lib/utils'
 
+/**
+ * Renderer-side representation of a StarterTemplatePayload (D-15).
+ * Matches the shape exported by exportImport.ts (main process).
+ * The AI provider/key fields are intentionally absent (D-16 — importer enters own key).
+ */
+export interface StarterTemplate {
+  version: 1
+  type: 'starterTemplate'
+  exportedAt: string
+  name: string
+  worldSetupMode: string
+  worldBrief: string | null
+  worldDocument: string | null
+  dmPersonality: string
+  strictness: string
+  partySize: number
+  encumbranceEnabled: boolean
+  homebrewContent: string | null
+}
+
 interface CreateCampaignModalProps {
   open: boolean
   onClose: () => void
+  /** When provided, the wizard pre-fills all D-15 world config fields from this template. */
+  initialTemplate?: StarterTemplate | null
 }
 
 type Strictness = 'strict' | 'balanced' | 'narrative'
@@ -70,7 +93,7 @@ const PARTY_SIZE_OPTIONS: Array<{
   { value: 4, label: 'Full Party', descriptor: '4 characters', icon: Users },
 ]
 
-export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps) {
+export function CreateCampaignModal({ open, onClose, initialTemplate }: CreateCampaignModalProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
@@ -103,6 +126,9 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
   const [dmPersonality, setDmPersonality] = useState('')
   const [strictness, setStrictness] = useState<Strictness>('balanced')
 
+  // Homebrew content — carried from template pre-fill; passed to campaigns.updateHomebrew after creation
+  const [homebrewContent, setHomebrewContent] = useState<string | null>(null)
+
   // Cancel confirmation dialog
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
@@ -128,6 +154,11 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
       trpc.campaigns.generateWorldBrief.mutate(data),
   })
 
+  const updateHomebrewMutation = useMutation({
+    mutationFn: (data: { campaignId: string; homebrewContent: string }) =>
+      trpc.campaigns.updateHomebrew.mutate(data),
+  })
+
   // Reset all state when modal opens
   useEffect(() => {
     if (open) {
@@ -147,6 +178,7 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
       setProviderErrors({})
       setDmPersonality('')
       setStrictness('balanced')
+      setHomebrewContent(null)
       setWorldBriefError(null)
       setSubmitPhase(null)
       setTimeout(() => {
@@ -154,6 +186,27 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
       }, 50)
     }
   }, [open])
+
+  // Pre-fill all D-15 wizard fields from the starter template (D-16).
+  // AI provider/key fields are intentionally NOT pre-filled — the importer enters their own key.
+  // Runs after the reset effect (same dep array length, batched by React) so template values
+  // correctly overwrite the blank defaults set by the reset effect above.
+  useEffect(() => {
+    if (open && initialTemplate) {
+      setName(initialTemplate.name ?? '')
+      setWorldSetup({
+        worldSetupMode: (initialTemplate.worldSetupMode as WorldSetupMode) ?? 'ai',
+        worldBrief: initialTemplate.worldBrief ?? '',
+        worldDocument: initialTemplate.worldDocument ?? null,
+        worldDocumentFilename: null,
+      })
+      setDmPersonality(initialTemplate.dmPersonality ?? '')
+      setStrictness((initialTemplate.strictness as Strictness) ?? 'balanced')
+      setPartySize((initialTemplate.partySize as PartySize) ?? 1)
+      setEncumbranceEnabled(initialTemplate.encumbranceEnabled ?? false)
+      setHomebrewContent(initialTemplate.homebrewContent ?? null)
+    }
+  }, [open, initialTemplate])
 
   const trimmedName = name.trim()
   const isStep0Valid = trimmedName.length >= 1 && trimmedName.length <= 80
@@ -235,6 +288,14 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
         fallbackApiKey: aiProvider.fallbackApiKey || undefined,
       })
 
+      // Step 2b: Persist homebrew content if pre-filled from a starter template (D-19)
+      if (homebrewContent) {
+        await updateHomebrewMutation.mutateAsync({
+          campaignId: campaign.id,
+          homebrewContent,
+        })
+      }
+
       queryClient.invalidateQueries({ queryKey: ['campaigns', 'list'] })
 
       // Step 3: If AI Generates mode, call generateWorldBrief before navigating
@@ -262,10 +323,12 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
     worldSetup,
     createMutation,
     updateAiConfigMutation,
+    updateHomebrewMutation,
     generateBriefMutation,
     trimmedName,
     partySize,
     encumbranceEnabled,
+    homebrewContent,
     aiProvider,
     dmPersonality,
     strictness,
@@ -303,6 +366,17 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
 
           {/* Scrollable content area */}
           <div className="flex-1 overflow-y-auto py-4 px-1">
+            {/* Template pre-fill banner — shown only when initialTemplate is provided (D-16) */}
+            {initialTemplate && (
+              <Alert className="mb-4">
+                <FileText className="h-4 w-4" />
+                <AlertTitle>Pre-filled from template: {initialTemplate.name}</AlertTitle>
+                <AlertDescription>
+                  Review and edit the settings below before creating your campaign.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Step 0: Campaign Details */}
             {step === 0 && (
               <div className="flex flex-col gap-4">

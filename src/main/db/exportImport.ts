@@ -602,6 +602,61 @@ export function importCampaign(payload: CampaignExportPayload): string {
 }
 
 // ---------------------------------------------------------------------------
+// exportStarterTemplate
+// ---------------------------------------------------------------------------
+
+/**
+ * Export campaign-level world config as a StarterTemplatePayload (DIST-03).
+ * Includes ONLY the 9 D-15 world/DM fields — no characters, sessions, messages,
+ * quests, NPCs, factions, or save state (T-08-12).
+ */
+export function exportStarterTemplate(campaignId: string): StarterTemplatePayload {
+  try {
+    const sqlite = getDb().$client
+
+    const campaign = sqlite
+      .prepare(
+        `SELECT name, world_setup_mode, world_brief, world_document, dm_personality,
+                strictness, party_size, encumbrance_enabled, homebrew_content
+         FROM campaigns WHERE id = ?`,
+      )
+      .get(campaignId) as {
+        name: string
+        world_setup_mode: string | null
+        world_brief: string | null
+        world_document: string | null
+        dm_personality: string | null
+        strictness: string
+        party_size: number
+        encumbrance_enabled: number | boolean
+        homebrew_content: string | null
+      } | undefined
+
+    if (!campaign) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: `Campaign ${campaignId} not found` })
+    }
+
+    return {
+      version: 1,
+      type: 'starterTemplate',
+      exportedAt: new Date().toISOString(),
+      name: campaign.name,
+      worldSetupMode: campaign.world_setup_mode ?? 'ai',
+      worldBrief: campaign.world_brief,
+      worldDocument: campaign.world_document,
+      dmPersonality: campaign.dm_personality ?? '',
+      strictness: campaign.strictness,
+      partySize: campaign.party_size,
+      encumbranceEnabled: Boolean(campaign.encumbrance_enabled),
+      homebrewContent: campaign.homebrew_content,
+    }
+  } catch (err) {
+    log.error('[exportImport] exportStarterTemplate failed:', err)
+    throw err
+  }
+}
+
+// ---------------------------------------------------------------------------
 // importCampaignOrTemplate
 // ---------------------------------------------------------------------------
 

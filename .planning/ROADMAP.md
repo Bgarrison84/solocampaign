@@ -267,9 +267,9 @@ Plans:
 - [x] 08-01-PLAN.md — Foundation: appPrefs store + tRPC router + IPC pre-mount bridge + initDatabase custom path + /settings route + TitleBar gear icon
 - [x] 08-02-PLAN.md — Font scaling + high contrast: globals.css theme + main.tsx pre-mount + SettingsScreen Appearance section (A11Y-01)
 - [x] 08-03-PLAN.md — Campaign JSON export/import: exportImport.ts (UUID remap, FK-ordered transaction) + DropdownMenu + CampaignCard 3-dot menu + Import button (DIST-01, DIST-03 dispatch)
-- [ ] 08-04-PLAN.md — Starter templates: exportStarterTemplate + exportTemplate procedure + CreateCampaignModal pre-fill (DIST-03)
+- [x] 08-04-PLAN.md — Starter templates: exportStarterTemplate + exportTemplate procedure + CreateCampaignModal pre-fill (DIST-03)
 - [x] 08-05-PLAN.md — Character sheet PDF: pdfService.ts (dynamic import) + CharacterSheetPdf.tsx + exportPdf procedure + CharacterSheetTab button (DIST-02)
-- [ ] 08-06-PLAN.md — Data folder migration: changeDataFolder (.backup + integrity check) + SettingsScreen Data section (DIST-04)
+- [x] 08-06-PLAN.md — Data folder migration: changeDataFolder (.backup + integrity check) + SettingsScreen Data section (DIST-04)
 - [ ] 08-07-PLAN.md — Accessibility pass: off-screen aria-live region + aria-label audit + keyboard/screen-reader human-verify (A11Y-02, A11Y-03)
 **Wave structure:**
   - Wave 0: 08-01 (foundation — appPrefs + IPC bridge + route scaffold + custom DB path)

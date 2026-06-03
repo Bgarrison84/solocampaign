@@ -115,5 +115,18 @@ declare global {
     shellBridge: {
       openExternal(url: string): Promise<void>
     }
+
+    /**
+     * Narrow surface for streaming session recap generation (Phase 4 — D-04-03).
+     * Mirrors window.aiStream but uses dedicated ai:recap-* IPC channels.
+     * Exposed by preload/index.ts via contextBridge.exposeInMainWorld('sessionRecap', ...).
+     */
+    sessionRecap: {
+      startStream(payload: { campaignId: string; sessionId: string }): Promise<{ started: boolean }>
+      onToken(cb: (token: string) => void): void
+      onFinish(cb: (finalText: string) => void): void
+      onError(cb: (err: { message: string }) => void): void
+      removeAllListeners(): void
+    }
   }
 }

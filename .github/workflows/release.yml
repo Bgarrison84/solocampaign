@@ -127,5 +127,7 @@ jobs:
             artifacts/**/*.exe
             artifacts/**/*.zip
             artifacts/**/*.AppImage
+            artifacts/**/latest*.yml
+            artifacts/**/*.blockmap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

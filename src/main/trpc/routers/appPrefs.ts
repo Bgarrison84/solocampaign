@@ -152,7 +152,10 @@ export const appPrefsRouter = t.router({
       try {
         // Step 1: WAL-safe backup — CRITICAL: NOT fs.copyFile (Landmine 2, Pitfall 1)
         const sqlite = getDb().$client
-        await sqlite.backup(newDbPath)
+        await sqlite.backup(newDbPath).catch(async (err: unknown) => {
+          await unlink(newDbPath).catch(() => {})
+          throw err
+        })
 
         // Step 2: Verify integrity of the new copy
         const newDb = new Database(newDbPath, { readonly: true })

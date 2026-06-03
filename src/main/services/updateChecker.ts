@@ -76,8 +76,9 @@ export async function checkForUpdate(currentVersion: string): Promise<UpdateInfo
     const [ma, mi, pa] = remoteVersion.split('.').map(Number)
     const [ca, ci, cp] = currentVersion.split('.').map(Number)
 
-    // T-09-05: NaN guard — malformed tag_name returns safe fallback instead of crashing
+    // T-09-05: NaN guard — malformed tag_name or currentVersion returns safe fallback
     if (isNaN(ma) || isNaN(mi) || isNaN(pa)) return NO_UPDATE
+    if (isNaN(ca) || isNaN(ci) || isNaN(cp)) return NO_UPDATE
 
     // Inline 3-part semver comparison: newer if major > current,
     // or same major and minor > current, or same major+minor and patch > current

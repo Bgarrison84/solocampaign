@@ -41,7 +41,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Rebuild native modules (better-sqlite3)
         run: npx @electron/rebuild -f -w better-sqlite3

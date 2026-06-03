@@ -97,6 +97,16 @@ export function StoryScrollPanel({
   // Track how many characters of streamingContent we've already processed
   const lastProcessedLenRef = useRef(0)
 
+  // WR-04: Reset stream-buffer and scroll refs when navigating to a different campaign.
+  // Without this, stale buffer from the previous campaign's stream would be prepended
+  // to the new campaign's first announcement, and a scrolled-up state would suppress
+  // auto-scroll for the new campaign.
+  useEffect(() => {
+    paragraphBufferRef.current = ''
+    lastProcessedLenRef.current = 0
+    isUserScrolledUpRef.current = false
+  }, [campaignId])
+
   // Fetch completed message history
   const messagesQuery = useQuery({
     queryKey: ['ai', 'getMessages', campaignId],

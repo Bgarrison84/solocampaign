@@ -3,6 +3,7 @@ import path from 'node:path'
 import { createIPCHandler } from 'electron-trpc/main'
 import log from 'electron-log'
 import Store from 'electron-store'
+import { appPrefsStore } from './trpc/routers/appPrefs'
 import { router } from './trpc/router'
 import { initDatabase } from './db/index'
 import { secretStorage } from './secrets'
@@ -32,14 +33,6 @@ let mainWindow: BrowserWindow | null = null
 // Window bounds persistence — saved on resize/move, restored on next launch (D-14)
 const boundsStore = new Store<{ windowBounds: { width: number; height: number; x?: number; y?: number } }>({ name: 'windowBounds' })
 
-// App-global preferences store (font size, high contrast, custom data folder — D-07, D-08, D-09)
-// Instantiated at module scope so the appPrefs:getInitial IPC handler can close over it.
-// Must be created BEFORE app.whenReady so the handler can register before BrowserWindow (Landmine 3).
-const appPrefs = new Store<{ fontSize: string; highContrast: boolean; dataFolder: string | null }>({
-  name: 'appPrefs',
-  defaults: { fontSize: 'normal', highContrast: false, dataFolder: null },
-})
-
 // Single-instance lock MUST run before app.whenReady()
 const gotLock = app.requestSingleInstanceLock()
 if (!gotLock) {
@@ -56,7 +49,7 @@ if (!gotLock) {
     // Initialize database before creating the window.
     // Read custom data folder from appPrefs (DIST-04: data folder migration, D-09).
     // If appPrefs.dataFolder is set, the DB opens from that path instead of userData.
-    const customDataFolder = appPrefs.get('dataFolder', null)
+    const customDataFolder = appPrefsStore.get('dataFolder', null)
     try {
       await initDatabase(customDataFolder)
     } catch (err) {
@@ -116,7 +109,7 @@ if (!gotLock) {
     // The preload bridge calls this synchronously during window load — the handler must
     // exist before the window is created so the preload's ipcRenderer.invoke can resolve.
     // Returns plain { fontSize, highContrast, dataFolder } object (T-08-02: no secrets).
-    ipcMain.handle('appPrefs:getInitial', () => appPrefs.store)
+    ipcMain.handle('appPrefs:getInitial', () => appPrefsStore.store)
 
     // Restore saved bounds from previous session (D-14: 1280×800 default, persist bounds)
     const savedBounds = boundsStore.get('windowBounds', { width: 1280, height: 800 })

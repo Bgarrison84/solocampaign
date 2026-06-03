@@ -36,7 +36,7 @@ mac:
       arch: arm64
 
 linux:
-  icon: src/resources/build/icons
+  icon: src/resources/build/icons/icon.png
   category: Game
   target:
     - AppImage

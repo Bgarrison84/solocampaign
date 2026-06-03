@@ -55,13 +55,11 @@ jobs:
         run: sudo apt-get install -y fuse libfuse2
 
       - name: Build packaged app
-        run: npm run build
+        run: npm run build -- --publish never
         env:
           # No code signing per D-01
           CSC_IDENTITY_AUTO_DISCOVERY: false
           SKIP_NOTARIZE: true
-          # GH_TOKEN intentionally omitted: electron-builder auto-publishes when it sees
-          # GH_TOKEN in CI. The aggregator publish job handles release creation instead.
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

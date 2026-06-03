@@ -24,7 +24,7 @@
 
 /** GitHub Releases API endpoint for this repo (slug from package.json repository.url). */
 const GITHUB_RELEASES_API_URL =
-  'https://api.github.com/repos/briston/solocampaign/releases/latest'
+  'https://api.github.com/repos/Bgarrison84/solocampaign/releases/latest'
 
 /**
  * Shape returned by checkForUpdate and by the appPrefs.checkForUpdate tRPC query.

@@ -19,7 +19,7 @@
 - [ ] **Phase 6: Quests, NPCs & World State** — AI-populated quest log, NPC tracker, faction/reputation, in-world calendar, location breadcrumb, and AI-awarded Inspiration via structured tool-call mutations
 - [x] **Phase 7: Content Depth & Advanced Character** — Full ability score generation methods (incl. negative-trait point buy), multiclass without prerequisites, feats + custom editor, companions as party members, Epic Boons, three world-setup modes, SRD reference, homebrew, and PDF/text rules import ✓ 11/11 plans complete (2026-06-01)
 - [x] **Phase 8: Polish, Export & Accessibility** — Full campaign JSON export/import, character sheet PDF, sharable starter templates, custom data folder, and accessibility (font scaling, high contrast, ARIA/keyboard) ✓ 7/7 plans complete (2026-06-02)
-- [ ] **Phase 9: Distribution & Update Notifications** — Signed + notarized cross-platform installers (Windows, macOS, Linux), GitHub Releases publishing, and notify-only update flow
+- [ ] **Phase 9: Distribution & Update Notifications** — Unsigned cross-platform installers (Windows NSIS, macOS .zip arm64, Linux AppImage), GitHub Actions tag-triggered release publishing, and in-app GitHub-poll update-notification banner
 
 ---
 
@@ -285,19 +285,30 @@ Plans:
 **UI hint:** yes
 
 ### Phase 9: Distribution & Update Notifications
-**Goal:** A user can download a signed, notarized SoloCampaign installer for their OS from a public GitHub Release, install it cleanly, and later see a notification when a new version ships — with the option to download and install manually.
+**Goal:** A user can download an (unsigned, per D-01) SoloCampaign installer for their OS from a public GitHub Release, install it cleanly (SmartScreen/Gatekeeper bypass documented in release notes), and see a dismissible in-app banner on startup when a newer version is available — clicking it opens the GitHub Release page in the browser.
 **Mode:** mvp
 **Depends on:** Phase 8
 **Requirements:** DIST-05
 **Success Criteria** (what must be TRUE):
-  1. A public GitHub Release exists with signed Windows (.exe via NSIS), notarized macOS (.dmg), and Linux (AppImage + .deb) artifacts produced by a GitHub Actions matrix build
-  2. macOS installer passes Gatekeeper and notarization on Intel and M-series; Windows installer is signed via Azure Trusted Signing and shows the publisher name in SmartScreen
-  3. When a new version is published on GitHub, the running app notifies the user; the user can dismiss or open the release page to download manually — no silent install ever happens
-  4. better-sqlite3 native module loads correctly inside the notarized macOS hardened runtime on both Intel and Apple Silicon
-**Plans:** TBD
+  1. A public GitHub Release exists with unsigned Windows (.exe via NSIS), macOS (.zip arm64), and Linux (AppImage) artifacts produced by a GitHub Actions tag-triggered matrix build using the aggregator pattern
+  2. Installers run on each platform; SmartScreen (Windows) and Gatekeeper (macOS, incl. the "app is damaged" xattr fix) bypass steps are documented in the release notes (signing/notarization deferred — D-01)
+  3. When a newer version is published on GitHub, the running app shows a dismissible in-app banner; the user can open the release page to download manually — no silent install ever happens (D-04, D-05)
+  4. better-sqlite3 native module loads in the packaged build (ASAR unpack preserved); macOS .node arch matches the arm64 runner (Pitfall 1)
+**Plans:** 4 plans
+Plans:
+- [ ] 09-01-PLAN.md — updateChecker service (GitHub poll) + appPrefs checkForUpdate/dismissUpdate tRPC + Wave 0 tests (DIST-05)
+- [ ] 09-02-PLAN.md — shellBridge preload (https://github.com/ allow-list) + UpdateBanner + App.tsx wiring (DIST-05)
+- [ ] 09-03-PLAN.md — electron-builder.yml macOS .zip target + release.yml tag-triggered matrix build + aggregator publish
+- [ ] 09-04-PLAN.md — Create public repo, push master, publish v0.1.0 release (checkpoint: gh auth + release verify)
+**Wave structure:**
+  - Wave 1: 09-01 (update-check backend) + 09-03 (release pipeline) in parallel — no file overlap
+  - Wave 2: 09-02 (renderer banner; depends on 09-01 tRPC procedures)
+  - Wave 3: 09-04 (repo creation + v0.1.0 publish; depends on 09-02 feature + 09-03 pipeline)
 **Notes:**
-  - Validate macOS hardened runtime entitlements for the better-sqlite3 .node binary (research flag)
-  - Code signing certs procured during Phase 1 should now be in hand; if not, this phase blocks until procurement completes
+  - Code signing / notarization / .dmg / .deb DEFERRED from v1.0 (D-01, D-02) — see CONTEXT.md Deferred Ideas
+  - macOS hardened runtime entitlements for better-sqlite3 deferred with signing
+  - No new npm dependencies (RESEARCH Package Legitimacy Audit: zero new deps)
+  - smoke.yml left untouched; release.yml is separate (D-07)
 **UI hint:** yes
 
 ---
@@ -314,7 +325,7 @@ Plans:
 | 6. Quests, NPCs & World State | 6/7 | In Progress|  |
 | 7. Content Depth & Advanced Character | 0/11 | Planned | - |
 | 8. Polish, Export & Accessibility | 7/7 | Complete | 2026-06-02 |
-| 9. Distribution & Update Notifications | 0/0 | Not started | - |
+| 9. Distribution & Update Notifications | 0/4 | Planned | - |
 
 ---
 

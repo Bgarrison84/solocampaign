@@ -1,5 +1,5 @@
 import { exposeElectronTRPC } from 'electron-trpc/main'
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, shell } from 'electron'
 
 // Expose electron-trpc bridge
 process.once('loaded', () => {
@@ -164,5 +164,28 @@ contextBridge.exposeInMainWorld('sessionRecap', {
     ipcRenderer.removeAllListeners('ai:recap-token')
     ipcRenderer.removeAllListeners('ai:recap-finish')
     ipcRenderer.removeAllListeners('ai:recap-error')
+  },
+})
+
+/**
+ * window.shellBridge — narrow contextBridge surface for opening external URLs (D-05).
+ *
+ * Security (T-09-07 / T-09-08):
+ *   - openExternal validates the URL before passing it to shell.openExternal.
+ *   - URL allow-list: only https://github.com/ host is permitted.
+ *     shell.openExternal hands URLs to the OS protocol handler, so file://, ssh://,
+ *     and other non-HTTPS protocols MUST be rejected before reaching the OS
+ *     (ASVS V5, RESEARCH Pitfall 6).
+ *   - The allow-list is enforced in the preload (main-process context) so a
+ *     compromised renderer cannot bypass it.
+ *   - Exposing a single, host-validated method does not widen the main-process
+ *     IPC event surface (T-09-08).
+ */
+contextBridge.exposeInMainWorld('shellBridge', {
+  openExternal: (url: string): Promise<void> => {
+    if (typeof url === 'string' && url.startsWith('https://github.com/')) {
+      return shell.openExternal(url)
+    }
+    return Promise.reject(new Error('Blocked non-GitHub URL'))
   },
 })

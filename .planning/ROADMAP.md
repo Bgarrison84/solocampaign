@@ -296,9 +296,9 @@ Plans:
   4. better-sqlite3 native module loads in the packaged build (ASAR unpack preserved); macOS .node arch matches the arm64 runner (Pitfall 1)
 **Plans:** 4 plans
 Plans:
-- [ ] 09-01-PLAN.md — updateChecker service (GitHub poll) + appPrefs checkForUpdate/dismissUpdate tRPC + Wave 0 tests (DIST-05)
+- [x] 09-01-PLAN.md — updateChecker service (GitHub poll) + appPrefs checkForUpdate/dismissUpdate tRPC + Wave 0 tests (DIST-05)
 - [ ] 09-02-PLAN.md — shellBridge preload (https://github.com/ allow-list) + UpdateBanner + App.tsx wiring (DIST-05)
-- [ ] 09-03-PLAN.md — electron-builder.yml macOS .zip target + release.yml tag-triggered matrix build + aggregator publish
+- [x] 09-03-PLAN.md — electron-builder.yml macOS .zip target + release.yml tag-triggered matrix build + aggregator publish
 - [ ] 09-04-PLAN.md — Create public repo, push master, publish v0.1.0 release (checkpoint: gh auth + release verify)
 **Wave structure:**
   - Wave 1: 09-01 (update-check backend) + 09-03 (release pipeline) in parallel — no file overlap

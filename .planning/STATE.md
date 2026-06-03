@@ -29,7 +29,7 @@ Phase: 09 (distribution-update-notifications) — PLANNED
 Plan: —
 **Milestone:** v1
 **Phase:** Phase 9 — Distribution & Update Notifications
-**Status:** Phase 09 executing. Wave 1 complete: 09-01 + 09-03 done. Wave 2 (09-02 renderer banner) in progress.
+**Status:** Phase 09 executing. Waves 1+2 complete (3/4 plans). Wave 3: 09-04 go-live (human checkpoint — requires gh auth).
 
 **Progress:** [███████████████████░] 89% (8/9 phases complete)
 

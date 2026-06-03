@@ -18,7 +18,7 @@
 - [ ] **Phase 5: Rules Engine, Dice & Combat** — Deterministic rules engine, player-rolls-dice paradigm, combat tracker with initiative/HP/conditions, XP-driven level-up, rests, spell slot management, and currency
 - [ ] **Phase 6: Quests, NPCs & World State** — AI-populated quest log, NPC tracker, faction/reputation, in-world calendar, location breadcrumb, and AI-awarded Inspiration via structured tool-call mutations
 - [x] **Phase 7: Content Depth & Advanced Character** — Full ability score generation methods (incl. negative-trait point buy), multiclass without prerequisites, feats + custom editor, companions as party members, Epic Boons, three world-setup modes, SRD reference, homebrew, and PDF/text rules import ✓ 11/11 plans complete (2026-06-01)
-- [ ] **Phase 8: Polish, Export & Accessibility** — Full campaign JSON export/import, character sheet PDF, sharable starter templates, custom data folder, and accessibility (font scaling, high contrast, ARIA/keyboard)
+- [x] **Phase 8: Polish, Export & Accessibility** — Full campaign JSON export/import, character sheet PDF, sharable starter templates, custom data folder, and accessibility (font scaling, high contrast, ARIA/keyboard) ✓ 7/7 plans complete (2026-06-02)
 - [ ] **Phase 9: Distribution & Update Notifications** — Signed + notarized cross-platform installers (Windows, macOS, Linux), GitHub Releases publishing, and notify-only update flow
 
 ---
@@ -313,7 +313,7 @@ Plans:
 | 5. Rules Engine, Dice & Combat | 7/7 | Human UAT pending | - |
 | 6. Quests, NPCs & World State | 6/7 | In Progress|  |
 | 7. Content Depth & Advanced Character | 0/11 | Planned | - |
-| 8. Polish, Export & Accessibility | 0/7 | Planned | - |
+| 8. Polish, Export & Accessibility | 7/7 | Complete | 2026-06-02 |
 | 9. Distribution & Update Notifications | 0/0 | Not started | - |
 
 ---

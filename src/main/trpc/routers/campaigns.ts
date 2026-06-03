@@ -375,8 +375,10 @@ export const campaignsRouter = t.router({
         apiKey: apiKey ?? undefined,
       })
 
+      // WR-01: sanitize name before embedding in prompt (strip chars that break delimiters)
+      const safeName = campaign.name.replace(/["\\\n]/g, ' ')
       const prompt =
-        `You are world-building a D&D 5e campaign setting. Create a detailed world brief for the campaign named "${campaign.name}". ` +
+        `You are world-building a D&D 5e campaign setting. Create a detailed world brief for the campaign named: """${safeName}""". ` +
         'Include: the setting name and geographic overview, the overall tone and themes, 2-3 major factions or power groups, ' +
         'the main conflict or central threat, 3-5 key locations, and a compelling Session 1 hook. ' +
         'Write in 500-800 words in third-person present tense. Be specific and evocative. ' +

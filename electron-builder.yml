@@ -34,8 +34,10 @@ extraResources:
 mac:
   icon: src/resources/build/icons/icon.icns
   category: public.app-category.games
+  identity: null
   target:
-    - dir
+    - target: zip
+      arch: arm64
 
 linux:
   icon: src/resources/build/icons

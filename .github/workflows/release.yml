@@ -1,0 +1,131 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Cancel in-progress runs on new push to the same tag
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build — ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: windows-artifacts
+            npm_config_arch: x64
+            node: 20
+          - os: macos-latest
+            artifact_name: macos-artifacts
+            npm_config_arch: arm64
+            node: 20
+          - os: ubuntu-latest
+            artifact_name: linux-artifacts
+            npm_config_arch: x64
+            node: 20
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Rebuild native modules (better-sqlite3)
+        run: npx @electron/rebuild -f -w better-sqlite3
+        env:
+          npm_config_arch: ${{ matrix.npm_config_arch }}
+
+      - name: Linux — install FUSE
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y fuse libfuse2
+
+      - name: Build packaged app
+        run: npm run build
+        env:
+          # No code signing per D-01
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          SKIP_NOTARIZE: true
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/
+          retention-days: 1
+
+  publish:
+    name: Publish GitHub Release
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          generate_release_notes: false
+          body: |
+            ## SoloCampaign ${{ github.ref_name }}
+
+            ## Installation & Security Warnings
+
+            ### Windows — SmartScreen Warning
+
+            Windows may show a "Windows protected your PC" SmartScreen warning because the installer is unsigned. This is expected for v1.0.
+
+            To install:
+            1. Click **More info** in the SmartScreen dialog
+            2. Click **Run anyway**
+            3. Proceed through the NSIS installer
+
+            ### macOS — Gatekeeper Warning
+
+            macOS may block the app with "app can't be opened because it is from an unidentified developer" or "the developer cannot be verified". This is expected for unsigned builds.
+
+            **Option 1 — Right-click to open:**
+            1. Right-click (or Control-click) the SoloCampaign app in your Applications folder
+            2. Click **Open** in the context menu
+            3. Click **Open** again in the dialog that appears
+
+            **Option 2 — If you see "app is damaged and can't be opened" (quarantine flag):**
+            Run this command in Terminal after copying the app to /Applications:
+            ```
+            xattr -cr /Applications/SoloCampaign.app
+            ```
+            Then try opening the app again.
+
+            ### Linux — AppImage
+
+            1. Download the `.AppImage` file
+            2. Make it executable: `chmod +x SoloCampaign-*.AppImage`
+            3. Run it: `./SoloCampaign-*.AppImage`
+          files: |
+            artifacts/**/*.exe
+            artifacts/**/*.zip
+            artifacts/**/*.AppImage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

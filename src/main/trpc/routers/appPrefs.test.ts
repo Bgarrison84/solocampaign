@@ -87,10 +87,20 @@ const showOpenDialogSpy = vi.fn()
 vi.mock('electron', () => ({
   app: {
     getPath: vi.fn(() => '/tmp/test-userdata'),
+    getVersion: vi.fn(() => '0.1.0'),
   },
   dialog: {
     showOpenDialog: showOpenDialogSpy,
   },
+}))
+
+// Mock updateChecker service to isolate appPrefs router from GitHub API calls
+vi.mock('../../services/updateChecker', () => ({
+  checkForUpdate: vi.fn(async () => ({
+    available: true,
+    version: '0.2.0',
+    releaseUrl: 'https://github.com/briston/solocampaign/releases/tag/v0.2.0',
+  })),
 }))
 
 // Mock electron-log
@@ -241,6 +251,42 @@ describe('appPrefsRouter', () => {
       // If we reach here without fs.copyFile being called, the test passes.
       // unlinkSpy not being called confirms no error path was triggered.
       expect(unlinkSpy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('dismissedUpdateVersion default', () => {
+    it('get() returns dismissedUpdateVersion: null by default', async () => {
+      const caller = await makeRouter()
+      const prefs = await caller.get()
+      expect(prefs.dismissedUpdateVersion).toBeNull()
+    })
+  })
+
+  describe('checkForUpdate', () => {
+    it('resolves to the mocked UpdateInfo shape ({ available: true, version, releaseUrl })', async () => {
+      const caller = await makeRouter()
+      const result = await caller.checkForUpdate()
+      expect(result).toEqual({
+        available: true,
+        version: '0.2.0',
+        releaseUrl: 'https://github.com/briston/solocampaign/releases/tag/v0.2.0',
+      })
+    })
+  })
+
+  describe('dismissUpdate', () => {
+    it('after dismissUpdate({ version: "0.2.0" }), get() reflects dismissedUpdateVersion === "0.2.0"', async () => {
+      const caller = await makeRouter()
+      const result = await caller.dismissUpdate({ version: '0.2.0' })
+      expect(result).toEqual({ dismissed: true })
+      const prefs = await caller.get()
+      expect(prefs.dismissedUpdateVersion).toBe('0.2.0')
+    })
+
+    it('returns { dismissed: true } on success', async () => {
+      const caller = await makeRouter()
+      const result = await caller.dismissUpdate({ version: '0.2.0' })
+      expect(result.dismissed).toBe(true)
     })
   })
 })

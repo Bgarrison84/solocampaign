@@ -60,7 +60,8 @@ jobs:
           # No code signing per D-01
           CSC_IDENTITY_AUTO_DISCOVERY: false
           SKIP_NOTARIZE: true
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GH_TOKEN intentionally omitted: electron-builder auto-publishes when it sees
+          # GH_TOKEN in CI. The aggregator publish job handles release creation instead.
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

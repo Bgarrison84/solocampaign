@@ -16,6 +16,7 @@ import log from 'electron-log'
  *   - fontSize: 'small' | 'normal' | 'large' — text size scale (D-07, A11Y-01)
  *   - highContrast: boolean — high contrast dark theme toggle (D-08, A11Y-01)
  *   - dataFolder: string | null — custom SQLite data folder path (D-09, DIST-04)
+ *   - dismissedUpdateVersion: string | null — last update version dismissed by user (D-05, DIST-05)
  *
  * Stored in userData/appPrefs.json (electron-store default).
  * Separate from campaign data (SQLite) and per-campaign panel prefs (prefs.json).
@@ -24,6 +25,7 @@ interface AppPrefs {
   fontSize: 'small' | 'normal' | 'large'
   highContrast: boolean
   dataFolder: string | null
+  dismissedUpdateVersion: string | null
 }
 
 export const appPrefsStore = new Store<AppPrefs>({
@@ -32,6 +34,7 @@ export const appPrefsStore = new Store<AppPrefs>({
     fontSize: 'normal',
     highContrast: false,
     dataFolder: null,
+    dismissedUpdateVersion: null,
   },
 })
 
@@ -39,17 +42,21 @@ export const appPrefsStore = new Store<AppPrefs>({
  * appPrefs tRPC router.
  *
  * Procedures:
- *   - get (query) → { fontSize, highContrast, dataFolder }
+ *   - get (query) → { fontSize, highContrast, dataFolder, dismissedUpdateVersion }
  *   - setFontSize (mutation) → { updated: true }
  *   - setHighContrast (mutation) → { updated: true }
  *   - getCurrentDataFolder (query) → { path: string, isCustom: boolean }
  *   - pickDataFolder (mutation) → { canceled: boolean, folderPath?: string }
  *   - changeDataFolder (mutation, { folderPath }) → { success: true, pendingRestart: true }
+ *   - checkForUpdate (query) → UpdateInfo ({ available, version, releaseUrl })
+ *   - dismissUpdate (mutation, { version }) → { dismissed: true }
  *
  * T-08-01 (Tampering): Zod enum/boolean validation at procedure boundary rejects any
  * value outside the allowed set before it reaches the store.
  * T-08-17 (Integrity): changeDataFolder uses sqlite.backup() NOT fs.copyFile (WAL-safe).
  * T-08-18 (Tampering): folderPath comes from OS openDirectory dialog; validated z.string().min(1).
+ * T-09-04 (Tampering): dismissUpdate validates input via Zod z.object({ version: z.string() })
+ * before appPrefsStore.set — renderer input treated as untrusted.
  */
 export const appPrefsRouter = t.router({
   /**
@@ -178,5 +185,42 @@ export const appPrefsRouter = t.router({
           message: err instanceof Error ? err.message : 'Failed to change data folder.',
         })
       }
+    }),
+
+  /**
+   * Check GitHub Releases for a newer version of SoloCampaign.
+   *
+   * Delegates to the pure updateChecker service (dynamically imported to enable mocking in tests).
+   * Uses app.getVersion() as the currentVersion baseline.
+   *
+   * Returns UpdateInfo: { available, version, releaseUrl } — see updateChecker.ts for full contract.
+   * Errors are silent (no throw, no electron-log) per D-04. The renderer calls this as a
+   * background query via TanStack Query; never blocks startup.
+   *
+   * DIST-05: Powers the UpdateBanner renderer component (Plan 02).
+   */
+  checkForUpdate: t.procedure.query(async () => {
+    const { checkForUpdate } = await import('../../services/updateChecker')
+    const currentVersion = app.getVersion()
+    return checkForUpdate(currentVersion)
+  }),
+
+  /**
+   * Persist the dismissed update version so the same banner does not reappear.
+   *
+   * T-09-04 (Tampering): Zod z.object({ version: z.string() }) validates input at the
+   * procedure boundary before appPrefsStore.set — renderer input is untrusted.
+   *
+   * Logic (Pitfall 7): The dismissed version is never cleared. When a newer release
+   * arrives (e.g. v0.3.0), the renderer compares data.version !== dismissedUpdateVersion
+   * and shows the banner again automatically.
+   *
+   * DIST-05: Called by UpdateBanner when user clicks the ✕ dismiss button.
+   */
+  dismissUpdate: t.procedure
+    .input(z.object({ version: z.string() }))
+    .mutation(({ input }) => {
+      appPrefsStore.set('dismissedUpdateVersion', input.version)
+      return { dismissed: true as const }
     }),
 })

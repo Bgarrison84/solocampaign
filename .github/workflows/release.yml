@@ -88,41 +88,7 @@ jobs:
         with:
           draft: false
           generate_release_notes: false
-          body: |
-            ## SoloCampaign ${{ github.ref_name }}
-
-            ## Installation & Security Warnings
-
-            ### Windows — SmartScreen Warning
-
-            Windows may show a "Windows protected your PC" SmartScreen warning because the installer is unsigned. This is expected for v1.0.
-
-            To install:
-            1. Click **More info** in the SmartScreen dialog
-            2. Click **Run anyway**
-            3. Proceed through the NSIS installer
-
-            ### macOS — Gatekeeper Warning
-
-            macOS may block the app with "app can't be opened because it is from an unidentified developer" or "the developer cannot be verified". This is expected for unsigned builds.
-
-            **Option 1 — Right-click to open:**
-            1. Right-click (or Control-click) the SoloCampaign app in your Applications folder
-            2. Click **Open** in the context menu
-            3. Click **Open** again in the dialog that appears
-
-            **Option 2 — If you see "app is damaged and can't be opened" (quarantine flag):**
-            Run this command in Terminal after copying the app to /Applications:
-            ```
-            xattr -cr /Applications/SoloCampaign.app
-            ```
-            Then try opening the app again.
-
-            ### Linux — AppImage
-
-            1. Download the `.AppImage` file
-            2. Make it executable: `chmod +x SoloCampaign-*.AppImage`
-            3. Run it: `./SoloCampaign-*.AppImage`
+          body: "## SoloCampaign ${{ github.ref_name }}\n\n**Windows:** SmartScreen may warn — click More info → Run anyway.\n\n**macOS:** Gatekeeper may warn — right-click the app → Open → Open. If you see \"app is damaged\", run: `xattr -cr /Applications/SoloCampaign.app`\n\n**Linux:** `chmod +x SoloCampaign-*.AppImage && ./SoloCampaign-*.AppImage`"
           files: |
             artifacts/**/*.exe
             artifacts/**/*.zip

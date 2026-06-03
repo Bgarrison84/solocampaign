@@ -102,5 +102,18 @@ declare global {
         dataFolder: string | null
       }>
     }
+
+    /**
+     * Narrow surface for opening external URLs in the default browser (D-05 / DIST-05).
+     * Exposed by preload/index.ts via contextBridge.exposeInMainWorld('shellBridge', ...).
+     *
+     * Security (T-09-07): Only https://github.com/ URLs are accepted.
+     * The allow-list is validated in the preload before calling shell.openExternal.
+     * Any other URL (file://, ssh://, etc.) causes the promise to reject without
+     * reaching the OS protocol handler.
+     */
+    shellBridge: {
+      openExternal(url: string): Promise<void>
+    }
   }
 }

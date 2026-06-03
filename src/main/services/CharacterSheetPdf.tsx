@@ -595,6 +595,9 @@ function CombatStatsSection({ data }: { data: CharacterPdfData }) {
 }
 
 function DeathSavesSection({ data }: { data: CharacterPdfData }) {
+  // Clamp to [0, 3] so .repeat() never receives a negative count (CR-03).
+  const successes = Math.min(3, Math.max(0, data.deathSaveSuccesses))
+  const failures  = Math.min(3, Math.max(0, data.deathSaveFailures))
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Death Saves</Text>
@@ -602,13 +605,13 @@ function DeathSavesSection({ data }: { data: CharacterPdfData }) {
         <View style={styles.deathSaveGroup}>
           <Text style={styles.deathSaveTitle}>Successes</Text>
           <Text style={styles.deathSaveDots}>
-            {'●'.repeat(data.deathSaveSuccesses) + '○'.repeat(3 - data.deathSaveSuccesses)}
+            {'●'.repeat(successes) + '○'.repeat(3 - successes)}
           </Text>
         </View>
         <View style={styles.deathSaveGroup}>
           <Text style={styles.deathSaveTitle}>Failures</Text>
           <Text style={styles.deathSaveDots}>
-            {'●'.repeat(data.deathSaveFailures) + '○'.repeat(3 - data.deathSaveFailures)}
+            {'●'.repeat(failures) + '○'.repeat(3 - failures)}
           </Text>
         </View>
       </View>

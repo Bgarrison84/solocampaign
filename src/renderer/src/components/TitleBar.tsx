@@ -21,8 +21,9 @@ export function TitleBar() {
   const campaignName = useWindowStore((s) => s.campaignName)
   const [isMaximized, setIsMaximized] = useState(false)
 
-  // Detect platform via navigator.platform (sandbox: true — no process.platform in renderer)
-  const isMac = navigator.platform.startsWith('Mac')
+  // Detect platform via contextBridge-exposed window.platform (process.platform from preload).
+  // navigator.platform is deprecated in modern Chromium and may return empty string.
+  const isMac = (window.platform as string) === 'darwin'
   const tbHeight = isMac ? '32px' : '36px'
 
   // Check maximize state on mount and keep in sync via resize events

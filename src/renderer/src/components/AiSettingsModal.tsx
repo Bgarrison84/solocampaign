@@ -159,7 +159,7 @@ export function AiSettingsModal({ campaignId, open, onClose }: AiSettingsModalPr
   })
 
   const importHomebrewTextMutation = useMutation({
-    mutationFn: () => trpc.campaigns.importHomebrewTextWithDialog.mutate({ campaignId }),
+    mutationFn: () => trpc.campaigns.importHomebrewTextWithDialog.mutate(),
     onSuccess: (text) => {
       if (text === null) return // user cancelled
       setHomebrewContent((prev) => {

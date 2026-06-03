@@ -326,7 +326,6 @@ export const campaignsRouter = t.router({
    * Content is capped at 50,000 chars to prevent DoS (T-07-10-02).
    */
   importHomebrewTextWithDialog: t.procedure
-    .input(z.object({ campaignId: campaignIdSchema }))
     .mutation(async () => {
       const { canceled, filePaths } = await dialog.showOpenDialog({
         title: 'Import Homebrew Text',

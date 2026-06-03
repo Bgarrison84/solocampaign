@@ -19,7 +19,7 @@
 - [ ] **Phase 6: Quests, NPCs & World State** — AI-populated quest log, NPC tracker, faction/reputation, in-world calendar, location breadcrumb, and AI-awarded Inspiration via structured tool-call mutations
 - [x] **Phase 7: Content Depth & Advanced Character** — Full ability score generation methods (incl. negative-trait point buy), multiclass without prerequisites, feats + custom editor, companions as party members, Epic Boons, three world-setup modes, SRD reference, homebrew, and PDF/text rules import ✓ 11/11 plans complete (2026-06-01)
 - [x] **Phase 8: Polish, Export & Accessibility** — Full campaign JSON export/import, character sheet PDF, sharable starter templates, custom data folder, and accessibility (font scaling, high contrast, ARIA/keyboard) ✓ 7/7 plans complete (2026-06-02)
-- [ ] **Phase 9: Distribution & Update Notifications** — Unsigned cross-platform installers (Windows NSIS, macOS .zip arm64, Linux AppImage), GitHub Actions tag-triggered release publishing, and in-app GitHub-poll update-notification banner
+- [ ] **Phase 9: Distribution & Update Notifications (code complete — go-live deferred)** — Unsigned cross-platform installers (Windows NSIS, macOS .zip arm64, Linux AppImage), GitHub Actions tag-triggered release publishing, and in-app GitHub-poll update-notification banner
 
 ---
 

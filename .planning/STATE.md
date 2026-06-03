@@ -29,7 +29,7 @@ Phase: 09 (distribution-update-notifications) — PLANNED
 Plan: —
 **Milestone:** v1
 **Phase:** Phase 9 — Distribution & Update Notifications
-**Status:** Phase 09 executing. Waves 1+2 complete (3/4 plans). Wave 3: 09-04 go-live (human checkpoint — requires gh auth).
+**Status:** Phase 09 code complete (3/4 plans). 10/10 automated checks verified. Plan 09-04 go-live deferred — requires gh auth + repo creation. Run /gsd-execute-phase 9 when ready to publish v0.1.0.
 
 **Progress:** [███████████████████░] 89% (8/9 phases complete)
 

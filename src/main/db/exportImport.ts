@@ -12,6 +12,7 @@
 
 import { randomUUID } from 'node:crypto'
 import { TRPCError } from '@trpc/server'
+import { z } from 'zod'
 import log from 'electron-log'
 import { getDb } from './index'
 
@@ -679,6 +680,39 @@ export function importCampaignOrTemplate(parsed: unknown): ImportResult {
   }
 
   if (p.type === 'campaignExport') {
+    // WR-02: Validate shape and apply field-level size bounds before any DB write.
+    // Prevents TypeError deep inside the SQLite transaction and limits large-field DoS.
+    const TEXT_MAX = 200_000
+    const campaignExportDataSchema = z.object({
+      campaign: z.object({
+        rolling_summary:    z.string().max(TEXT_MAX).optional().nullable(),
+        world_document:     z.string().max(TEXT_MAX).optional().nullable(),
+        homebrew_content:   z.string().max(TEXT_MAX).optional().nullable(),
+        world_brief:        z.string().max(TEXT_MAX).optional().nullable(),
+        dm_personality:     z.string().max(TEXT_MAX).optional().nullable(),
+      }).passthrough(),
+      characters: z.array(z.record(z.unknown())),
+      customFeats: z.array(z.record(z.unknown())).optional().default([]),
+      sessions: z.array(z.record(z.unknown())).optional().default([]),
+      characterResources: z.array(z.record(z.unknown())).optional().default([]),
+      characterItems: z.array(z.record(z.unknown())).optional().default([]),
+      characterSpells: z.array(z.record(z.unknown())).optional().default([]),
+      characterFeats: z.array(z.record(z.unknown())).optional().default([]),
+      messages: z.array(z.record(z.unknown())).optional().default([]),
+      combatants: z.array(z.record(z.unknown())).optional().default([]),
+      campaignEvents: z.array(z.record(z.unknown())).optional().default([]),
+      quests: z.array(z.record(z.unknown())).optional().default([]),
+      npcs: z.array(z.record(z.unknown())).optional().default([]),
+      factions: z.array(z.record(z.unknown())).optional().default([]),
+      campaignReferenceDocs: z.array(z.record(z.unknown())).optional().default([]),
+    })
+    const dataResult = campaignExportDataSchema.safeParse((p as { data?: unknown }).data)
+    if (!dataResult.success) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: `Import file has an invalid structure: ${dataResult.error.issues[0]?.message ?? 'validation failed'}`,
+      })
+    }
     const campaignId = importCampaign(parsed as CampaignExportPayload)
     return { kind: 'campaign', campaignId }
   }

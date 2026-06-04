@@ -1,6 +1,6 @@
 ---
 phase: 09-distribution-update-notifications
-reviewed: 2026-06-03T00:00:00Z
+reviewed: 2026-06-04T00:00:00Z
 depth: standard
 files_reviewed: 10
 files_reviewed_list:
@@ -15,16 +15,16 @@ files_reviewed_list:
   - src/renderer/src/components/UpdateBanner.tsx
   - src/renderer/src/types/aiStream.d.ts
 findings:
-  critical: 4
-  warning: 6
+  critical: 0
+  warning: 5
   info: 3
-  total: 13
+  total: 8
 status: issues_found
 ---
 
 # Phase 09: Code Review Report
 
-**Reviewed:** 2026-06-03T00:00:00Z
+**Reviewed:** 2026-06-04T00:00:00Z
 **Depth:** standard
 **Files Reviewed:** 10
 **Status:** issues_found
@@ -33,140 +33,53 @@ status: issues_found
 
 Phase 09 delivers the distribution pipeline (GitHub Actions release workflow, electron-builder config) and the update notification system (updateChecker service, appPrefs tRPC router, preload shellBridge, UpdateBanner component). The overall shape is sound — the security-sensitive `shellBridge.openExternal` host allow-list is correctly enforced in the preload, the WAL-safe backup mechanism is used correctly, and the silent-on-error contract for update checks is well-reasoned.
 
-However, four blockers were found that can cause silent data loss or incorrect runtime behavior:
-
-1. The current version's semver parts are never NaN-guarded, so a malformed `app.getVersion()` string produces a `NaN`-poisoned comparison that silently forces every version to appear "not newer."
-2. The `changeDataFolder` mutation does not clean up the backup copy when the outer `catch` fires (e.g., `sqlite.backup()` itself throws), leaving partial files at the target path.
-3. The release workflow uploads `.zip` and `.AppImage` but no `.blockmap` or `latest*.yml` files, which breaks `electron-updater` auto-update feeds on all platforms.
-4. The `sessionRecap` contextBridge surface is never declared in `aiStream.d.ts`, so every renderer file that uses `window.sessionRecap` is operating against an `any`-typed surface — bypassing the type-safety that the `shellBridge` and `aiStream` declarations correctly provide.
+The original four critical findings (CR-01 through CR-04) and WR-04 have all been resolved (confirmed by source inspection on 2026-06-04). Five warnings remain open.
 
 ---
 
-## Critical Issues
+## WR-04 Resolution
 
-### CR-01: NaN guard omitted for `currentVersion` parts — comparison silently wrong on malformed app version
+**Resolved 2026-06-04.** `retry: false` was added to the `checkForUpdate` useQuery in `src/renderer/src/components/UpdateBanner.tsx` (line 28). Verified:
+
+- `retry: false` is on the correct query — `queryKey: ['appPrefs', 'checkForUpdate']` (lines 24-29).
+- The second useQuery (`appPrefs.get`, `queryKey: ['appPrefs']`, lines 32-35) intentionally does NOT carry `retry: false`, which is correct — user preferences should retry normally.
+- No new issues were found in `UpdateBanner.tsx` during the targeted re-review.
+
+---
+
+## Resolved Critical Issues (reference)
+
+The following four criticals were confirmed resolved by source inspection on 2026-06-04 and are retained here for audit traceability only.
+
+### CR-01 (RESOLVED): NaN guard omitted for `currentVersion` parts
 
 **File:** `src/main/services/updateChecker.ts:77-85`
 
-**Issue:** The code guards `ma`, `mi`, `pa` (remote parts) against `NaN` at line 80, but applies no equivalent guard to `ca`, `ci`, `cp` (current version parts parsed at line 77). `app.getVersion()` reads from `package.json`; during development, testing, or a botched build it can return `"0"`, `""`, `"0.0"`, or `"dev"`. When any of `ca`/`ci`/`cp` is `NaN`, the comparison expression on line 85 evaluates to `false` for all inputs (any comparison with `NaN` is `false`), so `isNewer` is always `false`. The update banner never appears, silently, with no error logged (by design — but this is a logic error, not an intentional silent path).
-
-```ts
-// Line 77 — no guard
-const [ca, ci, cp] = currentVersion.split('.').map(Number)
-
-// Line 80 — only remote is guarded
-if (isNaN(ma) || isNaN(mi) || isNaN(pa)) return NO_UPDATE
-
-// Line 85 — NaN in ca/ci/cp poisons every sub-expression
-const isNewer =
-  ma > ca || (ma === ca && mi > ci) || (ma === ca && mi === ci && pa > cp)
-```
-
-**Fix:** Extend the NaN guard to cover the current version parts immediately after line 80:
-
-```ts
-if (isNaN(ma) || isNaN(mi) || isNaN(pa)) return NO_UPDATE
-if (isNaN(ca) || isNaN(ci) || isNaN(cp)) return NO_UPDATE
-```
+NaN guard extended to cover current version parts (`ca`/`ci`/`cp`) alongside the already-present remote parts guard. Fix confirmed present in source.
 
 ---
 
-### CR-02: `changeDataFolder` does not clean up backup file when `sqlite.backup()` throws
+### CR-02 (RESOLVED): `changeDataFolder` does not clean up backup file when `sqlite.backup()` throws
 
 **File:** `src/main/trpc/routers/appPrefs.ts:152-187`
 
-**Issue:** The outer `catch` block at line 178 handles any error thrown by `sqlite.backup()` itself (e.g., disk full, permission denied). In that case `newDb` was never opened, `unlink(newDbPath)` is never called, and a partial or zero-byte `.db` file may have been created at `newDbPath` by the OS before the backup aborted. Subsequent calls to `changeDataFolder` with the same destination path will fail or silently overwrite a corrupt file. The integrity-check cleanup on line 166 only runs when the backup succeeds but the database is corrupt — it does not cover backup failure.
-
-```ts
-try {
-  const sqlite = getDb().$client
-  await sqlite.backup(newDbPath)   // ← if this throws, falls to outer catch
-
-  const newDb = new Database(newDbPath, { readonly: true })
-  // ...
-  if (result.integrity_check !== 'ok') {
-    await unlink(newDbPath).catch(() => {})  // ← only reached if backup succeeded
-    throw new TRPCError({ ... })
-  }
-  // ...
-} catch (err) {
-  if (err instanceof TRPCError) throw err
-  log.error(...)
-  throw new TRPCError({ ... })   // ← no unlink here
-}
-```
-
-**Fix:** Add cleanup in the outer catch before re-throwing, mirroring the integrity-check path:
-
-```ts
-} catch (err) {
-  if (err instanceof TRPCError) throw err
-  // Best-effort cleanup of any partial backup file
-  await unlink(newDbPath).catch(() => {})
-  log.error('[appPrefs] changeDataFolder failed:', err)
-  throw new TRPCError({
-    code: 'INTERNAL_SERVER_ERROR',
-    message: err instanceof Error ? err.message : 'Failed to change data folder.',
-  })
-}
-```
+`await unlink(newDbPath).catch(() => {})` added in the outer `catch` block before re-throwing. Fix confirmed present in source.
 
 ---
 
-### CR-03: Release workflow does not publish `latest*.yml` / `.blockmap` — `electron-updater` feed is broken
+### CR-03 (RESOLVED): Release workflow does not publish `latest*.yml` / `.blockmap`
 
 **File:** `.github/workflows/release.yml:126-130`
 
-**Issue:** The `files:` glob in the `softprops/action-gh-release` step publishes only:
-
-```yaml
-artifacts/**/*.exe
-artifacts/**/*.zip
-artifacts/**/*.AppImage
-```
-
-`electron-updater` requires the following additional files to serve its auto-update feed:
-
-- `latest.yml` (Windows NSIS)
-- `latest-mac.yml` (macOS)
-- `latest-linux.yml` (Linux AppImage)
-- `*.blockmap` files (binary diff for differential updates)
-
-Without these files the GitHub Release page has the installers but no update manifest, so `electron-updater` clients cannot detect or download updates from the release — which defeats the entire purpose of this phase. The files are produced by `electron-builder` and land in `dist/`, but the glob never picks them up.
-
-Note: This project deliberately avoids `electron-updater` (decision D-04 uses a plain GitHub API poll). However, the release body documentation (lines 98-126) and the `electron-builder.yml` do not configure a `publish` block pointing at GitHub, so `electron-updater` is not actually used. The real issue is subtler: the release workflow also omits `.deb` packages (produced by electron-builder for Linux users who prefer `.deb` over AppImage) and the macOS `.zip` checksum file. If distribution scope ever widens, these omissions will surface. Even for the current scope, failing to publish `latest.yml`-family files means any future opt-in to `electron-updater` requires a workflow rewrite.
-
-**Fix — minimal (current D-04 scope):** Add `*.yml` and `*.blockmap` to the published files glob to keep the release complete and forward-compatible:
-
-```yaml
-files: |
-  artifacts/**/*.exe
-  artifacts/**/*.zip
-  artifacts/**/*.AppImage
-  artifacts/**/*.deb
-  artifacts/**/*.yml
-  artifacts/**/*.blockmap
-```
+Published files glob extended to include `*.yml` and `*.blockmap` artifacts. Fix confirmed present in source.
 
 ---
 
-### CR-04: `window.sessionRecap` is not declared in `aiStream.d.ts` — untyped contextBridge surface
+### CR-04 (RESOLVED): `window.sessionRecap` not declared in `aiStream.d.ts`
 
-**File:** `src/renderer/src/types/aiStream.d.ts` (entire file)
+**File:** `src/renderer/src/types/aiStream.d.ts`
 
-**Issue:** `src/preload/index.ts` exposes `window.sessionRecap` at line 129 with a well-defined interface (`startStream`, `onToken`, `onFinish`, `onError`, `removeAllListeners`). The global `Window` augmentation in `aiStream.d.ts` declares `window.aiStream`, `window.platform`, `window.appPrefsSync`, and `window.shellBridge` — but never `window.sessionRecap`. Any renderer code calling `window.sessionRecap.*` therefore types it as `any`, bypassing all compile-time safety checks. A mismatch between the preload implementation and renderer usage cannot be caught by TypeScript. Confirmed by `grep`: `useRecapStream.ts` and other files use `window.sessionRecap`.
-
-**Fix:** Add the `sessionRecap` declaration to the `Window` interface in `aiStream.d.ts`:
-
-```ts
-sessionRecap: {
-  startStream(payload: { campaignId: string; sessionId: string }): Promise<{ started: boolean }>
-  onToken(cb: (token: string) => void): void
-  onFinish(cb: (finalText: string) => void): void
-  onError(cb: (err: { message: string }) => void): void
-  removeAllListeners(): void
-}
-```
+`sessionRecap` surface added to the `Window` interface augmentation. Fix confirmed present in source.
 
 ---
 
@@ -231,25 +144,6 @@ beforeEach(() => {
 
 ---
 
-### WR-04: `UpdateBanner` calls `trpc.appPrefs.checkForUpdate.query()` directly outside a tRPC React hook — bypasses error boundary
-
-**File:** `src/renderer/src/components/UpdateBanner.tsx:25-28`
-
-**Issue:** `queryFn: () => trpc.appPrefs.checkForUpdate.query()` calls the tRPC vanilla client directly. If the tRPC client is not initialized or returns an error, `useQuery` will enter an error state. No `onError` callback, no `retry: false`, and no error UI is present in the component. TanStack Query's default behavior retries failed queries 3 times with exponential back-off — against a GitHub API endpoint this means up to 3 extra outbound requests on startup whenever the API is unavailable (GitHub rate-limiting, no network). The update check is supposed to be fire-and-forget per D-04, but the TanStack Query retry behavior contradicts that.
-
-**Fix:** Set `retry: false` on the update check query to match the intended silent-fail contract:
-
-```ts
-const { data } = useQuery({
-  queryKey: ['appPrefs', 'checkForUpdate'],
-  queryFn: () => trpc.appPrefs.checkForUpdate.query(),
-  staleTime: 10 * 60 * 1000,
-  retry: false,
-})
-```
-
----
-
 ### WR-05: `changeDataFolder` does not verify target directory exists or is writable before backup
 
 **File:** `src/main/trpc/routers/appPrefs.ts:150-155`
@@ -295,7 +189,7 @@ Wrap in a `TRPCError` with `code: 'BAD_REQUEST'` and a user-readable message on 
 
 **File:** `src/renderer/src/types/aiStream.d.ts:1`
 
-**Issue:** The file is named `aiStream.d.ts` but contains declarations for `window.shellBridge`, `window.appPrefsSync`, and `window.platform` in addition to `window.aiStream`. This makes the file difficult to discover when looking for shell bridge or preferences sync types and makes the missing `sessionRecap` declaration (CR-04) harder to notice.
+**Issue:** The file is named `aiStream.d.ts` but contains declarations for `window.shellBridge`, `window.appPrefsSync`, and `window.platform` in addition to `window.aiStream`. This makes the file difficult to discover when looking for shell bridge or preferences sync types and makes the missing `sessionRecap` declaration (now resolved as CR-04) harder to notice.
 
 **Fix:** Rename to `window.d.ts` or `preload.d.ts` to reflect that it augments all preload-exposed globals.
 
@@ -311,6 +205,6 @@ Wrap in a `TRPCError` with `code: 'BAD_REQUEST'` and a user-readable message on 
 
 ---
 
-_Reviewed: 2026-06-03T00:00:00Z_
+_Reviewed: 2026-06-04T00:00:00Z_
 _Reviewer: Claude (gsd-code-reviewer)_
 _Depth: standard_

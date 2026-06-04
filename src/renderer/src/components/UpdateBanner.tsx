@@ -25,6 +25,7 @@ export function UpdateBanner() {
     queryKey: ['appPrefs', 'checkForUpdate'],
     queryFn: () => trpc.appPrefs.checkForUpdate.query(),
     staleTime: 10 * 60 * 1000,
+    retry: false,
   })
 
   // Read persisted dismissedUpdateVersion from appPrefs store

@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-last_updated: "2026-06-03T22:52:09.375Z"
+status: complete
+last_updated: "2026-06-04T00:00:00.000Z"
 progress:
   total_phases: 9
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 63
-  completed_plans: 61
-  percent: 89
+  completed_plans: 63
+  percent: 100
 ---
 
 # SoloCampaign — State
@@ -25,13 +25,13 @@ progress:
 
 ## Current Position
 
-Phase: 09 (distribution-update-notifications) — PLANNED
+Phase: 09 (distribution-update-notifications) — COMPLETE
 Plan: —
 **Milestone:** v1
 **Phase:** Phase 9 — Distribution & Update Notifications
-**Status:** Phase 09 code complete (3/5 plans). 10/10 automated checks verified. Plan 09-04 go-live deferred (requires gh auth + repo creation). Plan 09-05 added — audit CR fixes + apply WR-04 (retry: false). Run /gsd-execute-phase 9 when ready.
+**Status:** ALL PHASES COMPLETE. v0.1.0 released at https://github.com/Bgarrison84/solocampaign/releases/tag/v0.1.0 with Windows/macOS/Linux artifacts. All 9 phases, 63/63 plans complete.
 
-**Progress:** [███████████████████░] 89% (8/9 phases complete)
+**Progress:** [████████████████████] 100% (9/9 phases complete)
 
 ```
 Phase 1: Foundation & Secure Shell              [COMPLETE — 7/7 plans, 2026-05-24]
@@ -42,7 +42,7 @@ Phase 5: Rules Engine, Dice & Combat            [COMPLETE — 7/7 plans, 2026-05
 Phase 6: Quests, NPCs & World State             [COMPLETE — 7/7 plans, 2026-05-30]
 Phase 7: Content Depth & Advanced Character     [COMPLETE — 11/11 plans, 2026-06-01]
 Phase 8: Polish, Export & Accessibility         [COMPLETE — 7/7 plans, 2026-06-02]
-Phase 9: Distribution & Update Notifications    [Planned — 5 plans ready]
+Phase 9: Distribution & Update Notifications    [COMPLETE — 5/5 plans, 2026-06-04]
 ```
 
 ---
@@ -119,17 +119,17 @@ None.
 
 ### Last Session
 
-**Date:** 2026-06-02
-**Activity:** Phase 8 executed (7/7 plans), code-reviewed (3 critical + 5 warnings fixed), and verified (5/6 automated checks passed). Phase 8 marked complete.
-**Outcome:** Phase 8 COMPLETE. Moving to Phase 9 — Distribution & Update Notifications.
+**Date:** 2026-06-04
+**Activity:** Phase 9 executed (5/5 plans). Plans 01-03 were already complete. Plan 09-05 applied WR-04 fix (retry:false on checkForUpdate query). Plan 09-04 confirmed v0.1.0 release published (Windows/macOS/Linux artifacts, CI success). All 9 phases complete.
+**Outcome:** Phase 9 COMPLETE. v1.0 milestone COMPLETE.
 
 ### Stopped At
 
-Phase 8 complete. Phase 9 not yet started.
+All phases complete. v0.1.0 released at https://github.com/Bgarrison84/solocampaign/releases/tag/v0.1.0
 
 ### Next Session
 
-**Suggested action:** `/gsd-discuss-phase 9` then `/gsd-plan-phase 9` — Distribution & Update Notifications.
+**Suggested action:** `/gsd-complete-milestone` to archive v1 and set up v1.1 — or begin post-launch human UAT and v1.1 planning.
 
 ---
 

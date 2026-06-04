@@ -294,16 +294,17 @@ Plans:
   2. Installers run on each platform; SmartScreen (Windows) and Gatekeeper (macOS, incl. the "app is damaged" xattr fix) bypass steps are documented in the release notes (signing/notarization deferred — D-01)
   3. When a newer version is published on GitHub, the running app shows a dismissible in-app banner; the user can open the release page to download manually — no silent install ever happens (D-04, D-05)
   4. better-sqlite3 native module loads in the packaged build (ASAR unpack preserved); macOS .node arch matches the arm64 runner (Pitfall 1)
-**Plans:** 4 plans
+**Plans:** 5 plans
 Plans:
 - [x] 09-01-PLAN.md — updateChecker service (GitHub poll) + appPrefs checkForUpdate/dismissUpdate tRPC + Wave 0 tests (DIST-05)
 - [x] 09-02-PLAN.md — shellBridge preload (https://github.com/ allow-list) + UpdateBanner + App.tsx wiring (DIST-05)
 - [x] 09-03-PLAN.md — electron-builder.yml macOS .zip target + release.yml tag-triggered matrix build + aggregator publish
 - [ ] 09-04-PLAN.md — Create public repo, push master, publish v0.1.0 release (checkpoint: gh auth + release verify)
+- [ ] 09-05-PLAN.md — Audit CR-01 through CR-04 review fixes + apply WR-04 (retry: false on update check) (DIST-05)
 **Wave structure:**
   - Wave 1: 09-01 (update-check backend) + 09-03 (release pipeline) in parallel — no file overlap
   - Wave 2: 09-02 (renderer banner; depends on 09-01 tRPC procedures)
-  - Wave 3: 09-04 (repo creation + v0.1.0 publish; depends on 09-02 feature + 09-03 pipeline)
+  - Wave 3: 09-04 (repo creation + v0.1.0 publish; depends on 09-02 feature + 09-03 pipeline) + 09-05 (review fix audit; depends on 09-03, parallel to 09-04)
 **Notes:**
   - Code signing / notarization / .dmg / .deb DEFERRED from v1.0 (D-01, D-02) — see CONTEXT.md Deferred Ideas
   - macOS hardened runtime entitlements for better-sqlite3 deferred with signing

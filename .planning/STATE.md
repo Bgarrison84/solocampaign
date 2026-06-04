@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-06-03T00:00:00.000Z"
+status: verifying
+last_updated: "2026-06-03T22:52:09.375Z"
 progress:
   total_phases: 9
   completed_phases: 8
-  total_plans: 62
-  completed_plans: 58
+  total_plans: 63
+  completed_plans: 61
   percent: 89
 ---
 
@@ -29,7 +29,7 @@ Phase: 09 (distribution-update-notifications) — PLANNED
 Plan: —
 **Milestone:** v1
 **Phase:** Phase 9 — Distribution & Update Notifications
-**Status:** Phase 09 code complete (3/4 plans). 10/10 automated checks verified. Plan 09-04 go-live deferred — requires gh auth + repo creation. Run /gsd-execute-phase 9 when ready to publish v0.1.0.
+**Status:** Phase 09 code complete (3/5 plans). 10/10 automated checks verified. Plan 09-04 go-live deferred (requires gh auth + repo creation). Plan 09-05 added — audit CR fixes + apply WR-04 (retry: false). Run /gsd-execute-phase 9 when ready.
 
 **Progress:** [███████████████████░] 89% (8/9 phases complete)
 
@@ -42,7 +42,7 @@ Phase 5: Rules Engine, Dice & Combat            [COMPLETE — 7/7 plans, 2026-05
 Phase 6: Quests, NPCs & World State             [COMPLETE — 7/7 plans, 2026-05-30]
 Phase 7: Content Depth & Advanced Character     [COMPLETE — 11/11 plans, 2026-06-01]
 Phase 8: Polish, Export & Accessibility         [COMPLETE — 7/7 plans, 2026-06-02]
-Phase 9: Distribution & Update Notifications    [Planned — 4 plans ready]
+Phase 9: Distribution & Update Notifications    [Planned — 5 plans ready]
 ```
 
 ---
